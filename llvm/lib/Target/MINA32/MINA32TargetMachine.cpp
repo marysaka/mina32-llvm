@@ -42,9 +42,10 @@ MINA32TargetMachine::MINA32TargetMachine(const Target &T, const Triple &TT,
                                          Optional<CodeModel::Model> CM,
                                          CodeGenOpt::Level OL, bool JIT)
     : LLVMTargetMachine(T, MINA32DataLayout, TT, CPU, FS, Options,
-                        getEffectiveRelocModel(RM), getEffectiveCodeModel(CM, CodeModel::Small), OL),
+                        getEffectiveRelocModel(RM),
+                        getEffectiveCodeModel(CM, CodeModel::Small), OL),
       TLOF(std::make_unique<TargetLoweringObjectFileELF>()),
-      SubTarget(TT,  std::string(CPU),  std::string(FS), *this) {
+      SubTarget(TT, std::string(CPU), std::string(FS), *this) {
   initAsmInfo();
 }
 

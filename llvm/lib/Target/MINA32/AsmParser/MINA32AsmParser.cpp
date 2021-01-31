@@ -7,9 +7,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "MINA32.h"
 #include "MCTargetDesc/MINA32MCExpr.h"
 #include "MCTargetDesc/MINA32MCTargetDesc.h"
+#include "MINA32.h"
 #include "MINA32RegisterInfo.h"
 #include "TargetInfo/MINA32TargetInfo.h"
 #include "llvm/ADT/APInt.h"
@@ -19,14 +19,12 @@
 #include "llvm/MC/MCInst.h"
 #include "llvm/MC/MCInstBuilder.h"
 #include "llvm/MC/MCParser/MCAsmLexer.h"
+#include "llvm/MC/MCParser/MCAsmParserExtension.h"
 #include "llvm/MC/MCParser/MCParsedAsmOperand.h"
 #include "llvm/MC/MCParser/MCTargetAsmParser.h"
-#include "llvm/MC/MCParser/MCAsmParserExtension.h"
 #include "llvm/MC/MCStreamer.h"
 #include "llvm/MC/MCSubtargetInfo.h"
 #include "llvm/MC/MCSymbol.h"
-#include "llvm/MC/MCParser/MCAsmLexer.h"
-#include "llvm/MC/MCParser/MCParsedAsmOperand.h"
 #include "llvm/MC/MCValue.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/MathExtras.h"
@@ -39,28 +37,25 @@ using namespace llvm;
 namespace {
 class MINA32AssemblerOptions {
 public:
-  MINA32AssemblerOptions():
-    reorder(true), macro(true) {
-  }
+  MINA32AssemblerOptions() : reorder(true), macro(true) {}
 
-  bool isReorder() {return reorder;}
-  void setReorder() {reorder = true;}
-  void setNoreorder() {reorder = false;}
+  bool isReorder() { return reorder; }
+  void setReorder() { reorder = true; }
+  void setNoreorder() { reorder = false; }
 
-  bool isMacro() {return macro;}
-  void setMacro() {macro = true;}
-  void setNomacro() {macro = false;}
+  bool isMacro() { return macro; }
+  void setMacro() { macro = true; }
+  void setNomacro() { macro = false; }
 
 private:
   bool reorder;
   bool macro;
 };
-}
+} // namespace
 
 namespace {
 class MINA32AsmParser : public MCTargetAsmParser {
   MINA32AssemblerOptions Options;
-
 
 #define GET_ASSEMBLER_HEADER
 #include "MINA32GenAsmMatcher.inc"
@@ -79,10 +74,10 @@ class MINA32AsmParser : public MCTargetAsmParser {
 
   bool ParseOperand(OperandVector &Operands, StringRef Mnemonic);
 
-  OperandMatchResultTy tryParseRegister(unsigned &RegNo, SMLoc &StartLoc, SMLoc &EndLoc);
+  OperandMatchResultTy tryParseRegister(unsigned &RegNo, SMLoc &StartLoc,
+                                        SMLoc &EndLoc);
 
-  bool tryParseRegisterOperand(OperandVector &Operands,
-                               StringRef Mnemonic);
+  bool tryParseRegisterOperand(OperandVector &Operands, StringRef Mnemonic);
   bool reportParseError(StringRef ErrorMsg);
 
   bool parseMemOffset(const MCExpr *&Res);
@@ -103,15 +98,15 @@ class MINA32AsmParser : public MCTargetAsmParser {
 
 public:
   MINA32AsmParser(const MCSubtargetInfo &sti, MCAsmParser &parser,
-                const MCInstrInfo &MII, const MCTargetOptions &Options)
-    : MCTargetAsmParser(Options, sti, MII) {
+                  const MCInstrInfo &MII, const MCTargetOptions &Options)
+      : MCTargetAsmParser(Options, sti, MII) {
     MCAsmParserExtension::Initialize(parser);
 
     // Initialize the set of available features.
     setAvailableFeatures(ComputeAvailableFeatures(getSTI().getFeatureBits()));
   }
 };
-}
+} // namespace
 
 namespace {
 
@@ -119,12 +114,7 @@ namespace {
 /// instruction.
 class MINA32Operand : public MCParsedAsmOperand {
 
-  enum KindTy {
-    k_Immediate,
-    k_Memory,
-    k_Register,
-    k_Token
-  } Kind;
+  enum KindTy { k_Immediate, k_Memory, k_Register, k_Token } Kind;
 
 public:
   MINA32Operand(KindTy K) : MCParsedAsmOperand(), Kind(K) {}
@@ -159,7 +149,7 @@ public:
     Inst.addOperand(MCOperand::createReg(getReg()));
   }
 
-  void addExpr(MCInst &Inst, const MCExpr *Expr) const{
+  void addExpr(MCInst &Inst, const MCExpr *Expr) const {
     // Add as immediate when possible.  Null MCExpr = 0.
     if (Expr == 0)
       Inst.addOperand(MCOperand::createImm(0));
@@ -172,7 +162,7 @@ public:
   void addImmOperands(MCInst &Inst, unsigned N) const {
     assert(N == 1 && "Invalid number of operands!");
     const MCExpr *Expr = getImm();
-    addExpr(Inst,Expr);
+    addExpr(Inst, Expr);
   }
 
   void addMemOperands(MCInst &Inst, unsigned N) const {
@@ -181,7 +171,7 @@ public:
     Inst.addOperand(MCOperand::createReg(getMemBase()));
 
     const MCExpr *Expr = getMemOff();
-    addExpr(Inst,Expr);
+    addExpr(Inst, Expr);
   }
 
   bool isReg() const override { return Kind == k_Register; }
@@ -224,8 +214,8 @@ public:
   }
 
   /// Internal constructor for register kinds
-  static std::unique_ptr<MINA32Operand> CreateReg(unsigned RegNum, SMLoc S, 
-                                                SMLoc E) {
+  static std::unique_ptr<MINA32Operand> CreateReg(unsigned RegNum, SMLoc S,
+                                                  SMLoc E) {
     auto Op = std::make_unique<MINA32Operand>(k_Register);
     Op->Reg.RegNum = RegNum;
     Op->StartLoc = S;
@@ -233,7 +223,8 @@ public:
     return Op;
   }
 
-  static std::unique_ptr<MINA32Operand> CreateImm(const MCExpr *Val, SMLoc S, SMLoc E) {
+  static std::unique_ptr<MINA32Operand> CreateImm(const MCExpr *Val, SMLoc S,
+                                                  SMLoc E) {
     auto Op = std::make_unique<MINA32Operand>(k_Immediate);
     Op->Imm.Val = Val;
     Op->StartLoc = S;
@@ -241,8 +232,8 @@ public:
     return Op;
   }
 
-  static std::unique_ptr<MINA32Operand> CreateMem(unsigned Base, const MCExpr *Off,
-                                 SMLoc S, SMLoc E) {
+  static std::unique_ptr<MINA32Operand>
+  CreateMem(unsigned Base, const MCExpr *Off, SMLoc S, SMLoc E) {
     auto Op = std::make_unique<MINA32Operand>(k_Memory);
     Op->Mem.Base = Base;
     Op->Mem.Off = Off;
@@ -279,11 +270,11 @@ public:
     }
   }
 };
-}
+} // namespace
 
 void printMINA32Operands(OperandVector &Operands) {
   for (size_t i = 0; i < Operands.size(); i++) {
-    MINA32Operand* op = static_cast<MINA32Operand*>(&*Operands[i]);
+    MINA32Operand *op = static_cast<MINA32Operand *>(&*Operands[i]);
     assert(op != nullptr);
     LLVM_DEBUG(dbgs() << "<" << *op << ">");
   }
@@ -291,16 +282,17 @@ void printMINA32Operands(OperandVector &Operands) {
 }
 
 bool MINA32AsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
-                                            OperandVector &Operands,
-                                            MCStreamer &Out,
-                                            uint64_t &ErrorInfo,
-                                            bool MatchingInlineAsm) {
+                                              OperandVector &Operands,
+                                              MCStreamer &Out,
+                                              uint64_t &ErrorInfo,
+                                              bool MatchingInlineAsm) {
   printMINA32Operands(Operands);
   MCInst Inst;
-  unsigned MatchResult = MatchInstructionImpl(Operands, Inst, ErrorInfo,
-                                              MatchingInlineAsm);
+  unsigned MatchResult =
+      MatchInstructionImpl(Operands, Inst, ErrorInfo, MatchingInlineAsm);
   switch (MatchResult) {
-  default: break;
+  default:
+    break;
   case Match_Success: {
     Inst.setLoc(IDLoc);
     Out.emitInstruction(Inst, getSTI());
@@ -316,7 +308,8 @@ bool MINA32AsmParser::MatchAndEmitInstruction(SMLoc IDLoc, unsigned &Opcode,
         return Error(IDLoc, "too few operands for instruction");
 
       ErrorLoc = ((MINA32Operand &)*Operands[ErrorInfo]).getStartLoc();
-      if (ErrorLoc == SMLoc()) ErrorLoc = IDLoc;
+      if (ErrorLoc == SMLoc())
+        ErrorLoc = IDLoc;
     }
 
     return Error(ErrorLoc, "invalid operand for instruction");
@@ -338,7 +331,9 @@ int MINA32AsmParser::matchRegisterName(StringRef Name) {
   return MatchRegisterName(Name);
 }
 
-OperandMatchResultTy MINA32AsmParser::tryParseRegister(unsigned &RegNo, SMLoc &StartLoc, SMLoc &EndLoc) {
+OperandMatchResultTy MINA32AsmParser::tryParseRegister(unsigned &RegNo,
+                                                       SMLoc &StartLoc,
+                                                       SMLoc &EndLoc) {
   const AsmToken &Tok = getParser().getTok();
 
   if (Tok.is(AsmToken::Identifier)) {
@@ -353,9 +348,8 @@ OperandMatchResultTy MINA32AsmParser::tryParseRegister(unsigned &RegNo, SMLoc &S
   return MatchOperand_NoMatch;
 }
 
-bool MINA32AsmParser::
-  tryParseRegisterOperand(OperandVector &Operands,
-                          StringRef Mnemonic){
+bool MINA32AsmParser::tryParseRegisterOperand(OperandVector &Operands,
+                                              StringRef Mnemonic) {
 
   MCAsmParser &Parser = getParser();
 
@@ -365,14 +359,14 @@ bool MINA32AsmParser::
   if (RegNo == 0)
     return true;
 
-  Operands.push_back(MINA32Operand::CreateReg(RegNo, S,
-      Parser.getTok().getLoc()));
+  Operands.push_back(
+      MINA32Operand::CreateReg(RegNo, S, Parser.getTok().getLoc()));
   Parser.Lex(); // Eat register token.
   return false;
 }
 
 bool MINA32AsmParser::ParseOperand(OperandVector &Operands,
-                                 StringRef Mnemonic) {
+                                   StringRef Mnemonic) {
   LLVM_DEBUG(dbgs() << "ParseOperand\n");
   // Check if the current operand has a custom associated parser, if so, try to
   // custom parse the operand, or fallback to the general approach.
@@ -430,8 +424,8 @@ bool MINA32AsmParser::ParseOperand(OperandVector &Operands,
     MCSymbol *Sym = getContext().getOrCreateSymbol("$" + Identifier);
 
     // Otherwise create a symbol ref.
-    const MCExpr *Res = MCSymbolRefExpr::create(Sym, MCSymbolRefExpr::VK_None,
-                                                getContext());
+    const MCExpr *Res =
+        MCSymbolRefExpr::create(Sym, MCSymbolRefExpr::VK_None, getContext());
 
     Operands.push_back(MINA32Operand::CreateImm(Res, S, E));
     return false;
@@ -442,7 +436,7 @@ bool MINA32AsmParser::ParseOperand(OperandVector &Operands,
   case AsmToken::Plus:
   case AsmToken::Integer:
   case AsmToken::String: {
-     // quoted label names
+    // quoted label names
     const MCExpr *IdVal;
     SMLoc S = Parser.getTok().getLoc();
     if (getParser().parseExpression(IdVal))
@@ -468,10 +462,10 @@ bool MINA32AsmParser::ParseOperand(OperandVector &Operands,
 }
 
 const MCExpr *MINA32AsmParser::evaluateRelocExpr(const MCExpr *Expr,
-                                               StringRef RelocStr) {
+                                                 StringRef RelocStr) {
   MINA32MCExpr::VariantKind Kind =
-      StringSwitch<MINA32MCExpr::VariantKind>(RelocStr)
-          .Default(MINA32MCExpr::VK_MINA32_None);
+      StringSwitch<MINA32MCExpr::VariantKind>(RelocStr).Default(
+          MINA32MCExpr::VK_MINA32_None);
 
   assert(Kind != MINA32MCExpr::VK_MINA32_None);
   return MINA32MCExpr::create(Kind, Expr, getContext());
@@ -480,7 +474,7 @@ const MCExpr *MINA32AsmParser::evaluateRelocExpr(const MCExpr *Expr,
 bool MINA32AsmParser::parseRelocOperand(const MCExpr *&Res) {
   MCAsmParser &Parser = getParser();
 
-  Parser.Lex(); // eat % token
+  Parser.Lex();                          // eat % token
   const AsmToken &Tok = Parser.getTok(); // get next token, operation
   if (Tok.isNot(AsmToken::Identifier))
     return true;
@@ -508,7 +502,7 @@ bool MINA32AsmParser::parseRelocOperand(const MCExpr *&Res) {
       } else
         break;
     }
-    if (getParser().parseParenExpression(IdVal,EndLoc))
+    if (getParser().parseParenExpression(IdVal, EndLoc))
       return true;
 
     while (getLexer().getKind() == AsmToken::RParen)
@@ -522,19 +516,19 @@ bool MINA32AsmParser::parseRelocOperand(const MCExpr *&Res) {
 }
 
 bool MINA32AsmParser::ParseRegister(unsigned &RegNo, SMLoc &StartLoc,
-                                  SMLoc &EndLoc) {
+                                    SMLoc &EndLoc) {
   return tryParseRegister(RegNo, StartLoc, EndLoc) != MatchOperand_Success;
 }
 
-bool MINA32AsmParser::
-ParseInstruction(ParseInstructionInfo &Info, StringRef Name, SMLoc NameLoc,
-                 OperandVector &Operands) {
+bool MINA32AsmParser::ParseInstruction(ParseInstructionInfo &Info,
+                                       StringRef Name, SMLoc NameLoc,
+                                       OperandVector &Operands) {
   MCAsmParser &Parser = getParser();
 
   // Create the leading tokens for the mnemonic, split by '.' characters.
   size_t Start = 0, Next = Name.find('.');
   StringRef Mnemonic = Name.slice(Start, Next);
-  // Refer to the explanation in source code of function DecodeJumpFR(...) in 
+  // Refer to the explanation in source code of function DecodeJumpFR(...) in
   // MINA32Disassembler.cpp
   if (Mnemonic == "ret")
     Mnemonic = "jr";
@@ -550,8 +544,8 @@ ParseInstruction(ParseInstructionInfo &Info, StringRef Name, SMLoc NameLoc,
       return Error(Loc, "unexpected token in argument list");
     }
 
-    while (getLexer().is(AsmToken::Comma) ) {
-      Parser.Lex();  // Eat the comma.
+    while (getLexer().is(AsmToken::Comma)) {
+      Parser.Lex(); // Eat the comma.
 
       // Parse and remember the operand.
       if (ParseOperand(Operands, Name)) {
@@ -573,9 +567,9 @@ ParseInstruction(ParseInstructionInfo &Info, StringRef Name, SMLoc NameLoc,
 }
 
 bool MINA32AsmParser::reportParseError(StringRef ErrorMsg) {
-   SMLoc Loc = getLexer().getLoc();
-   getParser().eatToEndOfStatement();
-   return Error(Loc, ErrorMsg);
+  SMLoc Loc = getLexer().getLoc();
+  getParser().eatToEndOfStatement();
+  return Error(Loc, ErrorMsg);
 }
 
 bool MINA32AsmParser::parseSetReorderDirective() {
@@ -593,17 +587,17 @@ bool MINA32AsmParser::parseSetReorderDirective() {
 }
 
 bool MINA32AsmParser::parseSetNoReorderDirective() {
-    MCAsmParser &Parser = getParser();
+  MCAsmParser &Parser = getParser();
 
-    Parser.Lex();
-    // if this is not the end of the statement, report error
-    if (getLexer().isNot(AsmToken::EndOfStatement)) {
-      reportParseError("unexpected token in statement");
-      return false;
-    }
-    Options.setNoreorder();
-    Parser.Lex(); // Consume the EndOfStatement
+  Parser.Lex();
+  // if this is not the end of the statement, report error
+  if (getLexer().isNot(AsmToken::EndOfStatement)) {
+    reportParseError("unexpected token in statement");
     return false;
+  }
+  Options.setNoreorder();
+  Parser.Lex(); // Consume the EndOfStatement
+  return false;
 }
 
 bool MINA32AsmParser::parseSetMacroDirective() {

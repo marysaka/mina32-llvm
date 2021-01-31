@@ -27,9 +27,9 @@
 
 #include "MINA32.h"
 //#include "MINA32MachineFunctionInfo.h"
+#include "MCTargetDesc/MINA32MCTargetDesc.h"
 #include "MINA32Subtarget.h"
 #include "MINA32TargetMachine.h"
-#include "MCTargetDesc/MINA32MCTargetDesc.h"
 
 namespace llvm {
 

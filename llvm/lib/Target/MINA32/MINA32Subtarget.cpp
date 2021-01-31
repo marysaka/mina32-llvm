@@ -31,8 +31,7 @@ void MINA32Subtarget::anchor() {}
 
 MINA32Subtarget::MINA32Subtarget(const Triple &TT, const std::string &CPU,
                                  const std::string &FS, const TargetMachine &TM)
-    : MINA32GenSubtargetInfo(TT, CPU, FS),
-      InstrInfo(), FrameLowering(),
+    : MINA32GenSubtargetInfo(TT, CPU, FS), InstrInfo(), FrameLowering(),
       TLInfo(TM, initializeSubtargetDependencies(CPU, FS, TM)) {
   // Parse features string.
   ParseSubtargetFeatures(CPU, FS);

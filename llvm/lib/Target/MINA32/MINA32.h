@@ -23,11 +23,10 @@ namespace llvm {
 class MINA32TargetMachine;
 class FunctionPass;
 
-FunctionPass *createMINA32ISelDag(MINA32TargetMachine &TM, CodeGenOpt::Level OptLevel);
+FunctionPass *createMINA32ISelDag(MINA32TargetMachine &TM,
+                                  CodeGenOpt::Level OptLevel);
 
-namespace MINA32 {
-
-} // end namespace MINA32
+namespace MINA32 {} // end namespace MINA32
 
 } // end namespace llvm
 

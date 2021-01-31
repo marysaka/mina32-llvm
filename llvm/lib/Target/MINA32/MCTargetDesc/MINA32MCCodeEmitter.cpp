@@ -11,9 +11,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "MINA32InstrInfo.h"
 #include "MINA32MCCodeEmitter.h"
+#include "MINA32InstrInfo.h"
 
+#include "llvm/ADT/Statistic.h"
 #include "llvm/MC/MCContext.h"
 #include "llvm/MC/MCExpr.h"
 #include "llvm/MC/MCFixup.h"
@@ -24,7 +25,6 @@
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/EndianStream.h"
 #include "llvm/Support/raw_ostream.h"
-#include "llvm/ADT/Statistic.h"
 
 #define DEBUG_TYPE "mccodeemitter"
 
@@ -37,8 +37,8 @@ STATISTIC(MCNumEmitted, "Number of MC instructions emitted.");
 using namespace llvm;
 
 void MINA32MCCodeEmitter::encodeInstruction(const MCInst &MI, raw_ostream &OS,
-                                             SmallVectorImpl<MCFixup> &Fixups,
-                                             const MCSubtargetInfo &STI) const {
+                                            SmallVectorImpl<MCFixup> &Fixups,
+                                            const MCSubtargetInfo &STI) const {
   verifyInstructionPredicates(MI,
                               computeAvailableFeatures(STI.getFeatureBits()));
 
@@ -49,8 +49,8 @@ void MINA32MCCodeEmitter::encodeInstruction(const MCInst &MI, raw_ostream &OS,
 
 unsigned
 MINA32MCCodeEmitter::getMachineOpValue(const MCInst &MI, const MCOperand &MO,
-                                        SmallVectorImpl<MCFixup> &Fixups,
-                                        const MCSubtargetInfo &STI) const {
+                                       SmallVectorImpl<MCFixup> &Fixups,
+                                       const MCSubtargetInfo &STI) const {
   if (MO.isReg())
     return Ctx.getRegisterInfo()->getEncodingValue(MO.getReg());
 
@@ -64,7 +64,7 @@ MINA32MCCodeEmitter::getMachineOpValue(const MCInst &MI, const MCOperand &MO,
 // TODO
 
 MCCodeEmitter *llvm::createMINA32MCCodeEmitter(const MCInstrInfo &MCII,
-                                         const MCRegisterInfo &MRI,
-                                         MCContext &Ctx) {
+                                               const MCRegisterInfo &MRI,
+                                               MCContext &Ctx) {
   return new MINA32MCCodeEmitter(MCII, Ctx);
 }

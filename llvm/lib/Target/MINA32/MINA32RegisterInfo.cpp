@@ -20,10 +20,10 @@
 #include "llvm/CodeGen/TargetFrameLowering.h"
 #include "llvm/IR/Function.h"
 
+#include "MCTargetDesc/MINA32MCTargetDesc.h"
 #include "MINA32.h"
 #include "MINA32Subtarget.h"
 #include "MINA32TargetMachine.h"
-#include "MCTargetDesc/MINA32MCTargetDesc.h"
 
 #define GET_REGINFO_TARGET_DESC
 #include "MINA32GenRegisterInfo.inc"

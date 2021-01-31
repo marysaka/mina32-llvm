@@ -21,9 +21,9 @@
 #include "llvm/MC/MCSubtargetInfo.h"
 #include "llvm/Support/TargetRegistry.h"
 
+#include "MCTargetDesc/MINA32InstPrinter.h"
 #include "MINA32MCAsmInfo.h"
 #include "TargetInfo/MINA32TargetInfo.h"
-#include "MCTargetDesc/MINA32InstPrinter.h"
 
 #define GET_INSTRINFO_MC_DESC
 #include "MINA32GenInstrInfo.inc"

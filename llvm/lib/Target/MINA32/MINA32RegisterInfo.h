@@ -14,8 +14,8 @@
 #ifndef LLVM_TARGET_MINA32_REGISTER_INFO_H
 #define LLVM_TARGET_MINA32_REGISTER_INFO_H
 
-#include "llvm/CodeGen/TargetRegisterInfo.h"
 #include "MCTargetDesc/MINA32MCTargetDesc.h"
+#include "llvm/CodeGen/TargetRegisterInfo.h"
 
 #define GET_REGINFO_HEADER
 #include "MINA32GenRegisterInfo.inc"
@@ -43,7 +43,6 @@ public:
   Register getFrameRegister(const MachineFunction &MF) const override;
 
   bool hasBasePointer(const MachineFunction &MF) const;
-
 };
 
 } // end namespace llvm

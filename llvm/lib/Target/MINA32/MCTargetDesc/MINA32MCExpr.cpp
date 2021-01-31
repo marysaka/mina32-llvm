@@ -25,8 +25,8 @@ const MINA32MCExpr *MINA32MCExpr::create(VariantKind Kind, const MCExpr *Expr,
 }
 
 bool MINA32MCExpr::evaluateAsRelocatableImpl(MCValue &Res,
-                                              MCAsmLayout const *Layout,
-                                              MCFixup const *Fixup) const {
+                                             MCAsmLayout const *Layout,
+                                             MCFixup const *Fixup) const {
   return Expr->evaluateAsRelocatable(Res, Layout, Fixup);
 }
 

@@ -14,8 +14,8 @@
 #ifndef LLVM_TARGET_MINA32_SUBTARGET_H
 #define LLVM_TARGET_MINA32_SUBTARGET_H
 
-#include "llvm/CodeGen/TargetSubtargetInfo.h"
 #include "llvm/CodeGen/SelectionDAGTargetInfo.h"
+#include "llvm/CodeGen/TargetSubtargetInfo.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/Target/TargetMachine.h"
 

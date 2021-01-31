@@ -314,7 +314,7 @@ enum {
   EM_VE = 251,            // NEC SX-Aurora VE
 
   // TODO: register this officially to get a number
-  EM_MINA32 = 1864,       // MINA32
+  EM_MINA32 = 1864, // MINA32
 };
 
 // Object file classes.

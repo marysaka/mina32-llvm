@@ -12,11 +12,10 @@
 #ifndef LLVM_LIB_TARGET_MINA32_MINA32TARGETMACHINE_H
 #define LLVM_LIB_TARGET_MINA32_MINA32TARGETMACHINE_H
 
-
 #include "llvm/Target/TargetMachine.h"
 
 #include "MINA32.h"
-#include "MINA32InstrInfo.h" 
+#include "MINA32InstrInfo.h"
 #include "MINA32Subtarget.h"
 
 namespace llvm {

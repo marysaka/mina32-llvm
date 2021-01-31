@@ -16,9 +16,9 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
 
+#include "MCTargetDesc/MINA32MCTargetDesc.h"
 #include "MINA32.h"
 #include "MINA32TargetMachine.h"
-#include "MCTargetDesc/MINA32MCTargetDesc.h"
 
 using namespace llvm;
 
@@ -27,7 +27,8 @@ using namespace llvm;
 /// Lowers LLVM IR (in DAG form) to MINA32 MC instructions (in DAG form).
 class MINA32DAGToDAGISel : public SelectionDAGISel {
 public:
-  explicit MINA32DAGToDAGISel(MINA32TargetMachine &TM, CodeGenOpt::Level OptLevel)
+  explicit MINA32DAGToDAGISel(MINA32TargetMachine &TM,
+                              CodeGenOpt::Level OptLevel)
       : SelectionDAGISel(TM, OptLevel), Subtarget(nullptr) {}
 
   StringRef getPassName() const override {
@@ -73,6 +74,6 @@ bool MINA32DAGToDAGISel::trySelect(SDNode *N) {
 }
 
 FunctionPass *llvm::createMINA32ISelDag(MINA32TargetMachine &TM,
-                                  CodeGenOpt::Level OptLevel) {
+                                        CodeGenOpt::Level OptLevel) {
   return new MINA32DAGToDAGISel(TM, OptLevel);
 }

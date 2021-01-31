@@ -59,7 +59,8 @@ void MINA32InstPrinter::printOperand(const MCInst *MI, unsigned OpNo,
   Op.getExpr()->print(O, &MAI, true);
 }
 
-void MINA32InstPrinter::printPCRelImm(const MCInst *MI, unsigned OpNo, raw_ostream &O) {
+void MINA32InstPrinter::printPCRelImm(const MCInst *MI, unsigned OpNo,
+                                      raw_ostream &O) {
   // TODO
   llvm_unreachable("printPCRelImm() unimplemented");
 }
