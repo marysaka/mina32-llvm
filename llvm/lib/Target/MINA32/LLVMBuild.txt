@@ -7,7 +7,7 @@
 ;===------------------------------------------------------------------------===;
 
 [common]
-subdirectories = TargetInfo
+subdirectories = MCTargetDesc TargetInfo
 
 [component_0]
 type = TargetGroup
@@ -23,5 +23,5 @@ type = Library
 name = MINA32CodeGen
 parent = MINA32
 required_libraries = AsmPrinter CodeGen Core MC SelectionDAG
-                     MINA32Info Support Target
+                     MINA32Desc MINA32Info Support Target
 add_to_library_groups = MINA32
