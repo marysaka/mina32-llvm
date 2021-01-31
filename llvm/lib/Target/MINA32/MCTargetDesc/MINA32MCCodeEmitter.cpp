@@ -47,6 +47,17 @@ void MINA32MCCodeEmitter::encodeInstruction(const MCInst &MI, raw_ostream &OS,
   ++MCNumEmitted; // Keep track of the # of mi's emitted.
 }
 
+unsigned
+MINA32MCCodeEmitter::getMachineOpValue(const MCInst &MI, const MCOperand &MO,
+                                        SmallVectorImpl<MCFixup> &Fixups,
+                                        const MCSubtargetInfo &STI) const {
+  if (MO.isReg())
+    return Ctx.getRegisterInfo()->getEncodingValue(MO.getReg());
+
+  assert(MO.isImm() && "did not expect relocated expression");
+  return static_cast<unsigned>(MO.getImm());
+}
+
 #define ENABLE_INSTR_PREDICATE_VERIFIER
 #include "MINA32GenMCCodeEmitter.inc"
 

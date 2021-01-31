@@ -1,0 +1,14 @@
+;===- ./lib/Target/MINA32/AsmParser/LLVMBuild.txt --------------*- Conf -*--===;
+;
+; Part of the LLVM fork for the MINA32 project, under the Apache License v2.0
+; with LLVM Exceptions. See https://llvm.org/LICENSE.txt for license
+; information.
+;
+;===------------------------------------------------------------------------===;
+
+[component_0]
+type = Library
+name = MINA32AsmParser
+parent = MINA32
+required_libraries = MC MCParser MINA32Desc MINA32Info Support
+add_to_library_groups = MINA32

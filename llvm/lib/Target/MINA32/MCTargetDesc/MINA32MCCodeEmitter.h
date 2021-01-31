@@ -61,6 +61,10 @@ private:
   void
   verifyInstructionPredicates(const MCInst &MI,
                               const FeatureBitset &AvailableFeatures) const;
+
+  unsigned getMachineOpValue(const MCInst &MI, const MCOperand &MO,
+                             SmallVectorImpl<MCFixup> &Fixups,
+                             const MCSubtargetInfo &STI) const;
 };
 
 } // end namespace llvm

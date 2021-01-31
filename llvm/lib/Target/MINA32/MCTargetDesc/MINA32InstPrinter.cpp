@@ -36,16 +36,27 @@ namespace llvm {
 void MINA32InstPrinter::printInst(const MCInst *MI, uint64_t Address,
                                   StringRef Annot, const MCSubtargetInfo &STI,
                                   raw_ostream &O) {
-  unsigned Opcode = MI->getOpcode();
+  if (!printAliasInstr(MI, Address, O))
+    printInstruction(MI, Address, O);
 
-  // TODO
-  llvm_unreachable("printInst() unimplemented");
+  printAnnotation(O, Annot);
 }
 
 void MINA32InstPrinter::printOperand(const MCInst *MI, unsigned OpNo,
                                      raw_ostream &O) {
-  // TODO
-  llvm_unreachable("printOperand() unimplemented");
+  const MCOperand &Op = MI->getOperand(OpNo);
+  if (Op.isReg()) {
+    printRegName(O, Op.getReg());
+    return;
+  }
+
+  if (Op.isImm()) {
+    O << Op.getImm();
+    return;
+  }
+
+  assert(Op.isExpr() && "unknown operand kind in printOperand");
+  Op.getExpr()->print(O, &MAI, true);
 }
 
 void MINA32InstPrinter::printPCRelImm(const MCInst *MI, unsigned OpNo, raw_ostream &O) {

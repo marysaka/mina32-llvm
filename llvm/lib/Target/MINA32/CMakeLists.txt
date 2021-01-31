@@ -1,6 +1,6 @@
 set(LLVM_TARGET_DEFINITIONS MINA32.td)
 
-# tablegen(LLVM MINA32GenAsmMatcher.inc -gen-asm-matcher)
+tablegen(LLVM MINA32GenAsmMatcher.inc -gen-asm-matcher)
 tablegen(LLVM MINA32GenAsmWriter.inc -gen-asm-writer)
 # tablegen(LLVM MINA32GenCallingConv.inc -gen-callingconv)
 tablegen(LLVM MINA32GenDAGISel.inc -gen-dag-isel)
@@ -27,7 +27,7 @@ add_llvm_target(MINA32CodeGen
   MINA32ISelDAGToDAG.cpp
  )
 
-# add_subdirectory(AsmParser)
+add_subdirectory(AsmParser)
 # add_subdirectory(Disassembler)
 add_subdirectory(MCTargetDesc)
 add_subdirectory(TargetInfo)
