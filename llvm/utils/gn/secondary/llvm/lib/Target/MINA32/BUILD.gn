@@ -1,0 +1,54 @@
+import("//llvm/utils/TableGen/tablegen.gni")
+
+tablegen("MINA32GenCallingConv") {
+  visibility = [ ":LLVMMINA32CodeGen" ]
+  args = [ "-gen-callingconv" ]
+  td_file = "MINA32.td"
+}
+
+tablegen("MINA32GenDAGISel") {
+  visibility = [ ":LLVMMINA32CodeGen" ]
+  args = [ "-gen-dag-isel" ]
+  td_file = "MINA32.td"
+}
+
+static_library("LLVMMINA32CodeGen") {
+  deps = [
+    ":MINA32GenCallingConv",
+    ":MINA32GenDAGISel",
+    "MCTargetDesc",
+    "TargetInfo",
+    "//llvm/include/llvm/Config:llvm-config",
+    "//llvm/lib/CodeGen",
+    "//llvm/lib/CodeGen/AsmPrinter",
+    "//llvm/lib/CodeGen/SelectionDAG",
+    "//llvm/lib/IR",
+    "//llvm/lib/MC",
+    "//llvm/lib/Support",
+    "//llvm/lib/Target",
+  ]
+  include_dirs = [ "." ]
+  sources = [
+    "MINA32TargetMachine.cpp",
+    "MINA32Subtarget.cpp",
+    "MINA32RegisterInfo.cpp",
+    "MINA32InstrInfo.cpp",
+    "MINA32FrameLowering.cpp",
+    "MINA32ISelLowering.cpp",
+    "MINA32ISelDAGToDAG.cpp",
+  ]
+}
+
+# This is a bit different from most build files: Due to this group
+# having the directory's name, "//llvm/lib/Target/MINA32" will refer to this
+# target, which pulls in the code in this directory *and all subdirectories*.
+# For most other directories, "//llvm/lib/Foo" only pulls in the code directly
+# in "llvm/lib/Foo". The forwarding targets in //llvm/lib/Target expect this
+# different behavior.
+group("MINA32") {
+  deps = [
+    ":LLVMMINA32CodeGen",
+    "MCTargetDesc",
+    "TargetInfo",
+  ]
+}
