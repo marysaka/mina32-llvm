@@ -60,3 +60,65 @@ class MINA32InstStandard<bits<4> group, bits<4> opcode, dag outs, dag ins, strin
   let Inst{27-24} = opcode;
   let Inst{31-28} = group;
 }
+
+// Immediate format
+class MINA32InstImmediate<bits<4> group, bits<4> opcode, dag outs, dag ins, string asmstr, list<dag> pattern>
+  : MINA32Inst<outs, ins, asmstr, pattern>
+{
+  bits<12> IMM;
+  bits<4>  DEST;
+  bits<4>  SHIFT;
+  bits<4>  SRC1;
+  
+  let Inst{11-0}  = IMM;
+  let Inst{15-12} = DEST;
+  let Inst{19-16} = SHIFT;
+  let Inst{23-20} = SRC1;
+  let Inst{27-24} = opcode;
+  let Inst{31-28} = group;
+}
+
+// Move format
+class MINA32InstMove<bits<4> group, bits<4> opcode, dag outs, dag ins, string asmstr, list<dag> pattern>
+  : MINA32Inst<outs, ins, asmstr, pattern>
+{
+  bits<12> IMM1;
+  bits<4>  DEST;
+  bits<4>  IMM2;
+  
+  let Inst{11-0}  = IMM1;
+  let Inst{15-12} = DEST;
+  let Inst{19-16} = IMM2;
+  let Inst{23-20} = 0;
+  let Inst{27-24} = opcode;
+  let Inst{31-28} = group;
+}
+
+// Funnel Shift format
+class MINA32InstFunnelShift<bits<4> group, bits<4> opcode, dag outs, dag ins, string asmstr, list<dag> pattern>
+  : MINA32Inst<outs, ins, asmstr, pattern>
+{
+  bits<4> RSHIFT;
+  bits<4> DEST;
+  bits<4> SRC2;
+  bits<4> SRC1;
+  
+  let Inst{7-0}   = 0;
+  let Inst{11-8}  = RSHIFT;
+  let Inst{15-12} = DEST;
+  let Inst{19-16} = SRC2;
+  let Inst{23-20} = SRC1;
+  let Inst{27-24} = opcode;
+  let Inst{31-28} = group;
+}
+
+// Branch format
+class MINA32InstBranch<bits<4> group, bits<4> opcode, dag outs, dag ins, string asmstr, list<dag> pattern>
+  : MINA32Inst<outs, ins, asmstr, pattern>
+{
+  bits<24> IMM;
+  
+  let Inst{23-0}   = IMM;
+  let Inst{27-24} = opcode;
+  let Inst{31-28} = group;
+}
