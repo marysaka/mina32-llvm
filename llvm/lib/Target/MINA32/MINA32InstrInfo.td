@@ -42,5 +42,6 @@ def ADJCALLSTACKUP   : Pseudo<(outs), (ins i32imm:$amt1, i32imm:$amt2),
 let hasSideEffects = 0, DEST = 0x0, SRC1 = 0x0, SRC2 = 0x0 in
   def NOP : MINA32InstStandard<0b0000, 0b0110, (outs), (ins), "nop", []>;
 
+def ADD : MINA32InstStandard<0b0000, 0b1000, (outs GPR:$DEST), (ins GPR:$SRC1, GPR:$SRC2), "add $DEST, $SRC1, $SRC2", []>;
 
 // TODO rest after

@@ -60,8 +60,8 @@ void MINA32AsmBackend::adjustFixupValue(const MCFixup &Fixup,
                                         const MCValue &Target, uint64_t &Value,
                                         MCContext *Ctx) const {
   // The size of the fixup in bits.
-  uint64_t Size =
-      MINA32AsmBackend::getFixupKindInfo(Fixup.getKind()).TargetSize;
+  // uint64_t Size =
+  //     MINA32AsmBackend::getFixupKindInfo(Fixup.getKind()).TargetSize;
 
   unsigned Kind = Fixup.getKind();
   switch (Kind) {

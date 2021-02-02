@@ -273,10 +273,11 @@ public:
 } // namespace
 
 void printMINA32Operands(OperandVector &Operands) {
+  LLVM_DEBUG(dbgs() << "printMINA32Operands: ");
   for (size_t i = 0; i < Operands.size(); i++) {
     MINA32Operand *op = static_cast<MINA32Operand *>(&*Operands[i]);
     assert(op != nullptr);
-    LLVM_DEBUG(dbgs() << "<" << *op << ">");
+    LLVM_DEBUG(dbgs() << "<" << *op << "> ");
   }
   LLVM_DEBUG(dbgs() << "\n");
 }
@@ -354,13 +355,13 @@ bool MINA32AsmParser::tryParseRegisterOperand(OperandVector &Operands,
   MCAsmParser &Parser = getParser();
 
   SMLoc S = Parser.getTok().getLoc();
-  int RegNo = matchRegisterName(Mnemonic);
+  std::string RegisterName = Parser.getTok().getIdentifier().lower();
+  int RegNo = matchRegisterName(RegisterName);
 
   if (RegNo == 0)
     return true;
 
-  Operands.push_back(
-      MINA32Operand::CreateReg(RegNo, S, Parser.getTok().getLoc()));
+  Operands.push_back(MINA32Operand::CreateReg(RegNo, S, Parser.getTok().getLoc()));
   Parser.Lex(); // Eat register token.
   return false;
 }
@@ -525,30 +526,26 @@ bool MINA32AsmParser::ParseInstruction(ParseInstructionInfo &Info,
                                        OperandVector &Operands) {
   MCAsmParser &Parser = getParser();
 
-  // Create the leading tokens for the mnemonic, split by '.' characters.
   size_t Start = 0, Next = Name.find('.');
-  StringRef Mnemonic = Name.slice(Start, Next);
-  // Refer to the explanation in source code of function DecodeJumpFR(...) in
-  // MINA32Disassembler.cpp
-  if (Mnemonic == "ret")
-    Mnemonic = "jr";
+  StringRef Head = Name.slice(Start, Next);
 
-  Operands.push_back(MINA32Operand::CreateToken(Mnemonic, NameLoc));
+  // Create the leading tokens for the mnemonic.
+  Operands.push_back(MINA32Operand::CreateToken(Head, NameLoc));
 
   // Read the remaining operands.
   if (getLexer().isNot(AsmToken::EndOfStatement)) {
     // Read the first operand.
-    if (ParseOperand(Operands, Name)) {
+    if (ParseOperand(Operands, Head)) {
       SMLoc Loc = getLexer().getLoc();
       Parser.eatToEndOfStatement();
-      return Error(Loc, "unexpected token in argument list");
+      return Error(Loc, "unexpected token in argument list (first)");
     }
 
     while (getLexer().is(AsmToken::Comma)) {
       Parser.Lex(); // Eat the comma.
 
       // Parse and remember the operand.
-      if (ParseOperand(Operands, Name)) {
+      if (ParseOperand(Operands, Head)) {
         SMLoc Loc = getLexer().getLoc();
         Parser.eatToEndOfStatement();
         return Error(Loc, "unexpected token in argument list");
