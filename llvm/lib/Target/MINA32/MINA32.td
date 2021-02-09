@@ -16,16 +16,12 @@
 include "llvm/Target/Target.td"
 
 //===---------------------------------------------------------------------===//
-// Register File Description
+// Register File, Calling Conv, and Instruction Descriptions
 //===---------------------------------------------------------------------===//
 
 include "MINA32RegisterInfo.td"
-
-//===---------------------------------------------------------------------===//
-// Instruction Descriptions
-//===---------------------------------------------------------------------===//
-
 include "MINA32InstrInfo.td"
+include "MINA32CallingConv.td"
 
 def MINA32InstrInfo : InstrInfo;
 

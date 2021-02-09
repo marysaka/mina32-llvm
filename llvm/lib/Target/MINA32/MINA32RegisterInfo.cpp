@@ -34,15 +34,13 @@ MINA32RegisterInfo::MINA32RegisterInfo() : MINA32GenRegisterInfo(MINA32::PC) {}
 
 const MCPhysReg *
 MINA32RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
-  // TODO
-  return nullptr /*CSR_SaveList*/;
+  return CSR_SaveList;
 }
 
 const uint32_t *
 MINA32RegisterInfo::getCallPreservedMask(const MachineFunction &MF,
                                          CallingConv::ID CC) const {
-  // TODO
-  return nullptr /*CSR_RegMask*/;
+  return CSR_RegMask;
 }
 
 bool MINA32RegisterInfo::hasBasePointer(const MachineFunction &MF) const {

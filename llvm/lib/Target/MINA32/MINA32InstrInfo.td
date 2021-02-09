@@ -13,6 +13,10 @@
 
 include "MINA32InstrFormats.td"
 
+// Procedure return
+def mina32_ret : SDNode<"MINA32ISD::RET", SDTNone,
+                        [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
+
 // Target-independent type requirements, but with target-specific formats.
 def SDT_CallSeqStart : SDCallSeqStart<[SDTCisVT<0, i32>,
                                        SDTCisVT<1, i32>]>;
@@ -42,6 +46,17 @@ def ADJCALLSTACKUP   : Pseudo<(outs), (ins i32imm:$amt1, i32imm:$amt2),
 let hasSideEffects = 0, DEST = 0x0, SRC1 = 0x0, SRC2 = 0x0 in
   def NOP : MINA32InstStandard<0b0000, 0b0110, (outs), (ins), "nop", []>;
 
-def ADD : MINA32InstStandard<0b0000, 0b1000, (outs GPR:$DEST), (ins GPR:$SRC1, GPR:$SRC2), "add $DEST, $SRC1, $SRC2", []>;
+let hasSideEffects = 0, isCommutable = 1 in
+  def ADD : MINA32InstStandard<0b0000, 0b1000,
+              (outs GPR:$DEST), (ins GPR:$SRC1, GPR:$SRC2),
+              "add $DEST, $SRC1, $SRC2",
+              [(set GPR:$DEST, (add GPR:$SRC1, GPR:$SRC2))]>;
+
+// Register Branch Group
+
+let isReturn = 1, isTerminator = 1, isBarrier = 1,
+    IMM = 0x0, DEST = 0x0, SHIFT = 0x0, SRC1 = 0x0 in
+  def RET : MINA32InstImmediate<0b0011, 0b0010,
+              (outs), (ins), "ret", [(mina32_ret)]>;
 
 // TODO rest after

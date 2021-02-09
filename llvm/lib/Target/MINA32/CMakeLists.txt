@@ -2,7 +2,7 @@ set(LLVM_TARGET_DEFINITIONS MINA32.td)
 
 tablegen(LLVM MINA32GenAsmMatcher.inc -gen-asm-matcher)
 tablegen(LLVM MINA32GenAsmWriter.inc -gen-asm-writer)
-# tablegen(LLVM MINA32GenCallingConv.inc -gen-callingconv)
+tablegen(LLVM MINA32GenCallingConv.inc -gen-callingconv)
 tablegen(LLVM MINA32GenDAGISel.inc -gen-dag-isel)
 # tablegen(LLVM MINA32GenDisassemblerTables.inc -gen-disassembler)
 # tablegen(LLVM MINA32GenFastISel.inc -gen-fast-isel)

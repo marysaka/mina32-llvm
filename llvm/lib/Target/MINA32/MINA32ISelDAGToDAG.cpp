@@ -61,16 +61,10 @@ void MINA32DAGToDAGISel::Select(SDNode *N) {
   }
 
   // See if subclasses can handle this node.
-  if (trySelect(N))
-    return;
+  // if (trySelect(N)) ...
 
   // Select the default instruction.
   SelectCode(N);
-}
-
-bool MINA32DAGToDAGISel::trySelect(SDNode *N) {
-  // TODO
-  llvm_unreachable("trySelect() unimplemented");
 }
 
 FunctionPass *llvm::createMINA32ISelDag(MINA32TargetMachine &TM,
