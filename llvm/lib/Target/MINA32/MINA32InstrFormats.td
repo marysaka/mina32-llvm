@@ -82,13 +82,12 @@ class MINA32InstImmediate<bits<4> group, bits<4> opcode, dag outs, dag ins, stri
 class MINA32InstMove<bits<4> group, bits<4> opcode, dag outs, dag ins, string asmstr, list<dag> pattern>
   : MINA32Inst<outs, ins, asmstr, pattern>
 {
-  bits<12> IMM1;
+  bits<16> IMM;
   bits<4>  DEST;
-  bits<4>  IMM2;
   
-  let Inst{11-0}  = IMM1;
+  let Inst{11-0}  = IMM{11-0};
   let Inst{15-12} = DEST;
-  let Inst{19-16} = IMM2;
+  let Inst{19-16} = IMM{15-12};
   let Inst{23-20} = 0;
   let Inst{27-24} = opcode;
   let Inst{31-28} = group;
@@ -118,7 +117,7 @@ class MINA32InstBranch<bits<4> group, bits<4> opcode, dag outs, dag ins, string 
 {
   bits<24> IMM;
   
-  let Inst{23-0}   = IMM;
+  let Inst{23-0}  = IMM;
   let Inst{27-24} = opcode;
   let Inst{31-28} = group;
 }

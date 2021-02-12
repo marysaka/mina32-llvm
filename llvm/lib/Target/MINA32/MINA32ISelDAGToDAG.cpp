@@ -44,6 +44,7 @@ private:
   const MINA32Subtarget *Subtarget;
   void Select(SDNode *N) override;
   bool trySelect(SDNode *N);
+  SDValue getImm(const SDNode *Node, unsigned Imm);
 };
 
 bool MINA32DAGToDAGISel::runOnMachineFunction(MachineFunction &MF) {
@@ -65,6 +66,10 @@ void MINA32DAGToDAGISel::Select(SDNode *N) {
 
   // Select the default instruction.
   SelectCode(N);
+}
+
+SDValue MINA32DAGToDAGISel::getImm(const SDNode *Node, unsigned Imm) {
+  return CurDAG->getTargetConstant(Imm, SDLoc(Node), MVT::i32);
 }
 
 FunctionPass *llvm::createMINA32ISelDag(MINA32TargetMachine &TM,
