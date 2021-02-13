@@ -41,18 +41,27 @@ def ADJCALLSTACKUP   : Pseudo<(outs), (ins i32imm:$amt1, i32imm:$amt2),
 
 // Immediate Patterns
 
+def immS12W : ImmLeaf<i32, [{
+  unsigned abs = Imm ^ (Imm >> 31);
+  int top = Log2_32(abs), end = countTrailingZeros(abs);
+  return top < 28 && end >= 2 && top < end + 11;
+}]>;
+def immS12H : ImmLeaf<i32, [{
+  unsigned abs = Imm ^ (Imm >> 31);
+  int top = Log2_32(abs), end = countTrailingZeros(abs);
+  return top < 27 && end >= 1 && top < end + 11;
+}]>;
+def immS12B : ImmLeaf<i32, [{
+  unsigned abs = Imm ^ (Imm >> 31);
+  int top = Log2_32(abs), end = countTrailingZeros(abs);
+  return top < 26 && end >= 0 && top < end + 11;
+}]>;
+
 def lo16x : SDNodeXForm<imm, [{
-    return getImm(N, (N->getZExtValue() >>  0) & 0xffff);
+  return getImm(N, (N->getZExtValue() >>  0) & 0xffff);
 }]>;
-
 def up16x : SDNodeXForm<imm, [{
-    return getImm(N, (N->getZExtValue() >> 16) & 0xffff);
-}]>;
-
-def immS12 : ImmLeaf<i32, [{
-    unsigned abs = Imm ^ (Imm >> 31);
-    int top = Log2_32(abs), end = countTrailingZeros(abs);
-    return top < 26 && top < end + 11;
+  return getImm(N, (N->getZExtValue() >> 16) & 0xffff);
 }]>;
 
 def immL16 : ImmLeaf<i32, [{ return isUInt<16>(Imm); }]>;
@@ -64,7 +73,7 @@ class ALUI<bits<4> group, bits<4> opcode, string opstr, SDPatternOperator opnode
     : MINA32InstImmediate<group, opcode,
                           (outs GPR:$DEST), (ins GPR:$SRC1, i32imm:$IMMS),
                           !strconcat(opstr, " $DEST, $SRC1, $IMMS"),
-                          [(set GPR:$DEST, (opnode GPR:$SRC1, immS12:$IMMS))]>;
+                          [(set GPR:$DEST, (opnode GPR:$SRC1, immS12B:$IMMS))]>;
 
 class ALU<bits<4> group, bits<4> opcode, string opstr, SDPatternOperator opnode>
     : MINA32InstStandard<group, opcode,
@@ -72,25 +81,49 @@ class ALU<bits<4> group, bits<4> opcode, string opstr, SDPatternOperator opnode>
                          !strconcat(opstr, " $DEST, $SRC1, $SRC2"),
                          [(set GPR:$DEST, (opnode GPR:$SRC1, GPR:$SRC2))]>;
 
+class LOADI<bits<4> opcode, string opstr, SDPatternOperator opnode, ImmLeaf off>
+    : MINA32InstImmediate<0b0100, opcode,
+                         (outs GPR:$DEST), (ins GPR:$SRC1, i32imm:$IMMS),
+                         !strconcat(opstr, " $DEST, [$SRC1, $IMMS]"),
+                         [(set GPR:$DEST, (opnode (add GPR:$SRC1, off:$IMMS)))]>;
+
+class LOAD<bits<4> opcode, string opstr, SDPatternOperator opnode>
+    : MINA32InstStandard<0b0100, opcode,
+                         (outs GPR:$DEST), (ins GPR:$SRC1, GPR:$SRC2),
+                         !strconcat(opstr, " $DEST, [$SRC1, $SRC2]"),
+                         [(set GPR:$DEST, (opnode (add GPR:$SRC1, GPR:$SRC2)))]>;
+
+class STOREI<bits<4> opcode, string opstr, SDPatternOperator opnode, ImmLeaf off>
+    : MINA32InstImmediate<0b0100, opcode,
+                         (outs), (ins GPR:$DEST, GPR:$SRC1, i32imm:$IMMS),
+                         !strconcat(opstr, " $DEST, [$SRC1, $IMMS]"),
+                         [(opnode GPR:$DEST, (add GPR:$SRC1, off:$IMMS))]>;
+
+class STORE<bits<4> opcode, string opstr, SDPatternOperator opnode>
+    : MINA32InstStandard<0b0100, opcode,
+                         (outs), (ins GPR:$DEST, GPR:$SRC1, GPR:$SRC2),
+                         !strconcat(opstr, " $DEST, [$SRC1, $SRC2]"),
+                         [(opnode GPR:$DEST, (add GPR:$SRC1, GPR:$SRC2))]>;
+
 // Arithmetic/Divide/NOP Group
 
-def ADDI  : ALUI<0b0000, 0b0000, "addi", add>;
+def ADDI  : ALUI<0b0000, 0b0000, "addi",  add>;
 def MULTI : ALUI<0b0000, 0b0001, "multi", mul>;
-def DIVI  : ALUI<0b0000, 0b0010, "divi", sdiv>;
-def REMI  : ALUI<0b0000, 0b0011, "remi", srem>;
-def SLTI  : ALUI<0b0000, 0b0100, "slti", setlt>;
+def DIVI  : ALUI<0b0000, 0b0010, "divi",  sdiv>;
+def REMI  : ALUI<0b0000, 0b0011, "remi",  srem>;
+def SLTI  : ALUI<0b0000, 0b0100, "slti",  setlt>;
 def SLTIU : ALUI<0b0000, 0b0101, "sltiu", setult>;
 
 let hasSideEffects = 0, DEST = 0x0, SRC1 = 0x0, SRC2 = 0x0 in
 def NOP : MINA32InstStandard<0b0000, 0b0110, (outs), (ins), "nop", []>;
 
-def ADD   : ALU<0b0000, 0b1000, "add", add>;
+def ADD   : ALU<0b0000, 0b1000, "add",  add>;
 def MULT  : ALU<0b0000, 0b1001, "mult", mul>;
-def DIV   : ALU<0b0000, 0b1010, "div", sdiv>;
-def REM   : ALU<0b0000, 0b1011, "rem", srem>;
-def SLT   : ALU<0b0000, 0b1100, "slt", setlt>;
+def DIV   : ALU<0b0000, 0b1010, "div",  sdiv>;
+def REM   : ALU<0b0000, 0b1011, "rem",  srem>;
+def SLT   : ALU<0b0000, 0b1100, "slt",  setlt>;
 def SLTU  : ALU<0b0000, 0b1101, "sltu", setult>;
-def SUB   : ALU<0b0000, 0b1110, "sub", sub>;
+def SUB   : ALU<0b0000, 0b1110, "sub",  sub>;
 
 // Logic/Bitwise Group
 
@@ -98,11 +131,11 @@ def SUB   : ALU<0b0000, 0b1110, "sub", sub>;
 //                   (not (and node:$src1, node:$src2))>;
 
 def ANDI  : ALUI<0b0001, 0b0000, "andi", and>;
-def ORI   : ALUI<0b0001, 0b0001, "ori", or>;
+def ORI   : ALUI<0b0001, 0b0001, "ori",  or>;
 def XORI  : ALUI<0b0001, 0b0010, "xori", xor>;
 
 def AND   : ALU<0b0001, 0b1000, "and", and>;
-def OR    : ALU<0b0001, 0b1001, "or", or>;
+def OR    : ALU<0b0001, 0b1001, "or",  or>;
 def XOR   : ALU<0b0001, 0b1010, "xor", xor>;
 
 // Register Branch Group
@@ -113,10 +146,21 @@ def RET : MINA32InstImmediate<0b0011, 0b0010,
                               (outs), (ins), "ret", [(mina32_ret)]>;
 // Memory Group
 
-//def ST : MINA32InstImmediate<0b0100, 0b0011,
-//           (outs), (ins GPR:$SRC1, GPR:$DEST),
-//           "st $DEST, [$SRC1, $IMM]",
-//           [(store GPR:$DEST, (add GPR:$SRC, $DEST
+def LD    : LOADI<0b0000, "ld",  load,        immS12W>;
+def LDH   : LOADI<0b0001, "ldh", sextloadi16, immS12H>;
+def LDB   : LOADI<0b0010, "ldb", sextloadi8,  immS12B>;
+
+def ST    : STOREI<0b0011, "st",  store,         immS12W>;
+def STH   : STOREI<0b0100, "sth", truncstorei16, immS12H>;
+def STB   : STOREI<0b0101, "stb", truncstorei8,  immS12B>;
+
+def RLD   : LOAD<0b1000, "rld",  load>;
+def RLDH  : LOAD<0b1001, "rldh", sextloadi16>;
+def RLDB  : LOAD<0b1010, "rldb", sextloadi8>;
+
+def RST   : STORE<0b1011, "rst",  store>;
+def RSTH  : STORE<0b1100, "rsth", truncstorei16>;
+def RSTB  : STORE<0b1101, "rstb", truncstorei8>;
 
 // Move Group
 
@@ -146,3 +190,11 @@ def RROR  : ALU<0b0110, 0b1011, "rror", rotr>;
 // Non-Instruction Patterns
 
 def : Pat<(i32 imm:$IMM), (MOVL (MOVU (up16x imm:$IMM)), (lo16x imm:$IMM))>;
+
+def : Pat<(load        GPR:$SRC1), (LD  GPR:$SRC1, 0)>;
+def : Pat<(sextloadi16 GPR:$SRC1), (LDH GPR:$SRC1, 0)>;
+def : Pat<(sextloadi8  GPR:$SRC1), (LDB GPR:$SRC1, 0)>;
+
+def : Pat<(store         GPR:$DEST, GPR:$SRC1), (ST  GPR:$DEST, GPR:$SRC1, 0)>;
+def : Pat<(truncstorei16 GPR:$DEST, GPR:$SRC1), (STH GPR:$DEST, GPR:$SRC1, 0)>;
+def : Pat<(truncstorei8  GPR:$DEST, GPR:$SRC1), (STB GPR:$DEST, GPR:$SRC1, 0)>;
