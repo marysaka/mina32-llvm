@@ -65,7 +65,6 @@ BitVector MINA32RegisterInfo::getReservedRegs(const MachineFunction &MF) const {
   markSuperRegs(Reserved, MINA32::SP_USER);
   markSuperRegs(Reserved, MINA32::LR_USER);
   markSuperRegs(Reserved, MINA32::PC_USER);
-  markSuperRegs(Reserved, MINA32::MCR);
   markSuperRegs(Reserved, MINA32::FRET);
   if (TFI->hasFP(MF))
     markSuperRegs(Reserved, MINA32::R11);

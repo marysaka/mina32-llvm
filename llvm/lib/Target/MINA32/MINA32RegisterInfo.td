@@ -37,7 +37,7 @@ def SP  : MINA32Reg<13, "sp", [], ["r13"]>;
 def LR  : MINA32Reg<14, "lr", [], ["r14"]>;
 def PC  : MINA32Reg<15, "pc", [], ["r15"]>;
 
-def GPR  : RegisterClass<"MINA32", [i32], 32, (add (sequence "R%u", 0, 12), SP, LR, PC)>;
+def GPR : RegisterClass<"MINA32", [i32], 32, (add (sequence "R%u", 0, 12), SP, LR, PC)>;
 
 // User registers
 def R8_USER  : MINA32Reg< 8, "r8_usr">;
@@ -54,6 +54,7 @@ def PC_USER  : MINA32Reg<15, "pc_usr", [], ["r15_usr"]>;
 def MCR  : MINA32Reg<0, "mcr">;
 def FRET : MINA32Reg<1, "fret">;
 
+def TFR  : RegisterClass<"MINA32", [i32], 32, (add MCR)>;
 
 // Supervior only
 def SPR  : RegisterClass<"MINA32", [i32], 32, (add (sequence "R%u_USER", 8, 12), SP_USER, LR_USER, PC_USER, MCR, FRET)> {

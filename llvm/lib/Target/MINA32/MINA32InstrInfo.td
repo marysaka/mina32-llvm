@@ -43,17 +43,17 @@ def ADJCALLSTACKUP   : Pseudo<(outs), (ins i32imm:$amt1, i32imm:$amt2),
 
 def immS12W : ImmLeaf<i32, [{
   unsigned abs = Imm ^ (Imm >> 31);
-  int top = Log2_32(abs), end = countTrailingZeros(abs);
+  int top = Log2_32(abs), end = countTrailingZeros(Imm);
   return top < 28 && end >= 2 && top < end + 11;
 }]>;
 def immS12H : ImmLeaf<i32, [{
   unsigned abs = Imm ^ (Imm >> 31);
-  int top = Log2_32(abs), end = countTrailingZeros(abs);
+  int top = Log2_32(abs), end = countTrailingZeros(Imm);
   return top < 27 && end >= 1 && top < end + 11;
 }]>;
 def immS12B : ImmLeaf<i32, [{
   unsigned abs = Imm ^ (Imm >> 31);
-  int top = Log2_32(abs), end = countTrailingZeros(abs);
+  int top = Log2_32(abs), end = countTrailingZeros(Imm);
   return top < 26 && end >= 0 && top < end + 11;
 }]>;
 
@@ -66,6 +66,8 @@ def up16x : SDNodeXForm<imm, [{
 
 def immL16 : ImmLeaf<i32, [{ return isUInt<16>(Imm); }]>;
 def immU16 : ImmLeaf<i32, [{ return isShiftedUInt<16, 16>(Imm); }], up16x>;
+
+def addr16 : Operand<OtherVT> {}
 
 // Instruction Templates
 
@@ -105,14 +107,24 @@ class STORE<bits<4> opcode, string opstr, SDPatternOperator opnode>
                          !strconcat(opstr, " $DEST, [$SRC1, $SRC2]"),
                          [(opnode GPR:$DEST, (add GPR:$SRC1, GPR:$SRC2))]>;
 
+class CMPI<bits<4> group, bits<4> opcode, string opstr, SDPatternOperator opnode>
+    : MINA32InstImmediate<group, opcode,
+                          (outs TFR:$MCR), (ins GPR:$DEST, i32imm:$IMMS),
+                          !strconcat(opstr, " $DEST, $IMMS"),
+                          [(set TFR:$MCR, (opnode GPR:$DEST, immS12B:$IMMS))]>;
+
+class CMP<bits<4> group, bits<4> opcode, string opstr, SDPatternOperator opnode>
+    : MINA32InstStandard<group, opcode,
+                         (outs TFR:$MCR), (ins GPR:$DEST, GPR:$SRC1),
+                         !strconcat(opstr, " $DEST, $SRC1"),
+                         [(set TFR:$MCR, (opnode GPR:$DEST, GPR:$SRC1))]>;
+
 // Arithmetic/Divide/NOP Group
 
 def ADDI  : ALUI<0b0000, 0b0000, "addi",  add>;
 def MULTI : ALUI<0b0000, 0b0001, "multi", mul>;
 def DIVI  : ALUI<0b0000, 0b0010, "divi",  sdiv>;
 def REMI  : ALUI<0b0000, 0b0011, "remi",  srem>;
-def SLTI  : ALUI<0b0000, 0b0100, "slti",  setlt>;
-def SLTIU : ALUI<0b0000, 0b0101, "sltiu", setult>;
 
 let hasSideEffects = 0, DEST = 0x0, SRC1 = 0x0, SRC2 = 0x0 in
 def NOP : MINA32InstStandard<0b0000, 0b0110, (outs), (ins), "nop", []>;
@@ -121,22 +133,41 @@ def ADD   : ALU<0b0000, 0b1000, "add",  add>;
 def MULT  : ALU<0b0000, 0b1001, "mult", mul>;
 def DIV   : ALU<0b0000, 0b1010, "div",  sdiv>;
 def REM   : ALU<0b0000, 0b1011, "rem",  srem>;
-def SLT   : ALU<0b0000, 0b1100, "slt",  setlt>;
-def SLTU  : ALU<0b0000, 0b1101, "sltu", setult>;
 def SUB   : ALU<0b0000, 0b1110, "sub",  sub>;
 
 // Logic/Bitwise Group
 
-//def nand : PatFrag<(ops node:$src1, node:$src2),
-//                   (not (and node:$src1, node:$src2))>;
+def nand : PatFrag<(ops node:$src1, node:$src2),
+                   (not (and node:$src1, node:$src2))>;
 
-def ANDI  : ALUI<0b0001, 0b0000, "andi", and>;
-def ORI   : ALUI<0b0001, 0b0001, "ori",  or>;
-def XORI  : ALUI<0b0001, 0b0010, "xori", xor>;
+def ANDI : ALUI<0b0001, 0b0000, "andi", and>;
+def ORI  : ALUI<0b0001, 0b0001, "ori",  or>;
+def XORI : ALUI<0b0001, 0b0010, "xori", xor>;
+def NANDI : ALUI<0b0001, 0b0011, "nandi", nand>;
 
-def AND   : ALU<0b0001, 0b1000, "and", and>;
-def OR    : ALU<0b0001, 0b1001, "or",  or>;
-def XOR   : ALU<0b0001, 0b1010, "xor", xor>;
+def AND  : ALU<0b0001, 0b1000, "and", and>;
+def OR   : ALU<0b0001, 0b1001, "or",  or>;
+def XOR  : ALU<0b0001, 0b1010, "xor", xor>;
+def NAND : ALU<0b0001, 0b1011, "nand", nand>;
+
+// Compare Group
+
+def CMPIEQ : CMPI<0b0010, 0b0000, "cmpi/eq", seteq>;
+def CMPILO : CMPI<0b0010, 0b0001, "cmpi/lo", setult>;
+def CMPILS : CMPI<0b0010, 0b0010, "cmpi/ls", setule>;
+def CMPILT : CMPI<0b0010, 0b0011, "cmpi/lt", setlt>;
+def CMPILE : CMPI<0b0010, 0b0100, "cmpi/le", setle>;
+
+def CMPEQ  : CMP<0b0010, 0b1000, "cmp/eq", seteq>;
+def CMPLO  : CMP<0b0010, 0b1001, "cmp/lo", setult>;
+def CMPLS  : CMP<0b0010, 0b1010, "cmp/ls", setule>;
+def CMPLT  : CMP<0b0010, 0b1011, "cmp/lt", setlt>;
+def CMPLE  : CMP<0b0010, 0b1100, "cmp/le", setle>;
+
+def SLTI  : ALUI<0b0000, 0b0100, "slti",  setlt>;
+def SLTIU : ALUI<0b0000, 0b0101, "sltiu", setult>;
+def SLT   : ALU<0b0000, 0b1100, "slt",  setlt>;
+def SLTU  : ALU<0b0000, 0b1101, "sltu", setult>;
 
 // Register Branch Group
 
@@ -146,29 +177,28 @@ def RET : MINA32InstImmediate<0b0011, 0b0010,
                               (outs), (ins), "ret", [(mina32_ret)]>;
 // Memory Group
 
-def LD    : LOADI<0b0000, "ld",  load,        immS12W>;
-def LDH   : LOADI<0b0001, "ldh", sextloadi16, immS12H>;
-def LDB   : LOADI<0b0010, "ldb", sextloadi8,  immS12B>;
+def LD   : LOADI<0b0000, "ld",  load,        immS12W>;
+def LDH  : LOADI<0b0001, "ldh", sextloadi16, immS12H>;
+def LDB  : LOADI<0b0010, "ldb", sextloadi8,  immS12B>;
 
-def ST    : STOREI<0b0011, "st",  store,         immS12W>;
-def STH   : STOREI<0b0100, "sth", truncstorei16, immS12H>;
-def STB   : STOREI<0b0101, "stb", truncstorei8,  immS12B>;
+def ST   : STOREI<0b0011, "st",  store,         immS12W>;
+def STH  : STOREI<0b0100, "sth", truncstorei16, immS12H>;
+def STB  : STOREI<0b0101, "stb", truncstorei8,  immS12B>;
 
-def RLD   : LOAD<0b1000, "rld",  load>;
-def RLDH  : LOAD<0b1001, "rldh", sextloadi16>;
-def RLDB  : LOAD<0b1010, "rldb", sextloadi8>;
+def RLD  : LOAD<0b1000, "rld",  load>;
+def RLDH : LOAD<0b1001, "rldh", sextloadi16>;
+def RLDB : LOAD<0b1010, "rldb", sextloadi8>;
 
-def RST   : STORE<0b1011, "rst",  store>;
-def RSTH  : STORE<0b1100, "rsth", truncstorei16>;
-def RSTB  : STORE<0b1101, "rstb", truncstorei8>;
+def RST  : STORE<0b1011, "rst",  store>;
+def RSTH : STORE<0b1100, "rsth", truncstorei16>;
+def RSTB : STORE<0b1101, "rstb", truncstorei8>;
 
 // Move Group
 
 let Constraints = "$SRC = $DEST" in
 def MOVL : MINA32InstMove<0b0101, 0b0011,
                           (outs GPR:$DEST), (ins GPR:$SRC, i32imm:$IMM),
-                          "movl $DEST, $IMM",
-                          [(set GPR:$DEST, (or GPR:$SRC, immL16:$IMM))]>;
+                          "movl $DEST, $IMM", []>;
 
 def MOVU : MINA32InstMove<0b0101, 0b0011,
                           (outs GPR:$DEST), (ins i32imm:$IMM),
@@ -177,15 +207,32 @@ def MOVU : MINA32InstMove<0b0101, 0b0011,
 
 // Shift Group
 
-def LSL   : ALUI<0b0110, 0b0000, "lsl", shl>;
-def LSR   : ALUI<0b0110, 0b0001, "lsr", srl>;
-def ASR   : ALUI<0b0110, 0b0010, "asr", sra>;
-def ROR   : ALUI<0b0110, 0b0011, "ror", rotr>;
+def LSL  : ALUI<0b0110, 0b0000, "lsl", shl>;
+def LSR  : ALUI<0b0110, 0b0001, "lsr", srl>;
+def ASR  : ALUI<0b0110, 0b0010, "asr", sra>;
+def ROR  : ALUI<0b0110, 0b0011, "ror", rotr>;
 
-def RLSL  : ALU<0b0110, 0b1000, "rlsl", shl>;
-def RLSR  : ALU<0b0110, 0b1001, "rlsr", srl>;
-def RASR  : ALU<0b0110, 0b1010, "rasr", sra>;
-def RROR  : ALU<0b0110, 0b1011, "rror", rotr>;
+def RLSL : ALU<0b0110, 0b1000, "rlsl", shl>;
+def RLSR : ALU<0b0110, 0b1001, "rlsr", srl>;
+def RASR : ALU<0b0110, 0b1010, "rasr", sra>;
+def RROR : ALU<0b0110, 0b1011, "rror", rotr>;
+
+// PC-relative Branch Group
+
+let isBranch = 1, isTerminator = 1 in
+def BRA : MINA32InstBranch<0b1000, 0b0000,
+                           (outs), (ins addr16:$IMM),
+                           "bra $IMM", [(br bb:$IMM)]>;
+
+let isBranch = 1, isTerminator = 1 in
+def BT  : MINA32InstBranch<0b1000, 0b0001,
+                           (outs), (ins TFR:$MCR, addr16:$IMM),
+                           "bt $IMM", [(brcond TFR:$MCR, bb:$IMM)]>;
+
+let isBranch = 1, isTerminator = 1 in
+def BF  : MINA32InstBranch<0b1000, 0b0001,
+                           (outs), (ins TFR:$MCR, addr16:$IMM),
+                           "bf $IMM", [(brcond (not TFR:$MCR), bb:$IMM)]>;
 
 // Non-Instruction Patterns
 

@@ -42,6 +42,8 @@ MINA32TargetLowering::MINA32TargetLowering(const TargetMachine &TM,
   // Compute derived properties from the register classes.
   computeRegisterProperties(Subtarget.getRegisterInfo());
 
+  setOperationAction(ISD::BR_CC, MVT::i32, Expand);
+  setBooleanContents(ZeroOrOneBooleanContent);
   setStackPointerRegisterToSaveRestore(MINA32::SP);
 }
 
