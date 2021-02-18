@@ -78,7 +78,30 @@ BitVector MINA32RegisterInfo::getReservedRegs(const MachineFunction &MF) const {
 void MINA32RegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator MI,
                                              int SPAdj, unsigned FIOperandNum,
                                              RegScavenger *RS) const {
-  // TODO
+  // TODO: this implementation is a temporary placeholder which does just
+  // enough to allow other aspects of code generation to be tested
+
+  assert(SPAdj == 0 && "Unexpected non-zero SPAdj value");
+
+  MachineFunction &MF = *MI->getParent()->getParent();
+  const TargetFrameLowering *TFI = MF.getSubtarget().getFrameLowering();
+  DebugLoc DL = MI->getDebugLoc();
+
+  Register FrameReg = getFrameRegister(MF);
+  int FrameIndex = MI->getOperand(FIOperandNum).getIndex();
+  int Offset = TFI->getFrameIndexReference(MF, FrameIndex, FrameReg);
+  Offset += MI->getOperand(FIOperandNum + 1).getImm();
+
+  assert(TFI->hasFP(MF) && "eliminateFrameIndex currently requires hasFP");
+
+  // Offsets must be directly encoded in a 12-bit immediate field
+  if (!isInt<12>(Offset)) {
+    report_fatal_error(
+        "Frame offsets outside of the signed 12-bit range not supported");
+  }
+
+  MI->getOperand(FIOperandNum).ChangeToRegister(FrameReg, false);
+  MI->getOperand(FIOperandNum + 1).ChangeToImmediate(Offset);
 }
 
 Register MINA32RegisterInfo::getFrameRegister(const MachineFunction &MF) const {

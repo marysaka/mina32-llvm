@@ -42,20 +42,23 @@ def ADJCALLSTACKUP   : Pseudo<(outs), (ins i32imm:$amt1, i32imm:$amt2),
 // Immediate Patterns
 
 def immS12W : ImmLeaf<i32, [{
-  unsigned abs = Imm ^ (Imm >> 31);
-  int top = Log2_32(abs), end = countTrailingZeros(Imm);
+  unsigned abs = Imm ^ (Imm >> 31), tmp = Imm;
+  int top = Log2_32(abs), end = countTrailingZeros(tmp);
   return top < 28 && end >= 2 && top < end + 11;
 }]>;
 def immS12H : ImmLeaf<i32, [{
-  unsigned abs = Imm ^ (Imm >> 31);
-  int top = Log2_32(abs), end = countTrailingZeros(Imm);
+  unsigned abs = Imm ^ (Imm >> 31), tmp = Imm;
+  int top = Log2_32(abs), end = countTrailingZeros(tmp);
   return top < 27 && end >= 1 && top < end + 11;
 }]>;
 def immS12B : ImmLeaf<i32, [{
-  unsigned abs = Imm ^ (Imm >> 31);
-  int top = Log2_32(abs), end = countTrailingZeros(Imm);
+  unsigned abs = Imm ^ (Imm >> 31), tmp = Imm;
+  int top = Log2_32(abs), end = countTrailingZeros(tmp);
   return top < 26 && end >= 0 && top < end + 11;
 }]>;
+
+// frameindex can't be matched directly
+def addrFI : ComplexPattern<iPTR, 1, "SelectAddrFI", [frameindex], []>;
 
 def lo16x : SDNodeXForm<imm, [{
   return getImm(N, (N->getZExtValue() >>  0) & 0xffff);
@@ -242,6 +245,14 @@ def : Pat<(load        GPR:$SRC1), (LD  GPR:$SRC1, 0)>;
 def : Pat<(sextloadi16 GPR:$SRC1), (LDH GPR:$SRC1, 0)>;
 def : Pat<(sextloadi8  GPR:$SRC1), (LDB GPR:$SRC1, 0)>;
 
+def : Pat<(load        addrFI:$SRC1), (LD  addrFI:$SRC1, 0)>;
+def : Pat<(sextloadi16 addrFI:$SRC1), (LDH addrFI:$SRC1, 0)>;
+def : Pat<(sextloadi8  addrFI:$SRC1), (LDB addrFI:$SRC1, 0)>;
+
 def : Pat<(store         GPR:$DEST, GPR:$SRC1), (ST  GPR:$DEST, GPR:$SRC1, 0)>;
 def : Pat<(truncstorei16 GPR:$DEST, GPR:$SRC1), (STH GPR:$DEST, GPR:$SRC1, 0)>;
 def : Pat<(truncstorei8  GPR:$DEST, GPR:$SRC1), (STB GPR:$DEST, GPR:$SRC1, 0)>;
+
+def : Pat<(store         GPR:$DEST, addrFI:$SRC1), (ST  GPR:$DEST, addrFI:$SRC1, 0)>;
+def : Pat<(truncstorei16 GPR:$DEST, addrFI:$SRC1), (STH GPR:$DEST, addrFI:$SRC1, 0)>;
+def : Pat<(truncstorei8  GPR:$DEST, addrFI:$SRC1), (STB GPR:$DEST, addrFI:$SRC1, 0)>;

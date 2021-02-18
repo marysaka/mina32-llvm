@@ -44,6 +44,7 @@ private:
   const MINA32Subtarget *Subtarget;
   void Select(SDNode *N) override;
   bool trySelect(SDNode *N);
+  bool SelectAddrFI(SDValue Addr, SDValue &Base);
   SDValue getImm(const SDNode *Node, unsigned Imm);
 };
 
@@ -66,6 +67,14 @@ void MINA32DAGToDAGISel::Select(SDNode *N) {
 
   // Select the default instruction.
   SelectCode(N);
+}
+
+bool MINA32DAGToDAGISel::SelectAddrFI(SDValue Addr, SDValue &Base) {
+  if (FrameIndexSDNode *FIN = dyn_cast<FrameIndexSDNode>(Addr)) {
+    Base = CurDAG->getTargetFrameIndex(FIN->getIndex(), MVT::i32);
+    return true;
+  }
+  return false;
 }
 
 SDValue MINA32DAGToDAGISel::getImm(const SDNode *Node, unsigned Imm) {

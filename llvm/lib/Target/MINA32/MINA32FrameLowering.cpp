@@ -36,7 +36,8 @@ void MINA32FrameLowering::emitEpilogue(MachineFunction &MF,
                                        MachineBasicBlock &MBB) const {}
 
 bool MINA32FrameLowering::hasFP(const MachineFunction &MF) const {
-  return MF.getFrameInfo().hasVarSizedObjects();
+  // return MF.getFrameInfo().hasVarSizedObjects();
+  return true;
 }
 
 bool MINA32FrameLowering::isFPCloseToIncomingSP() const { return false; }
