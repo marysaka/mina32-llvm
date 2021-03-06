@@ -66,6 +66,9 @@ def lo16x : SDNodeXForm<imm, [{
 def up16x : SDNodeXForm<imm, [{
   return getImm(N, (N->getZExtValue() >> 16) & 0xffff);
 }]>;
+def rol32x : SDNodeXForm<imm, [{
+  return getImm(N, 32 - N->getZExtValue());
+}]>;
 
 def immL16 : ImmLeaf<i32, [{ return isUInt<16>(Imm); }]>;
 def immU16 : ImmLeaf<i32, [{ return isShiftedUInt<16, 16>(Imm); }], up16x>;
@@ -126,17 +129,21 @@ class CMP<bits<4> group, bits<4> opcode, string opstr, SDPatternOperator opnode>
 
 def ADDI  : ALUI<0b0000, 0b0000, "addi",  add>;
 def MULTI : ALUI<0b0000, 0b0001, "multi", mul>;
-def DIVI  : ALUI<0b0000, 0b0010, "divi",  sdiv>;
-def REMI  : ALUI<0b0000, 0b0011, "remi",  srem>;
+def DIVI  : ALUI<0b0000, 0b0010, "divi",  udiv>;
+def REMI  : ALUI<0b0000, 0b0011, "remi",  urem>;
+def SLTI  : ALUI<0b0000, 0b0100, "slti",  setlt>;
+def SLTIU : ALUI<0b0000, 0b0101, "sltiu", setult>;
 
 let hasSideEffects = 0, DEST = 0x0, SRC1 = 0x0, SRC2 = 0x0 in
 def NOP : MINA32InstStandard<0b0000, 0b0110, (outs), (ins), "nop", []>;
 
 def ADD   : ALU<0b0000, 0b1000, "add",  add>;
 def MULT  : ALU<0b0000, 0b1001, "mult", mul>;
-def DIV   : ALU<0b0000, 0b1010, "div",  sdiv>;
-def REM   : ALU<0b0000, 0b1011, "rem",  srem>;
+def DIV   : ALU<0b0000, 0b1010, "div",  udiv>;
+def REM   : ALU<0b0000, 0b1011, "rem",  urem>;
 def SUB   : ALU<0b0000, 0b1110, "sub",  sub>;
+def SLT   : ALU<0b0000, 0b1100, "slt",  setlt>;
+def SLTU  : ALU<0b0000, 0b1101, "sltu", setult>;
 
 // Logic/Bitwise Group
 
@@ -167,11 +174,6 @@ def CMPLS  : CMP<0b0010, 0b1010, "cmp/ls", setule>;
 def CMPLT  : CMP<0b0010, 0b1011, "cmp/lt", setlt>;
 def CMPLE  : CMP<0b0010, 0b1100, "cmp/le", setle>;
 
-def SLTI  : ALUI<0b0000, 0b0100, "slti",  setlt>;
-def SLTIU : ALUI<0b0000, 0b0101, "sltiu", setult>;
-def SLT   : ALU<0b0000, 0b1100, "slt",  setlt>;
-def SLTU  : ALU<0b0000, 0b1101, "sltu", setult>;
-
 // Register Branch Group
 
 let isReturn = 1, isTerminator = 1, isBarrier = 1,
@@ -181,16 +183,16 @@ def RET : MINA32InstImmediate<0b0011, 0b0010,
 // Memory Group
 
 def LD   : LOADI<0b0000, "ld",  load,        immS12W>;
-def LDH  : LOADI<0b0001, "ldh", sextloadi16, immS12H>;
-def LDB  : LOADI<0b0010, "ldb", sextloadi8,  immS12B>;
+def LDH  : LOADI<0b0001, "ldh", zextloadi16, immS12H>;
+def LDB  : LOADI<0b0010, "ldb", zextloadi8,  immS12B>;
 
 def ST   : STOREI<0b0011, "st",  store,         immS12W>;
 def STH  : STOREI<0b0100, "sth", truncstorei16, immS12H>;
 def STB  : STOREI<0b0101, "stb", truncstorei8,  immS12B>;
 
 def RLD  : LOAD<0b1000, "rld",  load>;
-def RLDH : LOAD<0b1001, "rldh", sextloadi16>;
-def RLDB : LOAD<0b1010, "rldb", sextloadi8>;
+def RLDH : LOAD<0b1001, "rldh", zextloadi16>;
+def RLDB : LOAD<0b1010, "rldb", zextloadi8>;
 
 def RST  : STORE<0b1011, "rst",  store>;
 def RSTH : STORE<0b1100, "rsth", truncstorei16>;
@@ -198,15 +200,22 @@ def RSTB : STORE<0b1101, "rstb", truncstorei8>;
 
 // Move Group
 
+let SRC1 = 0x0 in
+def MOVI : MINA32InstImmediate<0b0101, 0b0000,
+                               (outs GPR:$DEST), (ins i32imm:$IMMS),
+                               "movi $DEST, $IMMS",
+                               [(set GPR:$DEST, immS12B:$IMMS)]>;
+
 let Constraints = "$SRC = $DEST" in
 def MOVL : MINA32InstMove<0b0101, 0b0011,
                           (outs GPR:$DEST), (ins GPR:$SRC, i32imm:$IMM),
                           "movl $DEST, $IMM", []>;
 
-def MOVU : MINA32InstMove<0b0101, 0b0011,
+def MOVU : MINA32InstMove<0b0101, 0b0100,
                           (outs GPR:$DEST), (ins i32imm:$IMM),
                           "movu $DEST, $IMM",
                           [(set GPR:$DEST, immU16:$IMM)]>;
+
 
 // Shift Group
 
@@ -240,14 +249,25 @@ def BF  : MINA32InstBranch<0b1000, 0b0001,
 // Non-Instruction Patterns
 
 def : Pat<(i32 imm:$IMM), (MOVL (MOVU (up16x imm:$IMM)), (lo16x imm:$IMM))>;
+def : Pat<(rotl GPR:$SRC1, immS12B:$IMMS), (ROR GPR:$SRC1, (rol32x imm:$IMMS))>;
+def : Pat<(rotl GPR:$SRC1, GPR:$SRC2), (RROR GPR:$SRC1, (MULTI GPR:$SRC2, -1))>;
+
+def : Pat<(extloadi16 (add GPR:$SRC1, immS12H:$IMMS)), (LDH GPR:$SRC1, imm:$IMMS)>;
+def : Pat<(extloadi8  (add GPR:$SRC1, immS12B:$IMMS)), (LDB GPR:$SRC1, imm:$IMMS)>;
+def : Pat<(extloadi16 (add GPR:$SRC1, GPR:$SRC2)), (RLDH GPR:$SRC1, GPR:$SRC2)>;
+def : Pat<(extloadi8  (add GPR:$SRC1, GPR:$SRC2)), (RLDB GPR:$SRC1, GPR:$SRC2)>;
 
 def : Pat<(load        GPR:$SRC1), (LD  GPR:$SRC1, 0)>;
-def : Pat<(sextloadi16 GPR:$SRC1), (LDH GPR:$SRC1, 0)>;
-def : Pat<(sextloadi8  GPR:$SRC1), (LDB GPR:$SRC1, 0)>;
+def : Pat<(zextloadi16 GPR:$SRC1), (LDH GPR:$SRC1, 0)>;
+def : Pat<(zextloadi8  GPR:$SRC1), (LDB GPR:$SRC1, 0)>;
+def : Pat<(extloadi16  GPR:$SRC1), (LDH GPR:$SRC1, 0)>;
+def : Pat<(extloadi8   GPR:$SRC1), (LDB GPR:$SRC1, 0)>;
 
 def : Pat<(load        addrFI:$SRC1), (LD  addrFI:$SRC1, 0)>;
-def : Pat<(sextloadi16 addrFI:$SRC1), (LDH addrFI:$SRC1, 0)>;
-def : Pat<(sextloadi8  addrFI:$SRC1), (LDB addrFI:$SRC1, 0)>;
+def : Pat<(zextloadi16 addrFI:$SRC1), (LDH addrFI:$SRC1, 0)>;
+def : Pat<(zextloadi8  addrFI:$SRC1), (LDB addrFI:$SRC1, 0)>;
+def : Pat<(extloadi16  addrFI:$SRC1), (LDH addrFI:$SRC1, 0)>;
+def : Pat<(extloadi8   addrFI:$SRC1), (LDB addrFI:$SRC1, 0)>;
 
 def : Pat<(store         GPR:$DEST, GPR:$SRC1), (ST  GPR:$DEST, GPR:$SRC1, 0)>;
 def : Pat<(truncstorei16 GPR:$DEST, GPR:$SRC1), (STH GPR:$DEST, GPR:$SRC1, 0)>;
