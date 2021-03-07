@@ -113,17 +113,15 @@ class STORE<bits<4> opcode, string opstr, SDPatternOperator opnode>
                          !strconcat(opstr, " $DEST, [$SRC1, $SRC2]"),
                          [(opnode GPR:$DEST, (add GPR:$SRC1, GPR:$SRC2))]>;
 
-class CMPI<bits<4> group, bits<4> opcode, string opstr, SDPatternOperator opnode>
+class CMPI<bits<4> group, bits<4> opcode, string opstr>
     : MINA32InstImmediate<group, opcode,
-                          (outs TFR:$MCR), (ins GPR:$DEST, i32imm:$IMMS),
-                          !strconcat(opstr, " $DEST, $IMMS"),
-                          [(set TFR:$MCR, (opnode GPR:$DEST, immS12B:$IMMS))]>;
+                          (outs TF:$MCR), (ins GPR:$DEST, i32imm:$IMMS),
+                          !strconcat(opstr, " $DEST, $IMMS"), []>;
 
-class CMP<bits<4> group, bits<4> opcode, string opstr, SDPatternOperator opnode>
+class CMP<bits<4> group, bits<4> opcode, string opstr>
     : MINA32InstStandard<group, opcode,
-                         (outs TFR:$MCR), (ins GPR:$DEST, GPR:$SRC1),
-                         !strconcat(opstr, " $DEST, $SRC1"),
-                         [(set TFR:$MCR, (opnode GPR:$DEST, GPR:$SRC1))]>;
+                         (outs TF:$MCR), (ins GPR:$DEST, GPR:$SRC1),
+                         !strconcat(opstr, " $DEST, $SRC1"), []>;
 
 // Arithmetic/Divide/NOP Group
 
@@ -162,17 +160,17 @@ def NAND : ALU<0b0001, 0b1011, "nand", nand>;
 
 // Compare Group
 
-def CMPIEQ : CMPI<0b0010, 0b0000, "cmpi/eq", seteq>;
-def CMPILO : CMPI<0b0010, 0b0001, "cmpi/lo", setult>;
-def CMPILS : CMPI<0b0010, 0b0010, "cmpi/ls", setule>;
-def CMPILT : CMPI<0b0010, 0b0011, "cmpi/lt", setlt>;
-def CMPILE : CMPI<0b0010, 0b0100, "cmpi/le", setle>;
+def CMPIEQ : CMPI<0b0010, 0b0000, "cmpi/eq">;
+def CMPILO : CMPI<0b0010, 0b0001, "cmpi/lo">;
+def CMPILS : CMPI<0b0010, 0b0010, "cmpi/ls">;
+def CMPILT : CMPI<0b0010, 0b0011, "cmpi/lt">;
+def CMPILE : CMPI<0b0010, 0b0100, "cmpi/le">;
 
-def CMPEQ  : CMP<0b0010, 0b1000, "cmp/eq", seteq>;
-def CMPLO  : CMP<0b0010, 0b1001, "cmp/lo", setult>;
-def CMPLS  : CMP<0b0010, 0b1010, "cmp/ls", setule>;
-def CMPLT  : CMP<0b0010, 0b1011, "cmp/lt", setlt>;
-def CMPLE  : CMP<0b0010, 0b1100, "cmp/le", setle>;
+def CMPEQ  : CMP<0b0010, 0b1000, "cmp/eq">;
+def CMPLO  : CMP<0b0010, 0b1001, "cmp/lo">;
+def CMPLS  : CMP<0b0010, 0b1010, "cmp/ls">;
+def CMPLT  : CMP<0b0010, 0b1011, "cmp/lt">;
+def CMPLE  : CMP<0b0010, 0b1100, "cmp/le">;
 
 // Register Branch Group
 
@@ -216,7 +214,6 @@ def MOVU : MINA32InstMove<0b0101, 0b0100,
                           "movu $DEST, $IMM",
                           [(set GPR:$DEST, immU16:$IMM)]>;
 
-
 // Shift Group
 
 def LSL  : ALUI<0b0110, 0b0000, "lsl", shl>;
@@ -238,19 +235,21 @@ def BRA : MINA32InstBranch<0b1000, 0b0000,
 
 let isBranch = 1, isTerminator = 1 in
 def BT  : MINA32InstBranch<0b1000, 0b0001,
-                           (outs), (ins TFR:$MCR, addr16:$IMM),
-                           "bt $IMM", [(brcond TFR:$MCR, bb:$IMM)]>;
+                           (outs), (ins TF:$MCR, addr16:$IMM),
+                           "bt $IMM", []>;
 
 let isBranch = 1, isTerminator = 1 in
 def BF  : MINA32InstBranch<0b1000, 0b0001,
-                           (outs), (ins TFR:$MCR, addr16:$IMM),
-                           "bf $IMM", [(brcond (not TFR:$MCR), bb:$IMM)]>;
+                           (outs), (ins TF:$MCR, addr16:$IMM),
+                           "bf $IMM", []>;
 
 // Non-Instruction Patterns
 
 def : Pat<(i32 imm:$IMM), (MOVL (MOVU (up16x imm:$IMM)), (lo16x imm:$IMM))>;
 def : Pat<(rotl GPR:$SRC1, immS12B:$IMMS), (ROR GPR:$SRC1, (rol32x imm:$IMMS))>;
 def : Pat<(rotl GPR:$SRC1, GPR:$SRC2), (RROR GPR:$SRC1, (MULTI GPR:$SRC2, -1))>;
+
+// Memory Patterns
 
 def : Pat<(extloadi16 (add GPR:$SRC1, immS12H:$IMMS)), (LDH GPR:$SRC1, imm:$IMMS)>;
 def : Pat<(extloadi8  (add GPR:$SRC1, immS12B:$IMMS)), (LDB GPR:$SRC1, imm:$IMMS)>;
@@ -276,3 +275,33 @@ def : Pat<(truncstorei8  GPR:$DEST, GPR:$SRC1), (STB GPR:$DEST, GPR:$SRC1, 0)>;
 def : Pat<(store         GPR:$DEST, addrFI:$SRC1), (ST  GPR:$DEST, addrFI:$SRC1, 0)>;
 def : Pat<(truncstorei16 GPR:$DEST, addrFI:$SRC1), (STH GPR:$DEST, addrFI:$SRC1, 0)>;
 def : Pat<(truncstorei8  GPR:$DEST, addrFI:$SRC1), (STB GPR:$DEST, addrFI:$SRC1, 0)>;
+
+// PC-Relative Branch Patterns
+
+multiclass CmpiPat<PatFrag opt, PatFrag opf, MINA32InstImmediate cmpi> {
+    def bt : Pat<(brcond (opt GPR:$SRC1, immS12B:$IMMS), bb:$IMM),
+             (BT (cmpi GPR:$SRC1, imm:$IMMS), addr16:$IMM)>;
+    def bf : Pat<(brcond (opf GPR:$SRC1, immS12B:$IMMS), bb:$IMM),
+             (BF (cmpi GPR:$SRC1, imm:$IMMS), addr16:$IMM)>;
+}
+
+multiclass CmpPat<PatFrag opt, PatFrag opf, MINA32InstStandard cmp> {
+    def bt : Pat<(brcond (opt GPR:$SRC1, GPR:$SRC2), bb:$IMM),
+             (BT (cmp GPR:$SRC1, GPR:$SRC2), addr16:$IMM)>;
+    def bf : Pat<(brcond (opf GPR:$SRC1, GPR:$SRC2), bb:$IMM),
+             (BF (cmp GPR:$SRC1, GPR:$SRC2), addr16:$IMM)>;
+}
+
+defm : CmpiPat<seteq,  setne,  CMPIEQ>;
+defm : CmpiPat<setult, setuge, CMPILO>;
+defm : CmpiPat<setule, setugt, CMPILS>;
+defm : CmpiPat<setlt,  setge,  CMPILT>;
+defm : CmpiPat<setle,  setgt,  CMPILE>;
+
+defm : CmpPat<seteq,  setne,  CMPEQ>;
+defm : CmpPat<setult, setuge, CMPLO>;
+defm : CmpPat<setule, setugt, CMPLS>;
+defm : CmpPat<setlt,  setge,  CMPLT>;
+defm : CmpPat<setle,  setgt,  CMPLE>;
+
+def : Pat<(brcond GPR:$SRC1, bb:$IMM), (BF (CMPIEQ GPR:$SRC1, 0), bb:$IMM)>;
