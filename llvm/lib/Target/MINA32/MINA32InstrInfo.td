@@ -13,17 +13,18 @@
 
 include "MINA32InstrFormats.td"
 
-// Procedure return
-def mina32_ret : SDNode<"MINA32ISD::RET", SDTNone,
-                        [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
-
-// Target-independent type requirements, but with target-specific formats.
+// Type requirements with target-specific formats.
+def SDT_MINA32Call   : SDTypeProfile<0, -1, [SDTCisVT<0, i32>]>;
 def SDT_CallSeqStart : SDCallSeqStart<[SDTCisVT<0, i32>,
                                        SDTCisVT<1, i32>]>;
 def SDT_CallSeqEnd   : SDCallSeqEnd<[SDTCisVT<0, i32>,
                                      SDTCisVT<1, i32>]>;
 
-// Target-independent nodes, but with target-specific formats.
+// Nodes with target-specific formats.
+def mina32_ret   : SDNode<"MINA32ISD::RET", SDTNone,
+                          [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
+def mina32_call  : SDNode<"MINA32ISD::CALL", SDT_MINA32Call,
+                          [SDNPHasChain, SDNPOutGlue, SDNPOptInGlue, SDNPVariadic]>;
 def callseq_start : SDNode<"ISD::CALLSEQ_START", SDT_CallSeqStart,
                            [SDNPHasChain, SDNPOutGlue]>;
 def callseq_end   : SDNode<"ISD::CALLSEQ_END", SDT_CallSeqEnd,
@@ -174,10 +175,17 @@ def CMPLE  : CMP<0b0010, 0b1100, "cmp/le">;
 
 // Register Branch Group
 
+let isCall = 1, DEST = 0x0, Defs = [SP] in
+def RCALL : MINA32InstImmediate<0b0011, 0b0001,
+                                (outs), (ins GPR:$SRC1, i32imm:$IMMS),
+                                "rcall $SRC1, $IMMS",
+                                [(mina32_call (add GPR:$SRC1, immS12W: $IMMS))]>;
+
 let isReturn = 1, isTerminator = 1, isBarrier = 1,
     IMM = 0x0, DEST = 0x0, SHIFT = 0x0, SRC1 = 0x0 in
 def RET : MINA32InstImmediate<0b0011, 0b0010,
                               (outs), (ins), "ret", [(mina32_ret)]>;
+
 // Memory Group
 
 def LD   : LOADI<0b0000, "ld",  load,        immS12W>;
@@ -248,6 +256,7 @@ def BF  : MINA32InstBranch<0b1000, 0b0001,
 def : Pat<(i32 imm:$IMM), (MOVL (MOVU (up16x imm:$IMM)), (lo16x imm:$IMM))>;
 def : Pat<(rotl GPR:$SRC1, immS12B:$IMMS), (ROR GPR:$SRC1, (rol32x imm:$IMMS))>;
 def : Pat<(rotl GPR:$SRC1, GPR:$SRC2), (RROR GPR:$SRC1, (MULTI GPR:$SRC2, -1))>;
+def : Pat<(mina32_call GPR:$SRC1), (RCALL GPR:$SRC1, 0)>;
 
 // Memory Patterns
 

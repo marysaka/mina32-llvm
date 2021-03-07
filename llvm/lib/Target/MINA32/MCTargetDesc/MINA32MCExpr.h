@@ -22,6 +22,8 @@ public:
   /// Specifies the type of an expression.
   enum VariantKind {
     VK_MINA32_None,
+    VK_MINA32_LO,
+    VK_MINA32_HI
     // TODO
   };
 

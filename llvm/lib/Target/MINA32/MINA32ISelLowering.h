@@ -26,7 +26,8 @@ namespace MINA32ISD {
 enum NodeType {
   // Start the numbering where ISD NodeType finishes
   FIRST_NUMBER = ISD::BUILTIN_OP_END,
-  RET  // subroutine return instruction
+  RET, // subroutine return instruction
+  CALL // subroutine call instruction
 };
 
 } // end namespace MINA32ISD
@@ -52,18 +53,21 @@ protected:
   const MINA32Subtarget &Subtarget;
 
 private:
+  SDValue LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const;
+
   SDValue LowerFormalArguments(SDValue Chain, CallingConv::ID CallConv,
                                bool isVarArg,
                                const SmallVectorImpl<ISD::InputArg> &Ins,
                                const SDLoc &DL, SelectionDAG &DAG,
                                SmallVectorImpl<SDValue> &InVals) const override;
 
+  SDValue LowerCall(TargetLowering::CallLoweringInfo &CLI,
+                    SmallVectorImpl<SDValue> &InVals) const override;
+
   SDValue LowerReturn(SDValue Chain, CallingConv::ID CallConv, bool isVarArg,
                       const SmallVectorImpl<ISD::OutputArg> &Outs,
                       const SmallVectorImpl<SDValue> &OutVals,
                       const SDLoc &dl, SelectionDAG &DAG) const override;
-
-  // TODO: Implement lowering
 };
 
 } // end namespace llvm

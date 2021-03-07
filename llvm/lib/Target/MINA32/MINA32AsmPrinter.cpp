@@ -24,6 +24,8 @@
 #include "llvm/MC/MCContext.h"
 #include "llvm/Support/TargetRegistry.h"
 
+#include "MCTargetDesc/MINA32MCExpr.h"
+
 using namespace llvm;
 
 #define DEBUG_TYPE "asm-printer"
@@ -64,6 +66,7 @@ void MINA32AsmPrinter::emitInstruction(const MachineInstr *MI) {
 }
 
 // TODO: Usually in seperate MINA32MCInstLower.cpp
+
 void MINA32AsmPrinter::LowerInstruction(const MachineInstr *MI,
                                         MCInst &OutMI) const {
   OutMI.setOpcode(MI->getOpcode());
@@ -112,6 +115,21 @@ MCOperand MINA32AsmPrinter::LowerOperand(const MachineOperand& MO) const {
 MCOperand MINA32AsmPrinter::LowerSymbolOperand(const MachineOperand &MO,
                                                MCSymbol *Sym) const {
   MCContext &Ctx = OutContext;
+  MINA32MCExpr::VariantKind Kind;
+
+  switch (MO.getTargetFlags()) {
+  default:
+    llvm_unreachable("Unknown target flag on GV operand");
+  case MINA32II::MO_None:
+    Kind = MINA32MCExpr::VK_MINA32_None;
+    break;
+  case MINA32II::MO_LO:
+    Kind = MINA32MCExpr::VK_MINA32_LO;
+    break;
+  case MINA32II::MO_HI:
+    Kind = MINA32MCExpr::VK_MINA32_HI;
+    break;
+  }
 
   const MCExpr *Expr =
     MCSymbolRefExpr::create(Sym, MCSymbolRefExpr::VK_None, Ctx);
@@ -120,6 +138,7 @@ MCOperand MINA32AsmPrinter::LowerSymbolOperand(const MachineOperand &MO,
     Expr = MCBinaryExpr::createAdd(
         Expr, MCConstantExpr::create(MO.getOffset(), Ctx), Ctx);
 
+  Expr = MINA32MCExpr::create(Kind, Expr, Ctx);
   return MCOperand::createExpr(Expr);
 }
 

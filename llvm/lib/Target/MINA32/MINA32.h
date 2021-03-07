@@ -18,6 +18,14 @@
 #include "llvm/CodeGen/SelectionDAGNodes.h"
 #include "llvm/Target/TargetMachine.h"
 
+namespace MINA32II {
+enum {
+  MO_None,
+  MO_LO,
+  MO_HI,
+};
+} // namespace MINA32II
+
 namespace llvm {
 
 class MINA32TargetMachine;

@@ -3,7 +3,6 @@
 ; RUN:   | FileCheck %s -check-prefix=M32I
 
 ; Check indexed and unindexed, sext, zext and anyext loads
-; TODO: Check global address
 
 define i32 @ldb(i8 *%a) nounwind {
 ; M32I-LABEL: ldb:
@@ -183,4 +182,29 @@ define i32 @ld_st_constant(i32 %a) nounwind {
   %2 = load volatile i32, i32* %1
   store i32 %a, i32* %1
   ret i32 %2
+}
+
+; Check load and store to a global
+@G = global i32 0
+
+define i32 @lw_sw_global(i32 %a) nounwind {
+; TODO: the addi should be folded in to the lw/sw operations
+; M32I-LABEL: lw_sw_global:
+; M32I:       ; %bb.0:
+; M32I-NEXT:    movu $r2, %hi(G)
+; M32I-NEXT:    movl $r2, %lo(G)
+; M32I-NEXT:    ld $r1, [$r2, 0]
+; M32I-NEXT:    st $r0, [$r2, 0]
+; M32I-NEXT:    movu $r2, %hi(G+36)
+; M32I-NEXT:    movl $r2, %lo(G+36)
+; M32I-NEXT:    ld $r3, [$r2, 0]
+; M32I-NEXT:    st $r0, [$r2, 0]
+; M32I-NEXT:    addi $r0, $r1, 0
+; M32I-NEXT:    ret
+  %1 = load volatile i32, i32* @G
+  store i32 %a, i32* @G
+  %2 = getelementptr i32, i32* @G, i32 9
+  %3 = load volatile i32, i32* %2
+  store i32 %a, i32* %2
+  ret i32 %1
 }

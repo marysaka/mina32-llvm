@@ -31,7 +31,13 @@ bool MINA32MCExpr::evaluateAsRelocatableImpl(MCValue &Res,
 }
 
 void MINA32MCExpr::printImpl(raw_ostream &OS, const MCAsmInfo *MAI) const {
+  if (Kind == VK_MINA32_LO) OS << "%lo(";
+  if (Kind == VK_MINA32_HI) OS << "%hi(";
+
   Expr->print(OS, MAI);
+
+  if (Kind != VK_MINA32_None)
+    OS << ')';
 }
 
 void MINA32MCExpr::visitUsedExpr(MCStreamer &Streamer) const {
