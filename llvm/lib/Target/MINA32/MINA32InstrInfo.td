@@ -212,6 +212,16 @@ def MOVI : MINA32InstImmediate<0b0101, 0b0000,
                                "movi $DEST, $IMMS",
                                [(set GPR:$DEST, immS12B:$IMMS)]>;
 
+let Constraints = "$SRC = $DEST", SRC1 = 0x0 in
+def MTI  : MINA32InstImmediate<0b0101, 0b0001,
+                               (outs GPR:$DEST), (ins TF:$MCR, GPR:$SRC, i32imm:$IMMS),
+                               "mti $DEST, $IMMS", []>;
+
+let Constraints = "$SRC = $DEST", SRC1 = 0x0 in
+def MFI  : MINA32InstImmediate<0b0101, 0b0010,
+                               (outs GPR:$DEST), (ins TF:$MCR, GPR:$SRC, i32imm:$IMMS),
+                               "mfi $DEST, $IMMS", []>;
+
 let Constraints = "$SRC = $DEST" in
 def MOVL : MINA32InstMove<0b0101, 0b0011,
                           (outs GPR:$DEST), (ins GPR:$SRC, i32imm:$IMM),
@@ -221,6 +231,16 @@ def MOVU : MINA32InstMove<0b0101, 0b0100,
                           (outs GPR:$DEST), (ins i32imm:$IMM),
                           "movu $DEST, $IMM",
                           [(set GPR:$DEST, immU16:$IMM)]>;
+
+let Constraints = "$SRC = $DEST", SRC2 = 0x0 in
+def MT  : MINA32InstStandard<0b0101, 0b0001,
+                             (outs GPR:$DEST), (ins TF:$MCR, GPR:$SRC, GPR:$SRC1),
+                             "mt $DEST, $SRC1", []>;
+
+let Constraints = "$SRC = $DEST", SRC2 = 0x0 in
+def MF  : MINA32InstStandard<0b0101, 0b0010,
+                             (outs GPR:$DEST), (ins TF:$MCR, GPR:$SRC, GPR:$SRC1),
+                             "mf $DEST, $SRC1", []>;
 
 // Shift Group
 
@@ -285,20 +305,36 @@ def : Pat<(store         GPR:$DEST, addrFI:$SRC1), (ST  GPR:$DEST, addrFI:$SRC1,
 def : Pat<(truncstorei16 GPR:$DEST, addrFI:$SRC1), (STH GPR:$DEST, addrFI:$SRC1, 0)>;
 def : Pat<(truncstorei8  GPR:$DEST, addrFI:$SRC1), (STB GPR:$DEST, addrFI:$SRC1, 0)>;
 
-// PC-Relative Branch Patterns
+// Compare Patterns
 
 multiclass CmpiPat<PatFrag opt, PatFrag opf, MINA32InstImmediate cmpi> {
-    def bt : Pat<(brcond (opt GPR:$SRC1, immS12B:$IMMS), bb:$IMM),
-             (BT (cmpi GPR:$SRC1, imm:$IMMS), addr16:$IMM)>;
-    def bf : Pat<(brcond (opf GPR:$SRC1, immS12B:$IMMS), bb:$IMM),
-             (BF (cmpi GPR:$SRC1, imm:$IMMS), addr16:$IMM)>;
+    def mti : Pat<(select (opt GPR:$SRC1, immS12B:$IMMS), immS12B:$IMMT, GPR:$SRCF),
+                  (MT (cmpi GPR:$SRC1, imm:$IMMS), GPR:$SRCF, imm:$IMMT)>;
+    def mfi : Pat<(select (opf GPR:$SRC1, immS12B:$IMMS), immS12B:$IMMT, GPR:$SRCF),
+                  (MF (cmpi GPR:$SRC1, imm:$IMMS), GPR:$SRCF, imm:$IMMT)>;
+    def mt  : Pat<(select (opt GPR:$SRC1, immS12B:$IMMS), GPR:$SRCT, GPR:$SRCF),
+                  (MT (cmpi GPR:$SRC1, imm:$IMMS), GPR:$SRCF, GPR:$SRCT)>;
+    def mf  : Pat<(select (opf GPR:$SRC1, immS12B:$IMMS), GPR:$SRCT, GPR:$SRCF),
+                  (MF (cmpi GPR:$SRC1, imm:$IMMS), GPR:$SRCF, GPR:$SRCT)>;
+    def bt  : Pat<(brcond (opt GPR:$SRC1, immS12B:$IMMS), bb:$IMM),
+                  (BT (cmpi GPR:$SRC1, imm:$IMMS), addr16:$IMM)>;
+    def bf  : Pat<(brcond (opf GPR:$SRC1, immS12B:$IMMS), bb:$IMM),
+                  (BF (cmpi GPR:$SRC1, imm:$IMMS), addr16:$IMM)>;
 }
 
 multiclass CmpPat<PatFrag opt, PatFrag opf, MINA32InstStandard cmp> {
-    def bt : Pat<(brcond (opt GPR:$SRC1, GPR:$SRC2), bb:$IMM),
-             (BT (cmp GPR:$SRC1, GPR:$SRC2), addr16:$IMM)>;
-    def bf : Pat<(brcond (opf GPR:$SRC1, GPR:$SRC2), bb:$IMM),
-             (BF (cmp GPR:$SRC1, GPR:$SRC2), addr16:$IMM)>;
+    def mti : Pat<(select (opt GPR:$SRC1, GPR:$SRC2), immS12B:$IMMT, GPR:$SRCF),
+                  (MT (cmp GPR:$SRC1, GPR:$SRC2), GPR:$SRCF, imm:$IMMT)>;
+    def mfi : Pat<(select (opf GPR:$SRC1, GPR:$SRC2), immS12B:$IMMT, GPR:$SRCF),
+                  (MF (cmp GPR:$SRC1, GPR:$SRC2), GPR:$SRCF, imm:$IMMT)>;
+    def mt  : Pat<(select (opt GPR:$SRC1, GPR:$SRC2), GPR:$SRCT, GPR:$SRCF),
+                  (MT (cmp GPR:$SRC1, GPR:$SRC2), GPR:$SRCF, GPR:$SRCT)>;
+    def mf  : Pat<(select (opf GPR:$SRC1, GPR:$SRC2), GPR:$SRCT, GPR:$SRCF),
+                  (MF (cmp GPR:$SRC1, GPR:$SRC2), GPR:$SRCF, GPR:$SRCT)>;
+    def bt  : Pat<(brcond (opt GPR:$SRC1, GPR:$SRC2), bb:$IMM),
+                  (BT (cmp GPR:$SRC1, GPR:$SRC2), addr16:$IMM)>;
+    def bf  : Pat<(brcond (opf GPR:$SRC1, GPR:$SRC2), bb:$IMM),
+                  (BF (cmp GPR:$SRC1, GPR:$SRC2), addr16:$IMM)>;
 }
 
 defm : CmpiPat<seteq,  setne,  CMPIEQ>;
@@ -313,4 +349,8 @@ defm : CmpPat<setule, setugt, CMPLS>;
 defm : CmpPat<setlt,  setge,  CMPLT>;
 defm : CmpPat<setle,  setgt,  CMPLE>;
 
+def : Pat<(select GPR:$SRC1, immS12B:$IMMT, GPR:$SRCF),
+          (MF (CMPIEQ GPR:$SRC1, 0), GPR:$SRCF, imm:$IMMT)>;
+def : Pat<(select GPR:$SRC1, GPR:$SRCT, GPR:$SRCF),
+          (MF (CMPIEQ GPR:$SRC1, 0), GPR:$SRCF, GPR:$SRCT)>;
 def : Pat<(brcond GPR:$SRC1, bb:$IMM), (BF (CMPIEQ GPR:$SRC1, 0), bb:$IMM)>;
