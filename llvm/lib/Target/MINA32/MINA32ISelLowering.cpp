@@ -56,6 +56,29 @@ MINA32TargetLowering::MINA32TargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::SIGN_EXTEND_INREG, VT, Expand);
   }
 
+  setOperationAction(ISD::ADDC, MVT::i32, Expand);
+  setOperationAction(ISD::ADDE, MVT::i32, Expand);
+  setOperationAction(ISD::SUBC, MVT::i32, Expand);
+  setOperationAction(ISD::SUBE, MVT::i32, Expand);
+
+  setOperationAction(ISD::SDIV, MVT::i32, Expand);
+  setOperationAction(ISD::SREM, MVT::i32, Expand);
+  setOperationAction(ISD::SDIVREM, MVT::i32, Expand);
+  setOperationAction(ISD::UDIVREM, MVT::i32, Expand);
+
+  setOperationAction(ISD::SMUL_LOHI, MVT::i32, Expand);
+  setOperationAction(ISD::UMUL_LOHI, MVT::i32, Expand);
+  setOperationAction(ISD::MULHS, MVT::i32, Expand);
+  setOperationAction(ISD::MULHU, MVT::i32, Expand);
+
+  setOperationAction(ISD::SHL_PARTS, MVT::i32, Expand);
+  setOperationAction(ISD::SRL_PARTS, MVT::i32, Expand);
+  setOperationAction(ISD::SRA_PARTS, MVT::i32, Expand);
+  setOperationAction(ISD::FSHL, MVT::i32, Legal);
+  setOperationAction(ISD::FSHR, MVT::i32, Legal);
+
+  setOperationAction(ISD::BSWAP, MVT::i32, Expand);
+  setOperationAction(ISD::CTTZ, MVT::i32, Expand);
   setOperationAction(ISD::GlobalAddress, MVT::i32, Custom);
 }
 
@@ -101,6 +124,23 @@ SDValue MINA32TargetLowering::LowerGlobalAddress(SDValue Op,
       DAG.getTargetGlobalAddress(GV, DL, Ty, Offset, MINA32II::MO_LO);
   SDValue MNHi = SDValue(DAG.getMachineNode(MINA32::MOVU, DL, Ty, GAHi), 0);
   return SDValue(DAG.getMachineNode(MINA32::MOVL, DL, Ty, MNHi, GALo), 0);
+}
+
+SDValue MINA32TargetLowering::LowerExternalSymbol(SDValue Op,
+                                                  SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  EVT Ty = Op.getValueType();
+  ExternalSymbolSDNode *N = cast<ExternalSymbolSDNode>(Op);
+  const char *Sym = N->getSymbol();
+
+  if (isPositionIndependent()) {
+    report_fatal_error("Unable to LowerExternalSymbol");
+  }
+
+  SDValue ESHi = DAG.getTargetExternalSymbol(Sym, Ty, MINA32II::MO_HI);
+  SDValue ESLo = DAG.getTargetExternalSymbol(Sym, Ty, MINA32II::MO_LO);
+  SDValue MNHi = SDValue(DAG.getMachineNode(MINA32::MOVU, DL, Ty, ESHi), 0);
+  return SDValue(DAG.getMachineNode(MINA32::MOVL, DL, Ty, MNHi, ESLo), 0);
 }
 
 #include "MINA32GenCallingConv.inc"
@@ -223,8 +263,7 @@ MINA32TargetLowering::LowerCall(CallLoweringInfo &CLI,
   if (isa<GlobalAddressSDNode>(Callee)) {
     Callee = LowerGlobalAddress(Callee, DAG);
   } else if (isa<ExternalSymbolSDNode>(Callee)) {
-    report_fatal_error(
-        "LowerExternalSymbol, needed for LowerCall, not yet handled");
+    Callee = LowerExternalSymbol(Callee, DAG);
   }
 
   // The first call operand is the chain and the second is the target address.

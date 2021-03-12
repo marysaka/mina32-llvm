@@ -159,6 +159,15 @@ def OR   : ALU<0b0001, 0b1001, "or",  or>;
 def XOR  : ALU<0b0001, 0b1010, "xor", xor>;
 def NAND : ALU<0b0001, 0b1011, "nand", nand>;
 
+def POPCNT : MINA32InstStandard<0b0001, 0b1100,
+                                (outs GPR:$DEST), (ins GPR:$SRC1),
+                                "popcnt $DEST, $SRC1",
+                                [(set GPR:$DEST, (ctpop GPR:$SRC1))]>;
+
+def CLO : MINA32InstStandard<0b0001, 0b1101,
+                             (outs GPR:$DEST), (ins GPR:$SRC1),
+                             "clo $DEST, $SRC1", []>;
+
 // Compare Group
 
 def CMPIEQ : CMPI<0b0010, 0b0000, "cmpi/eq">;
@@ -254,6 +263,16 @@ def RLSR : ALU<0b0110, 0b1001, "rlsr", srl>;
 def RASR : ALU<0b0110, 0b1010, "rasr", sra>;
 def RROR : ALU<0b0110, 0b1011, "rror", rotr>;
 
+def FLSL : MINA32InstFunnelShift<0b0110, 0b1100,
+                                 (outs GPR:$DEST), (ins GPR:$SRC1, GPR:$SRC2, GPR:$RSHIFT),
+                                 "flsl $DEST, $SRC1, $SRC2, $RSHIFT",
+                                 [(set GPR:$DEST, (fshl GPR:$SRC1, GPR:$SRC2, GPR:$RSHIFT))]>;
+
+def FLSR : MINA32InstFunnelShift<0b0110, 0b1101,
+                                 (outs GPR:$DEST), (ins GPR:$SRC1, GPR:$SRC2, GPR:$RSHIFT),
+                                 "flsl $DEST, $SRC1, $SRC2, $RSHIFT",
+                                 [(set GPR:$DEST, (fshr GPR:$SRC1, GPR:$SRC2, GPR:$RSHIFT))]>;
+
 // PC-relative Branch Group
 
 let isBranch = 1, isTerminator = 1 in
@@ -276,7 +295,17 @@ def BF  : MINA32InstBranch<0b1000, 0b0001,
 def : Pat<(i32 imm:$IMM), (MOVL (MOVU (up16x imm:$IMM)), (lo16x imm:$IMM))>;
 def : Pat<(rotl GPR:$SRC1, immS12B:$IMMS), (ROR GPR:$SRC1, (rol32x imm:$IMMS))>;
 def : Pat<(rotl GPR:$SRC1, GPR:$SRC2), (RROR GPR:$SRC1, (MULTI GPR:$SRC2, -1))>;
+def : Pat<(ctlz GPR:$SRC1), (CLO (XORI GPR:$SRC1, -1))>;
 def : Pat<(mina32_call GPR:$SRC1), (RCALL GPR:$SRC1, 0)>;
+
+def : Pat<(seteq GPR:$SRC1, GPR:$SRC2), (SLTIU (XOR GPR:$SRC1, GPR:$SRC2), 1)>;
+def : Pat<(setne GPR:$SRC1, GPR:$SRC2), (XORI (SLTIU (XOR GPR:$SRC1, GPR:$SRC2), 1), 1)>;
+def : Pat<(setugt GPR:$SRC1, GPR:$SRC2), (SLTU GPR:$SRC2, GPR:$SRC1)>;
+def : Pat<(setuge GPR:$SRC1, GPR:$SRC2), (XORI (SLTU GPR:$SRC1, GPR:$SRC2), 1)>;
+def : Pat<(setule GPR:$SRC1, GPR:$SRC2), (XORI (SLTU GPR:$SRC2, GPR:$SRC1), 1)>;
+def : Pat<(setgt GPR:$SRC1, GPR:$SRC2), (SLT GPR:$SRC2, GPR:$SRC1)>;
+def : Pat<(setge GPR:$SRC1, GPR:$SRC2), (XORI (SLT GPR:$SRC1, GPR:$SRC2), 1)>;
+def : Pat<(setle GPR:$SRC1, GPR:$SRC2), (XORI (SLT GPR:$SRC2, GPR:$SRC1), 1)>;
 
 // Memory Patterns
 
