@@ -8,7 +8,12 @@
 define i32 @addi(i32 %a) nounwind {
 ; M32I-LABEL: addi:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    addi $r0, $r0, 10
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = add i32 %a, 10
   ret i32 %1
@@ -17,7 +22,12 @@ define i32 @addi(i32 %a) nounwind {
 define i32 @multi(i32 %a) nounwind {
 ; M32I-LABEL: multi:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    multi $r0, $r0, 10
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = mul i32 %a, 10
   ret i32 %1
@@ -26,7 +36,12 @@ define i32 @multi(i32 %a) nounwind {
 define i32 @slti(i32 %a) nounwind {
 ; M32I-LABEL: slti:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    slti $r0, $r0, 2
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = icmp slt i32 %a, 2
   %2 = zext i1 %1 to i32
@@ -36,7 +51,12 @@ define i32 @slti(i32 %a) nounwind {
 define i32 @sltiu(i32 %a) nounwind {
 ; M32I-LABEL: sltiu:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    sltiu $r0, $r0, 3
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = icmp ult i32 %a, 3
   %2 = zext i1 %1 to i32
@@ -46,7 +66,12 @@ define i32 @sltiu(i32 %a) nounwind {
 define i32 @andi(i32 %a) nounwind {
 ; M32I-LABEL: andi:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    andi $r0, $r0, 6
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = and i32 %a, 6
   ret i32 %1
@@ -55,7 +80,12 @@ define i32 @andi(i32 %a) nounwind {
 define i32 @ori(i32 %a) nounwind {
 ; M32I-LABEL: ori:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    ori $r0, $r0, 5
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = or i32 %a, 5
   ret i32 %1
@@ -64,7 +94,12 @@ define i32 @ori(i32 %a) nounwind {
 define i32 @xori(i32 %a) nounwind {
 ; M32I-LABEL: xori:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    xori $r0, $r0, 4
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = xor i32 %a, 4
   ret i32 %1
@@ -73,7 +108,12 @@ define i32 @xori(i32 %a) nounwind {
 define i32 @lsl(i32 %a) nounwind {
 ; M32I-LABEL: lsl:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    lsl $r0, $r0, 7
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = shl i32 %a, 7
   ret i32 %1
@@ -82,7 +122,12 @@ define i32 @lsl(i32 %a) nounwind {
 define i32 @lsr(i32 %a) nounwind {
 ; M32I-LABEL: lsr:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    lsr $r0, $r0, 8
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = lshr i32 %a, 8
   ret i32 %1
@@ -91,7 +136,12 @@ define i32 @lsr(i32 %a) nounwind {
 define i32 @asr(i32 %a) nounwind {
 ; M32I-LABEL: asr:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    asr $r0, $r0, 9
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = ashr i32 %a, 9
   ret i32 %1
@@ -100,7 +150,12 @@ define i32 @asr(i32 %a) nounwind {
 define i32 @ror(i32 %a) nounwind {
 ; M32I-LABEL: ror:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    ror $r0, $r0, 7
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = lshr i32 %a, 7
   %2 = shl i32 %a, 25
@@ -113,7 +168,12 @@ define i32 @ror(i32 %a) nounwind {
 define i32 @add(i32 %a, i32 %b) nounwind {
 ; M32I-LABEL: add:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    add $r0, $r0, $r1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = add i32 %a, %b
   ret i32 %1
@@ -122,7 +182,12 @@ define i32 @add(i32 %a, i32 %b) nounwind {
 define i32 @mult(i32 %a, i32 %b) nounwind {
 ; M32I-LABEL: mult:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    mult $r0, $r0, $r1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = mul i32 %a, %b
   ret i32 %1
@@ -131,7 +196,12 @@ define i32 @mult(i32 %a, i32 %b) nounwind {
 define i32 @div(i32 %a, i32 %b) nounwind {
 ; M32I-LABEL: div:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    div $r0, $r0, $r1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = udiv i32 %a, %b
   ret i32 %1
@@ -140,7 +210,12 @@ define i32 @div(i32 %a, i32 %b) nounwind {
 define i32 @rem(i32 %a, i32 %b) nounwind {
 ; M32I-LABEL: rem:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    rem $r0, $r0, $r1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = urem i32 %a, %b
   ret i32 %1
@@ -149,7 +224,12 @@ define i32 @rem(i32 %a, i32 %b) nounwind {
 define i32 @sub(i32 %a, i32 %b) nounwind {
 ; M32I-LABEL: sub:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    sub $r0, $r0, $r1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = sub i32 %a, %b
   ret i32 %1
@@ -158,7 +238,12 @@ define i32 @sub(i32 %a, i32 %b) nounwind {
 define i32 @slt(i32 %a, i32 %b) nounwind {
 ; M32I-LABEL: slt:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    slt $r0, $r0, $r1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = icmp slt i32 %a, %b
   %2 = zext i1 %1 to i32
@@ -168,7 +253,12 @@ define i32 @slt(i32 %a, i32 %b) nounwind {
 define i32 @sltu(i32 %a, i32 %b) nounwind {
 ; M32I-LABEL: sltu:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    sltu $r0, $r0, $r1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = icmp ult i32 %a, %b
   %2 = zext i1 %1 to i32
@@ -178,7 +268,12 @@ define i32 @sltu(i32 %a, i32 %b) nounwind {
 define i32 @and(i32 %a, i32 %b) nounwind {
 ; M32I-LABEL: and:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    and $r0, $r0, $r1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = and i32 %a, %b
   ret i32 %1
@@ -187,7 +282,12 @@ define i32 @and(i32 %a, i32 %b) nounwind {
 define i32 @or(i32 %a, i32 %b) nounwind {
 ; M32I-LABEL: or:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    or $r0, $r0, $r1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = or i32 %a, %b
   ret i32 %1
@@ -196,7 +296,12 @@ define i32 @or(i32 %a, i32 %b) nounwind {
 define i32 @xor(i32 %a, i32 %b) nounwind {
 ; M32I-LABEL: xor:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    xor $r0, $r0, $r1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = xor i32 %a, %b
   ret i32 %1
@@ -205,7 +310,12 @@ define i32 @xor(i32 %a, i32 %b) nounwind {
 define i32 @nand(i32 %a, i32 %b) nounwind {
 ; M32I-LABEL: nand:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    nand $r0, $r0, $r1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = and i32 %a, %b
   %2 = xor i32 %1, -1
@@ -215,7 +325,12 @@ define i32 @nand(i32 %a, i32 %b) nounwind {
 define i32 @rlsl(i32 %a, i32 %b) nounwind {
 ; M32I-LABEL: rlsl:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    rlsl $r0, $r0, $r1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = shl i32 %a, %b
   ret i32 %1
@@ -224,7 +339,12 @@ define i32 @rlsl(i32 %a, i32 %b) nounwind {
 define i32 @rlsr(i32 %a, i32 %b) nounwind {
 ; M32I-LABEL: rlsr:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    rlsr $r0, $r0, $r1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = lshr i32 %a, %b
   ret i32 %1
@@ -233,7 +353,12 @@ define i32 @rlsr(i32 %a, i32 %b) nounwind {
 define i32 @rasr(i32 %a, i32 %b) nounwind {
 ; M32I-LABEL: rasr:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    rasr $r0, $r0, $r1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = ashr i32 %a, %b
   ret i32 %1
@@ -242,7 +367,12 @@ define i32 @rasr(i32 %a, i32 %b) nounwind {
 define i32 @rror(i32 %a, i32 %b) nounwind {
 ; M32I-LABEL: rror:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    rror $r0, $r0, $r1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = sub i32 32, %b
   %2 = lshr i32 %a, %b
@@ -254,8 +384,13 @@ define i32 @rror(i32 %a, i32 %b) nounwind {
 define i32 @rrol(i32 %a, i32 %b) nounwind {
 ; M32I-LABEL: rrol:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    multi $r1, $r1, -1
 ; M32I-NEXT:    rror $r0, $r0, $r1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = sub i32 32, %b
   %2 = shl i32 %a, %b

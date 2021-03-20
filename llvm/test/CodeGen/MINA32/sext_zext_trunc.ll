@@ -5,9 +5,14 @@
 define i8 @sext_i1_to_i8(i1 %a) {
 ; M32I-LABEL: sext_i1_to_i8:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    andi $r0, $r0, 1
 ; M32I-NEXT:    movi $r1, 0
 ; M32I-NEXT:    sub $r0, $r1, $r0
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = sext i1 %a to i8
   ret i8 %1
@@ -16,9 +21,14 @@ define i8 @sext_i1_to_i8(i1 %a) {
 define i16 @sext_i1_to_i16(i1 %a) {
 ; M32I-LABEL: sext_i1_to_i16:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    andi $r0, $r0, 1
 ; M32I-NEXT:    movi $r1, 0
 ; M32I-NEXT:    sub $r0, $r1, $r0
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = sext i1 %a to i16
   ret i16 %1
@@ -27,9 +37,14 @@ define i16 @sext_i1_to_i16(i1 %a) {
 define i32 @sext_i1_to_i32(i1 %a) {
 ; M32I-LABEL: sext_i1_to_i32:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    andi $r0, $r0, 1
 ; M32I-NEXT:    movi $r1, 0
 ; M32I-NEXT:    sub $r0, $r1, $r0
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = sext i1 %a to i32
   ret i32 %1
@@ -38,8 +53,13 @@ define i32 @sext_i1_to_i32(i1 %a) {
 define i16 @sext_i8_to_i16(i8 %a) {
 ; M32I-LABEL: sext_i8_to_i16:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    lsl $r0, $r0, 24
 ; M32I-NEXT:    asr $r0, $r0, 24
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = sext i8 %a to i16
   ret i16 %1
@@ -48,8 +68,13 @@ define i16 @sext_i8_to_i16(i8 %a) {
 define i32 @sext_i8_to_i32(i8 %a) {
 ; M32I-LABEL: sext_i8_to_i32:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    lsl $r0, $r0, 24
 ; M32I-NEXT:    asr $r0, $r0, 24
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = sext i8 %a to i32
   ret i32 %1
@@ -58,8 +83,13 @@ define i32 @sext_i8_to_i32(i8 %a) {
 define i32 @sext_i16_to_i32(i16 %a) {
 ; M32I-LABEL: sext_i16_to_i32:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    lsl $r0, $r0, 16
 ; M32I-NEXT:    asr $r0, $r0, 16
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = sext i16 %a to i32
   ret i32 %1
@@ -68,7 +98,12 @@ define i32 @sext_i16_to_i32(i16 %a) {
 define i8 @zext_i1_to_i8(i1 %a) {
 ; M32I-LABEL: zext_i1_to_i8:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    andi $r0, $r0, 1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = zext i1 %a to i8
   ret i8 %1
@@ -77,7 +112,12 @@ define i8 @zext_i1_to_i8(i1 %a) {
 define i16 @zext_i1_to_i16(i1 %a) {
 ; M32I-LABEL: zext_i1_to_i16:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    andi $r0, $r0, 1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = zext i1 %a to i16
   ret i16 %1
@@ -86,7 +126,12 @@ define i16 @zext_i1_to_i16(i1 %a) {
 define i32 @zext_i1_to_i32(i1 %a) {
 ; M32I-LABEL: zext_i1_to_i32:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    andi $r0, $r0, 1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = zext i1 %a to i32
   ret i32 %1
@@ -95,7 +140,12 @@ define i32 @zext_i1_to_i32(i1 %a) {
 define i16 @zext_i8_to_i16(i8 %a) {
 ; M32I-LABEL: zext_i8_to_i16:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    andi $r0, $r0, 255
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = zext i8 %a to i16
   ret i16 %1
@@ -104,7 +154,12 @@ define i16 @zext_i8_to_i16(i8 %a) {
 define i32 @zext_i8_to_i32(i8 %a) {
 ; M32I-LABEL: zext_i8_to_i32:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    andi $r0, $r0, 255
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = zext i8 %a to i32
   ret i32 %1
@@ -113,9 +168,14 @@ define i32 @zext_i8_to_i32(i8 %a) {
 define i32 @zext_i16_to_i32(i16 %a) {
 ; M32I-LABEL: zext_i16_to_i32:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    movu $r1, 0
 ; M32I-NEXT:    movl $r1, 65535
 ; M32I-NEXT:    and $r0, $r0, $r1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = zext i16 %a to i32
   ret i32 %1
@@ -124,6 +184,11 @@ define i32 @zext_i16_to_i32(i16 %a) {
 define i1 @trunc_i8_to_i1(i8 %a) {
 ; M32I-LABEL: trunc_i8_to_i1:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = trunc i8 %a to i1
   ret i1 %1
@@ -132,6 +197,11 @@ define i1 @trunc_i8_to_i1(i8 %a) {
 define i1 @trunc_i16_to_i1(i16 %a) {
 ; M32I-LABEL: trunc_i16_to_i1:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = trunc i16 %a to i1
   ret i1 %1
@@ -140,6 +210,11 @@ define i1 @trunc_i16_to_i1(i16 %a) {
 define i1 @trunc_i32_to_i1(i32 %a) {
 ; M32I-LABEL: trunc_i32_to_i1:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = trunc i32 %a to i1
   ret i1 %1
@@ -148,6 +223,11 @@ define i1 @trunc_i32_to_i1(i32 %a) {
 define i8 @trunc_i16_to_i8(i16 %a) {
 ; M32I-LABEL: trunc_i16_to_i8:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = trunc i16 %a to i8
   ret i8 %1
@@ -156,6 +236,11 @@ define i8 @trunc_i16_to_i8(i16 %a) {
 define i8 @trunc_i32_to_i8(i32 %a) {
 ; M32I-LABEL: trunc_i32_to_i8:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = trunc i32 %a to i8
   ret i8 %1
@@ -164,6 +249,11 @@ define i8 @trunc_i32_to_i8(i32 %a) {
 define i16 @trunc_i32_to_i16(i32 %a) {
 ; M32I-LABEL: trunc_i32_to_i16:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = trunc i32 %a to i16
   ret i16 %1

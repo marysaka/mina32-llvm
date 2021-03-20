@@ -37,6 +37,12 @@ public:
 
   int getFrameIndexReference(const MachineFunction &MF, int FI,
                              Register &FrameReg) const override;
+
+private:
+  void determineFrameLayout(MachineFunction &MF) const;
+  void adjustReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI,
+                 const DebugLoc &DL, unsigned DestReg, unsigned SrcReg,
+                 int64_t Val, MachineInstr::MIFlag Flag) const;
 };
 
 } // end namespace llvm

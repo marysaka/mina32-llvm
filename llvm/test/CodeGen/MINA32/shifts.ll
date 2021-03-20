@@ -8,9 +8,14 @@ declare i32 @llvm.fshr.i32(i32, i32, i32)
 define i64 @lshr64(i64 %a, i64 %b) nounwind {
 ; M32I-LABEL: lshr64:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    movu $r3, %hi(__lshrdi3)
 ; M32I-NEXT:    movl $r3, %lo(__lshrdi3)
 ; M32I-NEXT:    rcall $r3, 0
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = lshr i64 %a, %b
   ret i64 %1
@@ -19,9 +24,14 @@ define i64 @lshr64(i64 %a, i64 %b) nounwind {
 define i64 @ashr64(i64 %a, i64 %b) nounwind {
 ; M32I-LABEL: ashr64:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    movu $r3, %hi(__ashrdi3)
 ; M32I-NEXT:    movl $r3, %lo(__ashrdi3)
 ; M32I-NEXT:    rcall $r3, 0
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = ashr i64 %a, %b
   ret i64 %1
@@ -30,9 +40,14 @@ define i64 @ashr64(i64 %a, i64 %b) nounwind {
 define i64 @shl64(i64 %a, i64 %b) nounwind {
 ; M32I-LABEL: shl64:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    movu $r3, %hi(__ashldi3)
 ; M32I-NEXT:    movl $r3, %lo(__ashldi3)
 ; M32I-NEXT:    rcall $r3, 0
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = shl i64 %a, %b
   ret i64 %1
@@ -41,7 +56,12 @@ define i64 @shl64(i64 %a, i64 %b) nounwind {
 define i32 @fshl_i32(i32 %a, i32 %b, i32 %c) nounwind {
 ; M32I-LABEL: fshl_i32:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    flsl $r0, $r0, $r1, $r2
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = call i32 @llvm.fshl.i32(i32 %a, i32 %b, i32 %c)
   ret i32 %1
@@ -50,7 +70,12 @@ define i32 @fshl_i32(i32 %a, i32 %b, i32 %c) nounwind {
 define i32 @fshr_i32(i32 %a, i32 %b, i32 %c) nounwind {
 ; M32I-LABEL: fshr_i32:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    flsl $r0, $r0, $r1, $r2
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = call i32 @llvm.fshr.i32(i32 %a, i32 %b, i32 %c)
   ret i32 %1

@@ -7,9 +7,14 @@ declare i32 @external_function(i32)
 define i32 @call_external(i32 %a) nounwind {
 ; M32I-LABEL: call_external:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    movu $r1, %hi(external_function)
 ; M32I-NEXT:    movl $r1, %lo(external_function)
 ; M32I-NEXT:    rcall $r1, 0
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = call i32 @external_function(i32 %a)
   ret i32 %1
@@ -18,7 +23,12 @@ define i32 @call_external(i32 %a) nounwind {
 define i32 @defined_function(i32 %a) nounwind {
 ; M32I-LABEL: defined_function:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    addi $r0, $r0, 1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = add i32 %a, 1
   ret i32 %1
@@ -27,9 +37,14 @@ define i32 @defined_function(i32 %a) nounwind {
 define i32 @call_defined(i32 %a) nounwind {
 ; M32I-LABEL: call_defined:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    movu $r1, %hi(defined_function)
 ; M32I-NEXT:    movl $r1, %lo(defined_function)
 ; M32I-NEXT:    rcall $r1, 0
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = call i32 @defined_function(i32 %a) nounwind
   ret i32 %1
@@ -38,9 +53,14 @@ define i32 @call_defined(i32 %a) nounwind {
 define i32 @call_indirect(i32 (i32)* %a, i32 %b) nounwind {
 ; M32I-LABEL: call_indirect:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    addi $r2, $r0, 0
 ; M32I-NEXT:    addi $r0, $r1, 0
 ; M32I-NEXT:    rcall $r2, 0
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
   %1 = call i32 %a(i32 %b)
   ret i32 %1
@@ -52,7 +72,12 @@ define i32 @call_indirect(i32 (i32)* %a, i32 %b) nounwind {
 define fastcc i32 @fastcc_function(i32 %a, i32 %b) nounwind {
 ; M32I-LABEL: fastcc_function:
 ; M32I:       ; %bb.0:
+; M32I-NEXT:    addi $sp, $sp, -4
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 4
 ; M32I-NEXT:    add $r0, $r0, $r1
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    addi $sp, $sp, 4
 ; M32I-NEXT:    ret
  %1 = add i32 %a, %b
  ret i32 %1
@@ -61,13 +86,18 @@ define fastcc i32 @fastcc_function(i32 %a, i32 %b) nounwind {
 define i32 @call_fastcc(i32 %a, i32 %b) nounwind {
 ; M32I-LABEL: call_fastcc:
 ; M32I:       ; %bb.0:
-; M32I-NEXT:    st $r4, [$r11, 0]
+; M32I-NEXT:    addi $sp, $sp, -8
+; M32I-NEXT:    st $r4, [$sp, 4]
+; M32I-NEXT:    st $r11, [$sp, 0]
+; M32I-NEXT:    addi $r11, $sp, 8
 ; M32I-NEXT:    addi $r4, $r0, 0
 ; M32I-NEXT:    movu $r2, %hi(fastcc_function)
 ; M32I-NEXT:    movl $r2, %lo(fastcc_function)
 ; M32I-NEXT:    rcall $r2, 0
 ; M32I-NEXT:    addi $r0, $r4, 0
-; M32I-NEXT:    ld $r4, [$r11, 0]
+; M32I-NEXT:    ld $r11, [$sp, 0]
+; M32I-NEXT:    ld $r4, [$sp, 4]
+; M32I-NEXT:    addi $sp, $sp, 8
 ; M32I-NEXT:    ret
   %1 = call fastcc i32 @fastcc_function(i32 %a, i32 %b)
   ret i32 %a

@@ -95,6 +95,7 @@ void MINA32RegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator MI,
   assert(TFI->hasFP(MF) && "eliminateFrameIndex currently requires hasFP");
 
   // Offsets must be directly encoded in a 12-bit immediate field
+  // TODO: Check against actual MINA immediate range
   if (!isInt<12>(Offset)) {
     report_fatal_error(
         "Frame offsets outside of the signed 12-bit range not supported");
