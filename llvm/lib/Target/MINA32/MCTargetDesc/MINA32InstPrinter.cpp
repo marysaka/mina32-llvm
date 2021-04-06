@@ -60,7 +60,7 @@ void MINA32InstPrinter::printOperand(const MCInst *MI, unsigned OpNo,
 }
 
 void MINA32InstPrinter::printRegName(raw_ostream &OS, unsigned RegNo) const {
-  OS << '$' << StringRef(getRegisterName(RegNo)).lower();
+  OS << getRegisterName(RegNo);
 }
 
 void MINA32InstPrinter::printPCRelImm(const MCInst *MI, unsigned OpNo,

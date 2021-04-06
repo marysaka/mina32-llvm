@@ -130,7 +130,7 @@ bool MINA32AsmBackend::writeNopData(raw_ostream &OS, uint64_t Count) const {
   // enforce alignment rules for instructions fetches. As a result of that,
   // we won't ever find ourselves having gaps in instruction streams and hence
   // won't be needed to do any sort of padding through NOP constructions.
-  return false;
+  return true;
 }
 
 bool MINA32AsmBackend::shouldForceRelocation(const MCAssembler &Asm,

@@ -65,14 +65,13 @@ class MINA32InstStandard<bits<4> group, bits<4> opcode, dag outs, dag ins, strin
 class MINA32InstImmediate<bits<4> group, bits<4> opcode, dag outs, dag ins, string asmstr, list<dag> pattern>
   : MINA32Inst<outs, ins, asmstr, pattern>
 {
-  bits<12> IMM;
+  bits<16> IMMS;
   bits<4>  DEST;
-  bits<4>  SHIFT;
   bits<4>  SRC1;
   
-  let Inst{11-0}  = IMM;
+  let Inst{11-0}  = IMMS{11-0};
   let Inst{15-12} = DEST;
-  let Inst{19-16} = SHIFT;
+  let Inst{19-16} = IMMS{15-12};
   let Inst{23-20} = SRC1;
   let Inst{27-24} = opcode;
   let Inst{31-28} = group;

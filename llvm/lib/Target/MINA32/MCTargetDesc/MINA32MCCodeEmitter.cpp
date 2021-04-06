@@ -54,8 +54,35 @@ MINA32MCCodeEmitter::getMachineOpValue(const MCInst &MI, const MCOperand &MO,
   if (MO.isReg())
     return Ctx.getRegisterInfo()->getEncodingValue(MO.getReg());
 
-  assert(MO.isImm() && "did not expect relocated expression");
-  return static_cast<unsigned>(MO.getImm());
+  if (MO.isImm())
+    return static_cast<unsigned>(MO.getImm());
+
+  llvm_unreachable("Unhandled expression!");
+  return 0;
+}
+
+template <unsigned N> unsigned
+MINA32MCCodeEmitter::getImmOpValue(const MCInst &MI, unsigned OpNo,
+                                   SmallVectorImpl<MCFixup> &Fixups,
+                                   const MCSubtargetInfo &STI) const {
+  const MCOperand &MO = MI.getOperand(OpNo);
+
+  if (MO.isImm()) {
+    int Res = MO.getImm();
+    int Abs = Res ^ (Res >> 31);
+
+    int Shift = Log2_32(Abs) - N - 10;
+    Shift = Shift > 0 ? Shift : 0;
+    int Imm = (Res >> (Shift + N)) & 0xfff;
+
+    int Enc = SignExtend32<12>(Imm) << (Shift + N);
+    assert(Shift < 16 && "Unencodable shift");
+    assert(Enc == Res && "Unencodable immediate");
+    return (Shift << 12) | Imm;
+  }
+
+  llvm_unreachable("Unhandled expression!");
+  return 0;
 }
 
 #define ENABLE_INSTR_PREDICATE_VERIFIER

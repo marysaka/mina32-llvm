@@ -42,21 +42,23 @@ def ADJCALLSTACKUP   : Pseudo<(outs), (ins i32imm:$amt1, i32imm:$amt2),
 
 // Immediate Patterns
 
-def immS12W : ImmLeaf<i32, [{
+def immS12W : Operand<i32>, ImmLeaf<i32, [{
   unsigned abs = Imm ^ (Imm >> 31), tmp = Imm;
   int top = Log2_32(abs), end = countTrailingZeros(tmp);
   return top < 28 && end >= 2 && top < end + 11;
-}]>;
-def immS12H : ImmLeaf<i32, [{
+}]> { let EncoderMethod = "getImmOpValue<2>"; }
+
+def immS12H : Operand<i32>, ImmLeaf<i32, [{
   unsigned abs = Imm ^ (Imm >> 31), tmp = Imm;
   int top = Log2_32(abs), end = countTrailingZeros(tmp);
   return top < 27 && end >= 1 && top < end + 11;
-}]>;
-def immS12B : ImmLeaf<i32, [{
+}]> { let EncoderMethod = "getImmOpValue<1>"; }
+
+def immS12B : Operand<i32>, ImmLeaf<i32, [{
   unsigned abs = Imm ^ (Imm >> 31), tmp = Imm;
   int top = Log2_32(abs), end = countTrailingZeros(tmp);
   return top < 26 && end >= 0 && top < end + 11;
-}]>;
+}]> { let EncoderMethod = "getImmOpValue<0>"; }
 
 // frameindex can't be matched directly
 def addrFI : ComplexPattern<iPTR, 1, "SelectAddrFI", [frameindex], []>;
@@ -80,7 +82,7 @@ def addr16 : Operand<OtherVT> {}
 
 class ALUI<bits<4> group, bits<4> opcode, string opstr, SDPatternOperator opnode>
     : MINA32InstImmediate<group, opcode,
-                          (outs GPR:$DEST), (ins GPR:$SRC1, i32imm:$IMMS),
+                          (outs GPR:$DEST), (ins GPR:$SRC1, immS12B:$IMMS),
                           !strconcat(opstr, " $DEST, $SRC1, $IMMS"),
                           [(set GPR:$DEST, (opnode GPR:$SRC1, immS12B:$IMMS))]>;
 
@@ -92,7 +94,7 @@ class ALU<bits<4> group, bits<4> opcode, string opstr, SDPatternOperator opnode>
 
 class LOADI<bits<4> opcode, string opstr, SDPatternOperator opnode, ImmLeaf off>
     : MINA32InstImmediate<0b0100, opcode,
-                         (outs GPR:$DEST), (ins GPR:$SRC1, i32imm:$IMMS),
+                         (outs GPR:$DEST), (ins GPR:$SRC1, off:$IMMS),
                          !strconcat(opstr, " $DEST, [$SRC1, $IMMS]"),
                          [(set GPR:$DEST, (opnode (add GPR:$SRC1, off:$IMMS)))]>;
 
@@ -104,7 +106,7 @@ class LOAD<bits<4> opcode, string opstr, SDPatternOperator opnode>
 
 class STOREI<bits<4> opcode, string opstr, SDPatternOperator opnode, ImmLeaf off>
     : MINA32InstImmediate<0b0100, opcode,
-                         (outs), (ins GPR:$DEST, GPR:$SRC1, i32imm:$IMMS),
+                         (outs), (ins GPR:$DEST, GPR:$SRC1, off:$IMMS),
                          !strconcat(opstr, " $DEST, [$SRC1, $IMMS]"),
                          [(opnode GPR:$DEST, (add GPR:$SRC1, off:$IMMS))]>;
 
@@ -116,7 +118,7 @@ class STORE<bits<4> opcode, string opstr, SDPatternOperator opnode>
 
 class CMPI<bits<4> group, bits<4> opcode, string opstr>
     : MINA32InstImmediate<group, opcode,
-                          (outs TF:$MCR), (ins GPR:$DEST, i32imm:$IMMS),
+                          (outs TF:$MCR), (ins GPR:$DEST, immS12B:$IMMS),
                           !strconcat(opstr, " $DEST, $IMMS"), []>;
 
 class CMP<bits<4> group, bits<4> opcode, string opstr>
@@ -170,28 +172,28 @@ def CLO : MINA32InstStandard<0b0001, 0b1101,
 
 // Compare Group
 
-def CMPIEQ : CMPI<0b0010, 0b0000, "cmpi/eq">;
-def CMPILO : CMPI<0b0010, 0b0001, "cmpi/lo">;
-def CMPILS : CMPI<0b0010, 0b0010, "cmpi/ls">;
-def CMPILT : CMPI<0b0010, 0b0011, "cmpi/lt">;
-def CMPILE : CMPI<0b0010, 0b0100, "cmpi/le">;
+def CMPIEQ : CMPI<0b0010, 0b0000, "cmpi.eq">;
+def CMPILO : CMPI<0b0010, 0b0001, "cmpi.lo">;
+def CMPILS : CMPI<0b0010, 0b0010, "cmpi.ls">;
+def CMPILT : CMPI<0b0010, 0b0011, "cmpi.lt">;
+def CMPILE : CMPI<0b0010, 0b0100, "cmpi.le">;
 
-def CMPEQ  : CMP<0b0010, 0b1000, "cmp/eq">;
-def CMPLO  : CMP<0b0010, 0b1001, "cmp/lo">;
-def CMPLS  : CMP<0b0010, 0b1010, "cmp/ls">;
-def CMPLT  : CMP<0b0010, 0b1011, "cmp/lt">;
-def CMPLE  : CMP<0b0010, 0b1100, "cmp/le">;
+def CMPEQ  : CMP<0b0010, 0b1000, "cmp.eq">;
+def CMPLO  : CMP<0b0010, 0b1001, "cmp.lo">;
+def CMPLS  : CMP<0b0010, 0b1010, "cmp.ls">;
+def CMPLT  : CMP<0b0010, 0b1011, "cmp.lt">;
+def CMPLE  : CMP<0b0010, 0b1100, "cmp.le">;
 
 // Register Branch Group
 
 let isCall = 1, DEST = 0x0, Defs = [SP] in
 def RCALL : MINA32InstImmediate<0b0011, 0b0001,
-                                (outs), (ins GPR:$SRC1, i32imm:$IMMS),
+                                (outs), (ins GPR:$SRC1, immS12W:$IMMS),
                                 "rcall $SRC1, $IMMS",
                                 [(mina32_call (add GPR:$SRC1, immS12W: $IMMS))]>;
 
 let isReturn = 1, isTerminator = 1, isBarrier = 1,
-    IMM = 0x0, DEST = 0x0, SHIFT = 0x0, SRC1 = 0x0 in
+    IMMS = 0x0, DEST = 0x0, SRC1 = 0x0 in
 def RET : MINA32InstImmediate<0b0011, 0b0010,
                               (outs), (ins), "ret", [(mina32_ret)]>;
 

@@ -24,7 +24,7 @@
 
 namespace llvm {
 
-static const char *MINA32DataLayout = "e-p:32:32"; // TODO: more?
+static const char *MINA32DataLayout = "e-p:32:32-n32"; // TODO: more?
 
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeMINA32Target() {
   // Register the target.
