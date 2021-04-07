@@ -46,19 +46,28 @@ def immS12W : Operand<i32>, ImmLeaf<i32, [{
   unsigned abs = Imm ^ (Imm >> 31), tmp = Imm;
   int top = Log2_32(abs), end = countTrailingZeros(tmp);
   return top < 28 && end >= 2 && top < end + 11;
-}]> { let EncoderMethod = "getImmOpValue<2>"; }
+}]> {
+  let EncoderMethod = "getImmOpValue<2>";
+  let DecoderMethod = "decodeImmOperand<2>";
+}
 
 def immS12H : Operand<i32>, ImmLeaf<i32, [{
   unsigned abs = Imm ^ (Imm >> 31), tmp = Imm;
   int top = Log2_32(abs), end = countTrailingZeros(tmp);
   return top < 27 && end >= 1 && top < end + 11;
-}]> { let EncoderMethod = "getImmOpValue<1>"; }
+}]> {
+  let EncoderMethod = "getImmOpValue<1>";
+  let DecoderMethod = "decodeImmOperand<1>";
+}
 
 def immS12B : Operand<i32>, ImmLeaf<i32, [{
   unsigned abs = Imm ^ (Imm >> 31), tmp = Imm;
   int top = Log2_32(abs), end = countTrailingZeros(tmp);
   return top < 26 && end >= 0 && top < end + 11;
-}]> { let EncoderMethod = "getImmOpValue<0>"; }
+}]> {
+  let EncoderMethod = "getImmOpValue<0>";
+  let DecoderMethod = "decodeImmOperand<0>";
+}
 
 // frameindex can't be matched directly
 def addrFI : ComplexPattern<iPTR, 1, "SelectAddrFI", [frameindex], []>;
@@ -76,7 +85,9 @@ def rol32x : SDNodeXForm<imm, [{
 def immL16 : ImmLeaf<i32, [{ return isUInt<16>(Imm); }]>;
 def immU16 : ImmLeaf<i32, [{ return isShiftedUInt<16, 16>(Imm); }], up16x>;
 
-def addr16 : Operand<OtherVT> {}
+def addr24 : Operand<OtherVT> {
+  let DecoderMethod = "decodeAddrOperand";
+}
 
 // Instruction Templates
 
@@ -116,15 +127,17 @@ class STORE<bits<4> opcode, string opstr, SDPatternOperator opnode>
                          !strconcat(opstr, " $DEST, [$SRC1, $SRC2]"),
                          [(opnode GPR:$DEST, (add GPR:$SRC1, GPR:$SRC2))]>;
 
+let DEST = 0x0 in
 class CMPI<bits<4> group, bits<4> opcode, string opstr>
     : MINA32InstImmediate<group, opcode,
-                          (outs TF:$MCR), (ins GPR:$DEST, immS12B:$IMMS),
-                          !strconcat(opstr, " $DEST, $IMMS"), []>;
+                          (outs TF:$MCR), (ins GPR:$SRC1, immS12B:$IMMS),
+                          !strconcat(opstr, " $SRC1, $IMMS"), []>;
 
+let DEST = 0x0 in
 class CMP<bits<4> group, bits<4> opcode, string opstr>
     : MINA32InstStandard<group, opcode,
-                         (outs TF:$MCR), (ins GPR:$DEST, GPR:$SRC1),
-                         !strconcat(opstr, " $DEST, $SRC1"), []>;
+                         (outs TF:$MCR), (ins GPR:$SRC1, GPR:$SRC2),
+                         !strconcat(opstr, " $SRC1, $SRC2"), []>;
 
 // Arithmetic/Divide/NOP Group
 
@@ -279,17 +292,17 @@ def FLSR : MINA32InstFunnelShift<0b0110, 0b1101,
 
 let isBranch = 1, isTerminator = 1 in
 def BRA : MINA32InstBranch<0b1000, 0b0000,
-                           (outs), (ins addr16:$IMM),
+                           (outs), (ins addr24:$IMM),
                            "bra $IMM", [(br bb:$IMM)]>;
 
 let isBranch = 1, isTerminator = 1 in
 def BT  : MINA32InstBranch<0b1000, 0b0001,
-                           (outs), (ins TF:$MCR, addr16:$IMM),
+                           (outs), (ins TF:$MCR, addr24:$IMM),
                            "bt $IMM", []>;
 
 let isBranch = 1, isTerminator = 1 in
-def BF  : MINA32InstBranch<0b1000, 0b0001,
-                           (outs), (ins TF:$MCR, addr16:$IMM),
+def BF  : MINA32InstBranch<0b1000, 0b0010,
+                           (outs), (ins TF:$MCR, addr24:$IMM),
                            "bf $IMM", []>;
 
 // Non-Instruction Patterns
@@ -348,9 +361,9 @@ multiclass CmpiPat<PatFrag opt, PatFrag opf, MINA32InstImmediate cmpi> {
     def mf  : Pat<(select (opf GPR:$SRC1, immS12B:$IMMS), GPR:$SRCT, GPR:$SRCF),
                   (MF (cmpi GPR:$SRC1, imm:$IMMS), GPR:$SRCF, GPR:$SRCT)>;
     def bt  : Pat<(brcond (opt GPR:$SRC1, immS12B:$IMMS), bb:$IMM),
-                  (BT (cmpi GPR:$SRC1, imm:$IMMS), addr16:$IMM)>;
+                  (BT (cmpi GPR:$SRC1, imm:$IMMS), addr24:$IMM)>;
     def bf  : Pat<(brcond (opf GPR:$SRC1, immS12B:$IMMS), bb:$IMM),
-                  (BF (cmpi GPR:$SRC1, imm:$IMMS), addr16:$IMM)>;
+                  (BF (cmpi GPR:$SRC1, imm:$IMMS), addr24:$IMM)>;
 }
 
 multiclass CmpPat<PatFrag opt, PatFrag opf, MINA32InstStandard cmp> {
@@ -363,9 +376,9 @@ multiclass CmpPat<PatFrag opt, PatFrag opf, MINA32InstStandard cmp> {
     def mf  : Pat<(select (opf GPR:$SRC1, GPR:$SRC2), GPR:$SRCT, GPR:$SRCF),
                   (MF (cmp GPR:$SRC1, GPR:$SRC2), GPR:$SRCF, GPR:$SRCT)>;
     def bt  : Pat<(brcond (opt GPR:$SRC1, GPR:$SRC2), bb:$IMM),
-                  (BT (cmp GPR:$SRC1, GPR:$SRC2), addr16:$IMM)>;
+                  (BT (cmp GPR:$SRC1, GPR:$SRC2), addr24:$IMM)>;
     def bf  : Pat<(brcond (opf GPR:$SRC1, GPR:$SRC2), bb:$IMM),
-                  (BF (cmp GPR:$SRC1, GPR:$SRC2), addr16:$IMM)>;
+                  (BF (cmp GPR:$SRC1, GPR:$SRC2), addr24:$IMM)>;
 }
 
 defm : CmpiPat<seteq,  setne,  CMPIEQ>;

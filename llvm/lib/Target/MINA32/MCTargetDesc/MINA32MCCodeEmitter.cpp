@@ -73,12 +73,12 @@ MINA32MCCodeEmitter::getImmOpValue(const MCInst &MI, unsigned OpNo,
 
     int Shift = Log2_32(Abs) - N - 10;
     Shift = Shift > 0 ? Shift : 0;
-    int Imm = (Res >> (Shift + N)) & 0xfff;
+    int Base = (Res >> (Shift + N)) & 0xfff;
 
-    int Enc = SignExtend32<12>(Imm) << (Shift + N);
+    int Enc = SignExtend32<12>(Base) << (Shift + N);
     assert(Shift < 16 && "Unencodable shift");
     assert(Enc == Res && "Unencodable immediate");
-    return (Shift << 12) | Imm;
+    return (Shift << 12) | Base;
   }
 
   llvm_unreachable("Unhandled expression!");
