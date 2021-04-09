@@ -15,32 +15,30 @@
 namespace llvm {
 namespace MINA32 {
 
-/// The set of supported fixups.
-///
-/// Although most of the current fixup types reflect a unique relocation
-/// one can have multiple fixup types for a given relocation and thus need
-/// to be uniquely named.
-///
-/// \note This table *must* be in the same order of
-///       MCFixupKindInfo Infos[MINA32::NumTargetFixupKinds]
-///       in `MINA32AsmBackend.cpp`.
+// The set of supported fixups.
+//
+// Although most of the current fixup types reflect a unique relocation
+// one can have multiple fixup types for a given relocation and thus need
+// to be uniquely named.
+//
+// \note This table *must* be in the same order of
+//       MCFixupKindInfo Infos[MINA32::NumTargetFixupKinds]
+//       in `MINA32AsmBackend.cpp`.
 enum Fixups {
-  /// An unsigned 8-bit MINA32 fixup.
-  ///
-  /// These are used for bit positions, shifts and 8-bit-sized instructions.
-  fixup_u8 = FirstTargetFixupKind,
+  // 16-bit fixup corresponding to hi(foo) for MOVU
+  fixup_mina32_hi16 = FirstTargetFixupKind,
+
+  // 16-bit fixup corresponding to lo(foo) for MOVL
+  fixup_mina32_lo16,
+
+  // 24-bit fixup for PC relative branch
+  // instructions such as BRA, CALL, BT, etc.
+  fixup_mina32_bra,
 
   // Marker
   LastTargetFixupKind,
   NumTargetFixupKinds = LastTargetFixupKind - FirstTargetFixupKind,
 };
-
-namespace fixups {
-
-// TODO
-
-} // end namespace fixups
-
 } // end namespace MINA32
 } // end namespace llvm
 

@@ -13,6 +13,8 @@
 
 #include "MINA32MCCodeEmitter.h"
 #include "MINA32InstrInfo.h"
+#include "MINA32FixupKinds.h"
+#include "MINA32MCExpr.h"
 
 #include "llvm/ADT/Statistic.h"
 #include "llvm/MC/MCContext.h"
@@ -29,6 +31,7 @@
 #define DEBUG_TYPE "mccodeemitter"
 
 STATISTIC(MCNumEmitted, "Number of MC instructions emitted.");
+STATISTIC(MCNumFixups, "Number of MC fixups created");
 
 #define GET_INSTRMAP_INFO
 #include "MINA32GenInstrInfo.inc"
@@ -82,6 +85,46 @@ MINA32MCCodeEmitter::getImmOpValue(const MCInst &MI, unsigned OpNo,
   }
 
   llvm_unreachable("Unhandled expression!");
+  return 0;
+}
+
+unsigned MINA32MCCodeEmitter::getAddrOpValue(const MCInst &MI, unsigned OpNo,
+                                             SmallVectorImpl<MCFixup> &Fixups,
+                                             const MCSubtargetInfo &STI) const {
+  const MCOperand &MO = MI.getOperand(OpNo);
+
+  // If the destination is an immediate, there is nothing to do
+  if (MO.isImm())
+    return MO.getImm();
+
+  assert(MO.isExpr() &&
+         "getAddrOpValue expects only expressions or immediates");
+
+  const MCExpr *Expr = MO.getExpr();
+  MCExpr::ExprKind Kind = Expr->getKind();
+  MCFixupKind FixupKind;
+  if (Kind == MCExpr::Target) {
+    const MINA32MCExpr *MINA32Expr = cast<MINA32MCExpr>(Expr);
+    switch (MINA32Expr->getKind()) {
+    case MINA32MCExpr::VK_MINA32_None:
+      llvm_unreachable("Unhandled fixup kind!");
+    case MINA32MCExpr::VK_MINA32_LO:
+      FixupKind = MCFixupKind(MINA32::fixup_mina32_lo16);
+      break;
+    case MINA32MCExpr::VK_MINA32_HI:
+      FixupKind = MCFixupKind(MINA32::fixup_mina32_hi16);
+      break;
+    }
+  } else if (Kind == MCExpr::SymbolRef &&
+             cast<MCSymbolRefExpr>(Expr)->getKind() == MCSymbolRefExpr::VK_None) {
+    FixupKind = MCFixupKind(MINA32::fixup_mina32_bra);
+  } else {
+    llvm_unreachable("Unhandled expression!");
+    return 0;
+  }
+
+  Fixups.push_back(MCFixup::create(0, Expr, FixupKind, MI.getLoc()));
+  ++MCNumFixups;
   return 0;
 }
 

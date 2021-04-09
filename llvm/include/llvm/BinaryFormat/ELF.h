@@ -780,6 +780,11 @@ enum {
 #include "ELFRelocs/VE.def"
 };
 
+// ELF Relocation types for MINA32
+enum {
+#include "ELFRelocs/MINA32.def"
+};
+
 #undef ELF_RELOC
 
 // Section header.

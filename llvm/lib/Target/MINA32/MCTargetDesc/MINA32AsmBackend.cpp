@@ -29,52 +29,37 @@
 #include "MCTargetDesc/MINA32FixupKinds.h"
 #include "MCTargetDesc/MINA32MCTargetDesc.h"
 
-namespace adjust {
-
-using namespace llvm;
-
-static void assertUnsignedWidth(unsigned Width, uint64_t Value,
-                                std::string Description, const MCFixup &Fixup,
-                                MCContext *Ctx = nullptr) {
-  if (!isUIntN(Width, Value)) {
-    std::string Diagnostic = "out of range " + Description;
-
-    int64_t Max = maxUIntN(Width);
-
-    Diagnostic +=
-        " (expected an integer in the range 0 to " + std::to_string(Max) + ")";
-
-    if (Ctx) {
-      Ctx->reportFatalError(Fixup.getLoc(), Diagnostic);
-    } else {
-      llvm_unreachable(Diagnostic.c_str());
-    }
-  }
-}
-
-} // end namespace adjust
-
 namespace llvm {
-
-void MINA32AsmBackend::adjustFixupValue(const MCFixup &Fixup,
-                                        const MCValue &Target, uint64_t &Value,
-                                        MCContext *Ctx) const {
-  // The size of the fixup in bits.
-  // uint64_t Size =
-  //     MINA32AsmBackend::getFixupKindInfo(Fixup.getKind()).TargetSize;
-
-  unsigned Kind = Fixup.getKind();
-  switch (Kind) {
-  default:
-    llvm_unreachable("unhandled fixup");
-  case MINA32::fixup_u8:
-    adjust::assertUnsignedWidth(8, Value, "immediate", Fixup, Ctx);
-  }
-}
 
 std::unique_ptr<MCObjectTargetWriter>
 MINA32AsmBackend::createObjectTargetWriter() const {
   return createMINA32ELFObjectWriter(0);
+}
+
+static uint64_t adjustFixupValue(const MCFixup &Fixup, uint64_t Value,
+                                 MCContext *Ctx) {
+  unsigned Kind = Fixup.getKind();
+  switch (Kind) {
+  default:
+    llvm_unreachable("unhandled fixup");
+  case MINA32::fixup_mina32_hi16: {
+    unsigned Hi4  = (Value >> 28) & 0xf;
+    unsigned Lo12 = (Value >> 16) & 0xfff;
+    return (Hi4 << 16) | Lo12;
+  }
+  case MINA32::fixup_mina32_lo16: {
+    unsigned Hi4  = (Value >> 12) & 0xf;
+    unsigned Lo12 = (Value >>  0) & 0xfff;
+    return (Hi4 << 16) | Lo12;
+  }
+  case MINA32::fixup_mina32_bra: {
+    if (!isInt<26>(Value))
+      Ctx->reportError(Fixup.getLoc(), "fixup value out of range");
+    if (Value & 0x3)
+      Ctx->reportError(Fixup.getLoc(), "fixup value must be 4-byte aligned");
+    return (Value >> 2) & 0xffffff;
+  }
+  }
 }
 
 void MINA32AsmBackend::applyFixup(const MCAssembler &Asm, const MCFixup &Fixup,
@@ -82,10 +67,9 @@ void MINA32AsmBackend::applyFixup(const MCAssembler &Asm, const MCFixup &Fixup,
                                   MutableArrayRef<char> Data, uint64_t Value,
                                   bool IsResolved,
                                   const MCSubtargetInfo *STI) const {
-  adjustFixupValue(Fixup, Target, Value, &Asm.getContext());
   if (!Value)
     return; // Doesn't change encoding.
-
+  Value = adjustFixupValue(Fixup, Value, &Asm.getContext());
   MCFixupKindInfo Info = getFixupKindInfo(Fixup.getKind());
 
   // The number of bits in the fixup mask.
@@ -112,8 +96,10 @@ MINA32AsmBackend::getFixupKindInfo(MCFixupKind Kind) const {
       // This table *must* be in same the order of fixup_* kinds in
       // MINA32FixupKinds.h
       //
-      // name    offset  bits  flags
-      {"fixup_u8", 0, 8, 0},
+      // name               offset  bits  flags
+      {"fixup_mina32_hi16", 0,      32,   0},
+      {"fixup_mina32_lo16", 0,      32,   0},
+      {"fixup_mina32_bra",  0,      24,   MCFixupKindInfo::FKF_IsPCRel},
   };
 
   if (Kind < FirstTargetFixupKind)
@@ -121,7 +107,6 @@ MINA32AsmBackend::getFixupKindInfo(MCFixupKind Kind) const {
 
   assert(unsigned(Kind - FirstTargetFixupKind) < getNumFixupKinds() &&
          "Invalid kind!");
-
   return Infos[Kind - FirstTargetFixupKind];
 }
 
@@ -131,17 +116,6 @@ bool MINA32AsmBackend::writeNopData(raw_ostream &OS, uint64_t Count) const {
   // we won't ever find ourselves having gaps in instruction streams and hence
   // won't be needed to do any sort of padding through NOP constructions.
   return true;
-}
-
-bool MINA32AsmBackend::shouldForceRelocation(const MCAssembler &Asm,
-                                             const MCFixup &Fixup,
-                                             const MCValue &Target) {
-  switch ((unsigned)Fixup.getKind()) {
-  default:
-    return false;
-    // Fixups which should always be recorded as relocations.
-    // TODO
-  }
 }
 
 MCAsmBackend *createMINA32AsmBackend(const Target &T,

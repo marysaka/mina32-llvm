@@ -44,6 +44,13 @@ void MINA32MCExpr::visitUsedExpr(MCStreamer &Streamer) const {
   Streamer.visitUsedExpr(*Expr);
 }
 
+MINA32MCExpr::VariantKind MINA32MCExpr::getVariantKindForName(StringRef name) {
+  return StringSwitch<MINA32MCExpr::VariantKind>(name)
+      .Case("lo", VK_MINA32_LO)
+      .Case("hi", VK_MINA32_HI)
+      .Default(VK_MINA32_None);
+}
+
 MCFragment *MINA32MCExpr::findAssociatedFragment() const {
   return Expr->findAssociatedFragment();
 }

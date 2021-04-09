@@ -75,6 +75,7 @@ class MINA32AsmParser : public MCTargetAsmParser {
 #define GET_ASSEMBLER_HEADER
 #include "MINA32GenAsmMatcher.inc"
 
+  OperandMatchResultTy parseOperandWithModifier(OperandVector &Operands);
   OperandMatchResultTy parseImmediate(OperandVector &Operands);
   OperandMatchResultTy parseRegister(OperandVector &Operands);
   bool parseOperand(OperandVector &Operands);
@@ -337,6 +338,38 @@ MINA32AsmParser::parseRegister(OperandVector &Operands) {
 }
 
 OperandMatchResultTy
+MINA32AsmParser::parseOperandWithModifier(OperandVector &Operands) {
+  SMLoc S = getParser().getTok().getLoc();
+  SMLoc E = SMLoc::getFromPointer(S.getPointer() - 1);
+
+  if (getLexer().isNot(AsmToken::Percent))
+    return MatchOperand_ParseFail;
+
+  getParser().Lex();  // Eat '%'
+
+  if (getLexer().isNot(AsmToken::Identifier))
+    return MatchOperand_ParseFail;
+
+  StringRef Identifier = getParser().getTok().getIdentifier();
+  MINA32MCExpr::VariantKind VK = MINA32MCExpr::getVariantKindForName(Identifier);
+  if (VK == MINA32MCExpr::VK_MINA32_None)
+    return MatchOperand_ParseFail;
+
+  getParser().Lex();  // Eat the identifier
+  if (getLexer().isNot(AsmToken::LParen))
+    return MatchOperand_ParseFail;
+  getParser().Lex();  // Eat '('
+
+  const MCExpr *SubExpr;
+  if (getParser().parseParenExpression(SubExpr, E))
+    return MatchOperand_ParseFail;
+
+  const MCExpr *ModExpr = MINA32MCExpr::create(VK, SubExpr, getContext());
+  Operands.push_back(MINA32Operand::CreateImm(ModExpr, S, E));
+  return MatchOperand_Success;
+}
+
+OperandMatchResultTy
 MINA32AsmParser::parseImmediate(OperandVector &Operands) {
   SMLoc S = getParser().getTok().getLoc();
   SMLoc E = SMLoc::getFromPointer(S.getPointer() - 1);
@@ -353,14 +386,16 @@ MINA32AsmParser::parseImmediate(OperandVector &Operands) {
     if (getParser().parseExpression(IdVal))
       return MatchOperand_ParseFail;
     break;
-  /*case AsmToken::Identifier: {
+  case AsmToken::Identifier: {
     StringRef Identifier;
     if (getParser().parseIdentifier(Identifier))
       return MatchOperand_ParseFail;
     MCSymbol *Sym = getContext().getOrCreateSymbol(Identifier);
     IdVal = MCSymbolRefExpr::create(Sym, MCSymbolRefExpr::VK_None, getContext());
     break;
-  }*/
+  }
+  case AsmToken::Percent:
+    return parseOperandWithModifier(Operands);
   }
 
   Operands.push_back(MINA32Operand::CreateImm(IdVal, S, E));

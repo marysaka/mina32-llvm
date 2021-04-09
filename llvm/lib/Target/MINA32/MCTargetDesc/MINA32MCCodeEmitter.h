@@ -70,6 +70,10 @@ private:
   unsigned getImmOpValue(const MCInst &MI, unsigned OpNo,
                          SmallVectorImpl<MCFixup> &Fixups,
                          const MCSubtargetInfo &STI) const;
+
+  unsigned getAddrOpValue(const MCInst &MI, unsigned OpNo,
+                          SmallVectorImpl<MCFixup> &Fixups,
+                          const MCSubtargetInfo &STI) const;
 };
 
 } // end namespace llvm

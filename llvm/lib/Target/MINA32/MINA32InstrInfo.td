@@ -82,10 +82,20 @@ def rol32x : SDNodeXForm<imm, [{
   return getImm(N, 32 - N->getZExtValue());
 }]>;
 
-def immL16 : ImmLeaf<i32, [{ return isUInt<16>(Imm); }]>;
-def immU16 : ImmLeaf<i32, [{ return isShiftedUInt<16, 16>(Imm); }], up16x>;
+def immL16 : Operand<i32>, ImmLeaf<i32, [{
+  return isUInt<16>(Imm);
+}]> {
+  let EncoderMethod = "getAddrOpValue";
+}
+
+def immU16 : Operand<i32>, ImmLeaf<i32, [{
+  return isShiftedUInt<16, 16>(Imm);
+}], up16x> {
+  let EncoderMethod = "getAddrOpValue";
+}
 
 def addr24 : Operand<OtherVT> {
+  let EncoderMethod = "getAddrOpValue";
   let DecoderMethod = "decodeAddrOperand";
 }
 
@@ -248,11 +258,11 @@ def MFI  : MINA32InstImmediate<0b0101, 0b0010,
 
 let Constraints = "$SRC = $DEST" in
 def MOVL : MINA32InstMove<0b0101, 0b0011,
-                          (outs GPR:$DEST), (ins GPR:$SRC, i32imm:$IMM),
+                          (outs GPR:$DEST), (ins GPR:$SRC, immL16:$IMM),
                           "movl $DEST, $IMM", []>;
 
 def MOVU : MINA32InstMove<0b0101, 0b0100,
-                          (outs GPR:$DEST), (ins i32imm:$IMM),
+                          (outs GPR:$DEST), (ins immU16:$IMM),
                           "movu $DEST, $IMM",
                           [(set GPR:$DEST, immU16:$IMM)]>;
 
