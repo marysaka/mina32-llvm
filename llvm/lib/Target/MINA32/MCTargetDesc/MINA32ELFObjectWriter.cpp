@@ -41,7 +41,9 @@ unsigned MINA32ELFObjectWriter::getRelocType(MCContext &Ctx,
   // Determine the type of the relocation
   switch ((unsigned)Fixup.getKind()) {
   default:
-    llvm_unreachable("invalid fixup kind!");
+    llvm_unreachable("Invalid fixup kind!");
+  case FK_Data_4:
+    return ELF::R_MINA32_32;
   case MINA32::fixup_mina32_hi16:
     return ELF::R_MINA32_HI16;
   case MINA32::fixup_mina32_lo16:

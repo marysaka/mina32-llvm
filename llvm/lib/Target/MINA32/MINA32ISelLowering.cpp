@@ -172,14 +172,14 @@ SDValue MINA32TargetLowering::LowerFormalArguments(
       ArgValue = DAG.getCopyFromReg(Chain, DL, VReg, VA.getLocVT());
     } else {
       assert(VA.isMemLoc());  // sanity check
-      llvm_unreachable("Lowering formal arguments from MemLoc unimplemented");
       // create frame index object for parameter
-      /*int FI = MFI.CreateFixedObject(VA.getValVT().getSizeInBits() / 8,
+      MachineFrameInfo &MFI = MF.getFrameInfo();
+      int FI = MFI.CreateFixedObject(VA.getValVT().getSizeInBits() / 8,
                                      VA.getLocMemOffset(), true);
       // create SelectionDAG nodes for load from this parameter
       SDValue FIN = DAG.getFrameIndex(FI, MVT::i32);
       ArgValue = DAG.getLoad(VA.getLocVT(), DL, Chain, FIN,
-                             MachinePointerInfo::getFixedStack(MF, FI));*/
+                             MachinePointerInfo::getFixedStack(MF, FI));
     }
     InVals.push_back(ArgValue);
   }
@@ -220,19 +220,37 @@ MINA32TargetLowering::LowerCall(CallLoweringInfo &CLI,
   // Get a count of how many bytes are to be pushed on the stack.
   unsigned NumBytes = ArgCCInfo.getNextStackOffset();
 
-  for (auto &Arg : Outs) {
-    if (!Arg.Flags.isByVal())
+  // Create local copies for byval args
+  SmallVector<SDValue, 8> ByValArgs;
+  for (unsigned i = 0, e = Outs.size(); i != e; ++i) {
+    ISD::ArgFlagsTy Flags = Outs[i].Flags;
+    if (!Flags.isByVal())
       continue;
-    report_fatal_error("Passing arguments byval not yet implemented");
+
+    SDValue Arg = OutVals[i];
+    unsigned Size = Flags.getByValSize();
+    Align Alignment = Flags.getNonZeroByValAlign();
+
+    int FI = MF.getFrameInfo().CreateStackObject(Size, Alignment, false);
+    SDValue FIPtr = DAG.getFrameIndex(FI, getPointerTy(DAG.getDataLayout()));
+    SDValue SizeNode = DAG.getConstant(Size, DL, MVT::i32);
+
+    Chain = DAG.getMemcpy(Chain, DL, FIPtr, Arg, SizeNode, Alignment,
+                          false, false, false, MachinePointerInfo(),
+                          MachinePointerInfo());
+    ByValArgs.push_back(FIPtr);
   }
 
   Chain = DAG.getCALLSEQ_START(Chain, NumBytes, 0, CLI.DL);
 
   // Copy argument values to their designated locations.
   SmallVector<std::pair<unsigned, SDValue>, 8> RegsToPass;
-  for (unsigned I = 0, E = ArgLocs.size(); I != E; ++I) {
-    CCValAssign &VA = ArgLocs[I];
-    SDValue ArgValue = OutVals[I];
+  SmallVector<SDValue, 8> MemOpChains;
+  SDValue StackPtr;
+  for (unsigned i = 0, j = 0, e = ArgLocs.size(); i != e; ++i) {
+    CCValAssign &VA = ArgLocs[i];
+    SDValue ArgValue = OutVals[i];
+    ISD::ArgFlagsTy Flags = Outs[i].Flags;
 
     // Promote the value if needed.
     // For now, only handle fully promoted arguments.
@@ -243,14 +261,31 @@ MINA32TargetLowering::LowerCall(CallLoweringInfo &CLI,
       llvm_unreachable("Unknown loc info!");
     }
 
+    // Use local copy if it is a byval arg.
+    if (Flags.isByVal())
+      ArgValue = ByValArgs[j++];
+
     if (VA.isRegLoc()) {
       // Queue up the argument copies and emit them at the end.
       RegsToPass.push_back(std::make_pair(VA.getLocReg(), ArgValue));
     } else {
       assert(VA.isMemLoc() && "Argument not register or memory");
-      report_fatal_error("Passing arguments via the stack not yet implemented");
+      // Work out the address of the stack slot.
+      if (!StackPtr.getNode())
+        StackPtr = DAG.getCopyFromReg(Chain, DL, MINA32::R14, PtrVT);
+      SDValue Address =
+          DAG.getNode(ISD::ADD, DL, PtrVT, StackPtr,
+                      DAG.getIntPtrConstant(VA.getLocMemOffset(), DL));
+
+      // Emit the store.
+      MemOpChains.push_back(
+          DAG.getStore(Chain, DL, ArgValue, Address, MachinePointerInfo()));
     }
   }
+
+  // Join the stores, which are independent of one another.
+  if (!MemOpChains.empty())
+    Chain = DAG.getNode(ISD::TokenFactor, DL, MVT::Other, MemOpChains);
 
   SDValue Glue;
 

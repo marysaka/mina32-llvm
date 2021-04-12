@@ -23,6 +23,7 @@
 #include "Targets/Lanai.h"
 #include "Targets/Le64.h"
 #include "Targets/MSP430.h"
+#include "Targets/MINA32.h"
 #include "Targets/Mips.h"
 #include "Targets/NVPTX.h"
 #include "Targets/OSTargets.h"
@@ -240,6 +241,9 @@ TargetInfo *AllocateTarget(const llvm::Triple &Triple,
 
   case llvm::Triple::msp430:
     return new MSP430TargetInfo(Triple, Opts);
+
+  case llvm::Triple::mina32:
+    return new MINA32TargetInfo(Triple, Opts);
 
   case llvm::Triple::mips:
     switch (os) {

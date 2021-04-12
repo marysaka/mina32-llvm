@@ -41,7 +41,12 @@ static uint64_t adjustFixupValue(const MCFixup &Fixup, uint64_t Value,
   unsigned Kind = Fixup.getKind();
   switch (Kind) {
   default:
-    llvm_unreachable("unhandled fixup");
+    llvm_unreachable("Unknown fixup kind!");
+  case FK_Data_1:
+  case FK_Data_2:
+  case FK_Data_4:
+  case FK_Data_8:
+    return Value;
   case MINA32::fixup_mina32_hi16: {
     unsigned Hi4  = (Value >> 28) & 0xf;
     unsigned Lo12 = (Value >> 16) & 0xfff;

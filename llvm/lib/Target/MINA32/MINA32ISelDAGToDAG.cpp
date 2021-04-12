@@ -62,6 +62,16 @@ void MINA32DAGToDAGISel::Select(SDNode *N) {
     return;
   }
 
+  if (N->getOpcode() == ISD::FrameIndex) {
+    SDLoc DL(N);
+    SDValue Imm = CurDAG->getTargetConstant(0, DL, MVT::i32);
+    int FI = dyn_cast<FrameIndexSDNode>(N)->getIndex();
+    EVT VT = N->getValueType(0);
+    SDValue TFI = CurDAG->getTargetFrameIndex(FI, VT);
+    ReplaceNode(N, CurDAG->getMachineNode(MINA32::ADDI, DL, VT, TFI, Imm));
+    return;
+  }
+
   // See if subclasses can handle this node.
   // if (trySelect(N)) ...
 

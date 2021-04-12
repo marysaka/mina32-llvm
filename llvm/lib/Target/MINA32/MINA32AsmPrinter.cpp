@@ -138,7 +138,8 @@ MCOperand MINA32AsmPrinter::LowerSymbolOperand(const MachineOperand &MO,
     Expr = MCBinaryExpr::createAdd(
         Expr, MCConstantExpr::create(MO.getOffset(), Ctx), Ctx);
 
-  Expr = MINA32MCExpr::create(Kind, Expr, Ctx);
+  if (Kind != MINA32MCExpr::VK_MINA32_None)
+    Expr = MINA32MCExpr::create(Kind, Expr, Ctx);
   return MCOperand::createExpr(Expr);
 }
 

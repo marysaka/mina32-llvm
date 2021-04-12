@@ -4,9 +4,11 @@
 
 // No relocation
 ELF_RELOC(R_MINA32_NONE, 0)
+// General 32-bit relocation
+ELF_RELOC(R_MINA32_32,   1)
 // Upper 16-bits of a symbolic relocation
-ELF_RELOC(R_MINA32_HI16, 1)
+ELF_RELOC(R_MINA32_HI16, 2)
 // Lower 16-bits of a symbolic relocation
-ELF_RELOC(R_MINA32_LO16, 2)
+ELF_RELOC(R_MINA32_LO16, 3)
 // 24-bit relative branch targets
-ELF_RELOC(R_MINA32_BRA,  3)
+ELF_RELOC(R_MINA32_BRA,  4)
