@@ -26,4 +26,4 @@ def RetCC_MINA32 : CallingConv<[
   CCIfType<[i32], CCAssignToReg<[R0, R1, R2, R3]>>,
 ]>;
 
-def CSR : CalleeSavedRegs<(add LR, (sequence "R%u", 4, 12))>;
+def CSR : CalleeSavedRegs<(sequence "R%u", 4, 14)>;

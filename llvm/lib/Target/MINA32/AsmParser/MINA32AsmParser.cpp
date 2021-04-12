@@ -428,6 +428,12 @@ bool MINA32AsmParser::ParseInstruction(ParseInstructionInfo &Info,
 
   // Read the remaining operands.
   if (getLexer().isNot(AsmToken::EndOfStatement)) {
+    // Parse left bracket.
+    if (Parser.parseOptionalToken(AsmToken::LBrac)) {
+      SMLoc Loc = Parser.getTok().getLoc();
+      Operands.push_back(MINA32Operand::CreateToken("[", Loc));
+    }
+
     // Read the first operand.
     if (parseOperand(Operands)) {
       SMLoc Loc = getLexer().getLoc();

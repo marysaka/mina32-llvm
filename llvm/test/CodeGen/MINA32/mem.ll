@@ -8,11 +8,11 @@ define i32 @ldb(i8 *%a) nounwind {
 ; M32I-LABEL: ldb:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -4
-; M32I-NEXT:    st r11, [sp, 0]
-; M32I-NEXT:    addi r11, sp, 4
+; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    addi r14, sp, 4
 ; M32I-NEXT:    ldb r1, [r0, 0]
 ; M32I-NEXT:    ldb r0, [r0, 1]
-; M32I-NEXT:    ld r11, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
   %1 = getelementptr i8, i8* %a, i32 1
@@ -27,11 +27,11 @@ define i32 @ldh(i16 *%a) nounwind {
 ; M32I-LABEL: ldh:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -4
-; M32I-NEXT:    st r11, [sp, 0]
-; M32I-NEXT:    addi r11, sp, 4
+; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    addi r14, sp, 4
 ; M32I-NEXT:    ldh r1, [r0, 0]
 ; M32I-NEXT:    ldh r0, [r0, 4]
-; M32I-NEXT:    ld r11, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
   %1 = getelementptr i16, i16* %a, i32 2
@@ -46,11 +46,11 @@ define i32 @ld(i32 *%a) nounwind {
 ; M32I-LABEL: ld:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -4
-; M32I-NEXT:    st r11, [sp, 0]
-; M32I-NEXT:    addi r11, sp, 4
+; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    addi r14, sp, 4
 ; M32I-NEXT:    ld r1, [r0, 0]
 ; M32I-NEXT:    ld r0, [r0, 12]
-; M32I-NEXT:    ld r11, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
   %1 = getelementptr i32, i32* %a, i32 3
@@ -64,8 +64,8 @@ define i32 @ldb_sext(i8 *%a) nounwind {
 ; M32I-LABEL: ldb_sext:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -4
-; M32I-NEXT:    st r11, [sp, 0]
-; M32I-NEXT:    addi r11, sp, 4
+; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    addi r14, sp, 4
 ; M32I-NEXT:    ldb r1, [r0, 0]
 ; M32I-NEXT:    lsl r1, r1, 24
 ; M32I-NEXT:    asr r1, r1, 24
@@ -73,7 +73,7 @@ define i32 @ldb_sext(i8 *%a) nounwind {
 ; M32I-NEXT:    lsl r0, r0, 24
 ; M32I-NEXT:    asr r0, r0, 24
 ; M32I-NEXT:    add r0, r0, r1
-; M32I-NEXT:    ld r11, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
   %1 = getelementptr i8, i8* %a, i32 1
@@ -89,8 +89,8 @@ define i32 @ldh_sext(i16 *%a) nounwind {
 ; M32I-LABEL: ldh_sext:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -4
-; M32I-NEXT:    st r11, [sp, 0]
-; M32I-NEXT:    addi r11, sp, 4
+; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    addi r14, sp, 4
 ; M32I-NEXT:    ldh r1, [r0, 0]
 ; M32I-NEXT:    lsl r1, r1, 16
 ; M32I-NEXT:    asr r1, r1, 16
@@ -98,7 +98,7 @@ define i32 @ldh_sext(i16 *%a) nounwind {
 ; M32I-NEXT:    lsl r0, r0, 16
 ; M32I-NEXT:    asr r0, r0, 16
 ; M32I-NEXT:    add r0, r0, r1
-; M32I-NEXT:    ld r11, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
   %1 = getelementptr i16, i16* %a, i32 2
@@ -116,11 +116,11 @@ define void @stb(i8 *%a, i8 %b) nounwind {
 ; M32I-LABEL: stb:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -4
-; M32I-NEXT:    st r11, [sp, 0]
-; M32I-NEXT:    addi r11, sp, 4
+; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    addi r14, sp, 4
 ; M32I-NEXT:    stb r1, [r0, 4]
 ; M32I-NEXT:    stb r1, [r0, 0]
-; M32I-NEXT:    ld r11, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
   store i8 %b, i8* %a
@@ -133,11 +133,11 @@ define void @sth(i16 *%a, i16 %b) nounwind {
 ; M32I-LABEL: sth:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -4
-; M32I-NEXT:    st r11, [sp, 0]
-; M32I-NEXT:    addi r11, sp, 4
+; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    addi r14, sp, 4
 ; M32I-NEXT:    sth r1, [r0, 10]
 ; M32I-NEXT:    sth r1, [r0, 0]
-; M32I-NEXT:    ld r11, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
   store i16 %b, i16* %a
@@ -150,11 +150,11 @@ define void @st(i32 *%a, i32 %b) nounwind {
 ; M32I-LABEL: st:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -4
-; M32I-NEXT:    st r11, [sp, 0]
-; M32I-NEXT:    addi r11, sp, 4
+; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    addi r14, sp, 4
 ; M32I-NEXT:    st r1, [r0, 24]
 ; M32I-NEXT:    st r1, [r0, 0]
-; M32I-NEXT:    ld r11, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
   store i32 %b, i32* %a
@@ -168,13 +168,13 @@ define i32 @load_sext_zext_anyext_i1(i1 *%a) nounwind {
 ; M32I-LABEL: load_sext_zext_anyext_i1:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -4
-; M32I-NEXT:    st r11, [sp, 0]
-; M32I-NEXT:    addi r11, sp, 4
+; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    addi r14, sp, 4
 ; M32I-NEXT:    ldb r1, [r0, 0]
 ; M32I-NEXT:    ldb r1, [r0, 1]
 ; M32I-NEXT:    ldb r0, [r0, 2]
 ; M32I-NEXT:    sub r0, r0, r1
-; M32I-NEXT:    ld r11, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
   ; sextload i1
@@ -195,13 +195,13 @@ define i16 @load_sext_zext_anyext_i1_i16(i1 *%a) nounwind {
 ; M32I-LABEL: load_sext_zext_anyext_i1_i16:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -4
-; M32I-NEXT:    st r11, [sp, 0]
-; M32I-NEXT:    addi r11, sp, 4
+; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    addi r14, sp, 4
 ; M32I-NEXT:    ldb r1, [r0, 0]
 ; M32I-NEXT:    ldb r1, [r0, 1]
 ; M32I-NEXT:    ldb r0, [r0, 2]
 ; M32I-NEXT:    sub r0, r0, r1
-; M32I-NEXT:    ld r11, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
   ; sextload i1
@@ -223,14 +223,14 @@ define i32 @ld_st_constant(i32 %a) nounwind {
 ; M32I-LABEL: ld_st_constant:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -4
-; M32I-NEXT:    st r11, [sp, 0]
-; M32I-NEXT:    addi r11, sp, 4
+; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    addi r14, sp, 4
 ; M32I-NEXT:    movu r2, 57005
 ; M32I-NEXT:    movl r2, 48879
 ; M32I-NEXT:    ld r1, [r2, 0]
 ; M32I-NEXT:    st r0, [r2, 0]
 ; M32I-NEXT:    addi r0, r1, 0
-; M32I-NEXT:    ld r11, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
   %1 = inttoptr i32 3735928559 to i32*
@@ -247,8 +247,8 @@ define i32 @lw_sw_global(i32 %a) nounwind {
 ; M32I-LABEL: lw_sw_global:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -4
-; M32I-NEXT:    st r11, [sp, 0]
-; M32I-NEXT:    addi r11, sp, 4
+; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    addi r14, sp, 4
 ; M32I-NEXT:    movu r2, %hi(G)
 ; M32I-NEXT:    movl r2, %lo(G)
 ; M32I-NEXT:    ld r1, [r2, 0]
@@ -258,7 +258,7 @@ define i32 @lw_sw_global(i32 %a) nounwind {
 ; M32I-NEXT:    ld r3, [r2, 0]
 ; M32I-NEXT:    st r0, [r2, 0]
 ; M32I-NEXT:    addi r0, r1, 0
-; M32I-NEXT:    ld r11, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
   %1 = load volatile i32, i32* @G

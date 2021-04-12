@@ -58,7 +58,7 @@ static const unsigned GPRDecoderTable[] = {
   MINA32::R0, MINA32::R1, MINA32::R2, MINA32::R3,
   MINA32::R4, MINA32::R5, MINA32::R6, MINA32::R7,
   MINA32::R8, MINA32::R9, MINA32::R10, MINA32::R11,
-  MINA32::R12, MINA32::SP, MINA32::LR, MINA32::PC
+  MINA32::R12, MINA32::R13, MINA32::R14, MINA32::SP
 };
 
 static DecodeStatus DecodeGPRRegisterClass(MCInst &Inst, uint64_t RegNo,

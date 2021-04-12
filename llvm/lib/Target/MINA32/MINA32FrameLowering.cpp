@@ -96,7 +96,7 @@ void MINA32FrameLowering::emitPrologue(MachineFunction &MF,
   MachineFrameInfo &MFI = MF.getFrameInfo();
   MachineBasicBlock::iterator MBBI = MBB.begin();
 
-  Register FrameReg = MINA32::R11;
+  Register FrameReg = MINA32::R14;
   Register StackReg = MINA32::SP;
 
   // Debug location must be unknown since the first debug location is used
@@ -144,7 +144,7 @@ void MINA32FrameLowering::emitEpilogue(MachineFunction &MF,
   MachineFrameInfo &MFI = MF.getFrameInfo();
   DebugLoc DL = MBBI->getDebugLoc();
 
-  Register FrameReg = MINA32::R11;
+  Register FrameReg = MINA32::R14;
   Register StackReg = MINA32::SP;
 
   // Skip to before the restores of callee-saved registers
@@ -181,7 +181,7 @@ void MINA32FrameLowering::determineCalleeSaves(MachineFunction &MF,
   TargetFrameLowering::determineCalleeSaves(MF, SavedRegs, RS);
   // TODO: Once frame pointer elimination is implemented, don't
   // unconditionally spill the frame pointer
-  SavedRegs.set(MINA32::R11);
+  SavedRegs.set(MINA32::R14);
 }
 
 MachineBasicBlock::iterator MINA32FrameLowering::eliminateCallFramePseudoInstr(

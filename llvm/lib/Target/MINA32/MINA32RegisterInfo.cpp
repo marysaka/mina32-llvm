@@ -30,7 +30,7 @@
 
 namespace llvm {
 
-MINA32RegisterInfo::MINA32RegisterInfo() : MINA32GenRegisterInfo(MINA32::PC) {}
+MINA32RegisterInfo::MINA32RegisterInfo() : MINA32GenRegisterInfo(MINA32::SP) {}
 
 const MCPhysReg *
 MINA32RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
@@ -56,18 +56,17 @@ BitVector MINA32RegisterInfo::getReservedRegs(const MachineFunction &MF) const {
   // FIXME: avoid re-calculating this every time.
   BitVector Reserved(getNumRegs());
   markSuperRegs(Reserved, MINA32::SP);
-  markSuperRegs(Reserved, MINA32::PC);
   markSuperRegs(Reserved, MINA32::R8_USER);
   markSuperRegs(Reserved, MINA32::R9_USER);
   markSuperRegs(Reserved, MINA32::R10_USER);
   markSuperRegs(Reserved, MINA32::R11_USER);
   markSuperRegs(Reserved, MINA32::R12_USER);
+  markSuperRegs(Reserved, MINA32::R13_USER);
+  markSuperRegs(Reserved, MINA32::R14_USER);
   markSuperRegs(Reserved, MINA32::SP_USER);
-  markSuperRegs(Reserved, MINA32::LR_USER);
-  markSuperRegs(Reserved, MINA32::PC_USER);
   markSuperRegs(Reserved, MINA32::FRET);
   if (TFI->hasFP(MF))
-    markSuperRegs(Reserved, MINA32::R11);
+    markSuperRegs(Reserved, MINA32::R14);
   if (hasBasePointer(MF))
     markSuperRegs(Reserved, BasePtr);
 
@@ -107,7 +106,7 @@ void MINA32RegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator MI,
 
 Register MINA32RegisterInfo::getFrameRegister(const MachineFunction &MF) const {
   const TargetFrameLowering *TFI = MF.getSubtarget().getFrameLowering();
-  return TFI->hasFP(MF) ? MINA32::R11 : MINA32::SP;
+  return TFI->hasFP(MF) ? MINA32::R14 : MINA32::SP;
 }
 
 } // end namespace llvm

@@ -6,13 +6,13 @@ define i32 @bare_select(i1 %a, i32 %b, i32 %c) {
 ; M32I-LABEL: bare_select:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -4
-; M32I-NEXT:    st r11, [sp, 0]
-; M32I-NEXT:    addi r11, sp, 4
+; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    addi r14, sp, 4
 ; M32I-NEXT:    andi r0, r0, 1
 ; M32I-NEXT:    cmpi.eq r0, 0
 ; M32I-NEXT:    mf r2, r1
 ; M32I-NEXT:    addi r0, r2, 0
-; M32I-NEXT:    ld r11, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
   %1 = select i1 %a, i32 %b, i32 %c
@@ -23,8 +23,8 @@ define i32 @foo(i32 %a, i32 *%b) {
 ; M32I-LABEL: foo:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -4
-; M32I-NEXT:    st r11, [sp, 0]
-; M32I-NEXT:    addi r11, sp, 4
+; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    addi r14, sp, 4
 ; M32I-NEXT:    ld r2, [r1, 0]
 ; M32I-NEXT:    cmp.eq r0, r2
 ; M32I-NEXT:    mt r2, r0
@@ -55,7 +55,7 @@ define i32 @foo(i32 %a, i32 *%b) {
 ; M32I-NEXT:    ld r0, [r1, 0]
 ; M32I-NEXT:    cmp.le r2, r0
 ; M32I-NEXT:    mt r0, r2
-; M32I-NEXT:    ld r11, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
   %val1 = load volatile i32, i32* %b

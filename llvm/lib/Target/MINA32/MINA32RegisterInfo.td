@@ -33,11 +33,11 @@ def R9  : MINA32Reg< 9, "r9">;
 def R10 : MINA32Reg<10, "r10">;
 def R11 : MINA32Reg<11, "r11">;
 def R12 : MINA32Reg<12, "r12">;
-def SP  : MINA32Reg<13, "sp", [], ["r13"]>;
-def LR  : MINA32Reg<14, "lr", [], ["r14"]>;
-def PC  : MINA32Reg<15, "pc", [], ["r15"]>;
+def R13 : MINA32Reg<13, "r13">;
+def R14 : MINA32Reg<14, "r14">;
+def SP  : MINA32Reg<15, "sp", [], ["r15"]>;
 
-def GPR : RegisterClass<"MINA32", [i32], 32, (add (sequence "R%u", 0, 12), SP, LR, PC)>;
+def GPR : RegisterClass<"MINA32", [i32], 32, (add (sequence "R%u", 0, 14), SP)>;
 
 // User registers
 def R8_USER  : MINA32Reg< 8, "r8_usr">;
@@ -45,9 +45,9 @@ def R9_USER  : MINA32Reg< 9, "r9_usr">;
 def R10_USER : MINA32Reg<10, "r10_usr">;
 def R11_USER : MINA32Reg<11, "r11_usr">;
 def R12_USER : MINA32Reg<12, "r12_usr">;
-def SP_USER  : MINA32Reg<13, "sp_usr", [], ["r13_usr"]>;
-def LR_USER  : MINA32Reg<14, "lr_usr", [], ["r14_usr"]>;
-def PC_USER  : MINA32Reg<15, "pc_usr", [], ["r15_usr"]>;
+def R13_USER : MINA32Reg<13, "r13_usr">;
+def R14_USER : MINA32Reg<14, "r14_usr">;
+def SP_USER  : MINA32Reg<15, "sp_usr", [], ["r15_usr"]>;
 
 
 // System registers
@@ -57,7 +57,7 @@ def FRET : MINA32Reg<1, "fret">;
 def TF : RegisterClass<"MINA32", [i32], 32, (add MCR)>;
 
 // Supervior only
-def SPR  : RegisterClass<"MINA32", [i32], 32, (add (sequence "R%u_USER", 8, 12), SP_USER, LR_USER, PC_USER, MCR, FRET)> {
+def SPR  : RegisterClass<"MINA32", [i32], 32, (add (sequence "R%u_USER", 8, 14), SP_USER, MCR, FRET)> {
   let CopyCost = -1;  // Don't allow copying of special registers.
   let isAllocatable = 0;
 }

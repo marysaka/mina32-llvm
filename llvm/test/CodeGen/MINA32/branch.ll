@@ -6,8 +6,8 @@ define void @foo(i32 %a, i32 *%b, i1 %c) {
 ; M32I-LABEL: foo:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -4
-; M32I-NEXT:    st r11, [sp, 0]
-; M32I-NEXT:    addi r11, sp, 4
+; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    addi r14, sp, 4
 ; M32I-NEXT:    ld r3, [r1, 0]
 ; M32I-NEXT:    cmp.eq r3, r0
 ; M32I-NEXT:    bt .LBB0_12
@@ -66,7 +66,7 @@ define void @foo(i32 %a, i32 *%b, i1 %c) {
 ; M32I-NEXT:  .LBB0_11: ; %test12
 ; M32I-NEXT:    ld r0, [r1, 0]
 ; M32I-NEXT:  .LBB0_12: ; %end
-; M32I-NEXT:    ld r11, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
   %val1 = load volatile i32, i32* %b

@@ -184,14 +184,21 @@ def OR   : ALU<0b0001, 0b1001, "or",  or>;
 def XOR  : ALU<0b0001, 0b1010, "xor", xor>;
 def NAND : ALU<0b0001, 0b1011, "nand", nand>;
 
+let SRC2 = 0x0 in
 def POPCNT : MINA32InstStandard<0b0001, 0b1100,
                                 (outs GPR:$DEST), (ins GPR:$SRC1),
                                 "popcnt $DEST, $SRC1",
                                 [(set GPR:$DEST, (ctpop GPR:$SRC1))]>;
 
+let SRC2 = 0x0 in
 def CLO : MINA32InstStandard<0b0001, 0b1101,
                              (outs GPR:$DEST), (ins GPR:$SRC1),
                              "clo $DEST, $SRC1", []>;
+
+let SRC2 = 0x0 in
+def PLO : MINA32InstStandard<0b0001, 0b1110,
+                             (outs GPR:$DEST), (ins GPR:$SRC1),
+                             "plo $DEST, $SRC1", []>;
 
 // Compare Group
 
@@ -209,6 +216,11 @@ def CMPLE  : CMP<0b0010, 0b1100, "cmp.le">;
 
 // Register Branch Group
 
+let isBranch = 1, isTerminator = 1, DEST = 0x0 in
+def RBRA : MINA32InstImmediate<0b0011, 0b0000,
+                               (outs), (ins GPR:$SRC1, immS12W:$IMMS),
+                               "rbra $SRC1, $IMMS", []>;
+
 let isCall = 1, DEST = 0x0, Defs = [SP] in
 def RCALL : MINA32InstImmediate<0b0011, 0b0001,
                                 (outs), (ins GPR:$SRC1, immS12W:$IMMS),
@@ -220,6 +232,16 @@ let isReturn = 1, isTerminator = 1, isBarrier = 1,
 def RET : MINA32InstImmediate<0b0011, 0b0010,
                               (outs), (ins), "ret", [(mina32_ret)]>;
 
+let isBranch = 1, isTerminator = 1, DEST = 0x0 in
+def ROBRA : MINA32InstStandard<0b0011, 0b1000,
+                               (outs), (ins GPR:$SRC1, GPR:$SRC2),
+                               "robra $SRC1, $SRC2", []>;
+
+let isCall = 1, DEST = 0x0, Defs = [SP] in
+def ROCALL : MINA32InstStandard<0b0011, 0b1001,
+                                (outs), (ins GPR:$SRC1, GPR:$SRC2),
+                                "rocall $SRC1, $SRC2", []>;
+
 // Memory Group
 
 def LD   : LOADI<0b0000, "ld",  load,        immS12W>;
@@ -230,6 +252,16 @@ def ST   : STOREI<0b0011, "st",  store,         immS12W>;
 def STH  : STOREI<0b0100, "sth", truncstorei16, immS12H>;
 def STB  : STOREI<0b0101, "stb", truncstorei8,  immS12B>;
 
+let DEST = 0x0, Defs = [MCR] in
+def LDC : MINA32InstImmediate<0b0100, 0b0110,
+                              (outs), (ins GPR:$SRC1, immS12W:$IMMS),
+                              "ldc [$SRC1, $IMMS]", []>;
+
+let DEST = 0x0, Uses = [MCR] in
+def STC : MINA32InstImmediate<0b0100, 0b0111,
+                              (outs), (ins GPR:$SRC1, immS12W:$IMMS),
+                              "stc [$SRC1, $IMMS]", []>;
+
 def RLD  : LOAD<0b1000, "rld",  load>;
 def RLDH : LOAD<0b1001, "rldh", zextloadi16>;
 def RLDB : LOAD<0b1010, "rldb", zextloadi8>;
@@ -237,6 +269,16 @@ def RLDB : LOAD<0b1010, "rldb", zextloadi8>;
 def RST  : STORE<0b1011, "rst",  store>;
 def RSTH : STORE<0b1100, "rsth", truncstorei16>;
 def RSTB : STORE<0b1101, "rstb", truncstorei8>;
+
+let SRC1 = 0x0, SRC2 = 0x0 in
+def POP : MINA32InstStandard<0b0100, 0b1110,
+                             (outs GPR:$DEST), (ins),
+                             "pop $DEST", []>;
+
+let SRC1 = 0x0, SRC2 = 0x0 in
+def PUSH : MINA32InstStandard<0b0100, 0b1111,
+                              (outs), (ins GPR:$DEST),
+                              "push $DEST", []>;
 
 // Move Group
 
@@ -266,15 +308,40 @@ def MOVU : MINA32InstMove<0b0101, 0b0100,
                           "movu $DEST, $IMM",
                           [(set GPR:$DEST, immU16:$IMM)]>;
 
+let SRC2 = 0x0 in
+def MOV : MINA32InstStandard<0b0101, 0b1000,
+                             (outs GPR:$DEST), (ins GPR:$SRC1),
+                             "mov $DEST, $SRC1", []>;
+
 let Constraints = "$SRC = $DEST", SRC2 = 0x0 in
-def MT  : MINA32InstStandard<0b0101, 0b0001,
+def MT  : MINA32InstStandard<0b0101, 0b1001,
                              (outs GPR:$DEST), (ins TF:$MCR, GPR:$SRC, GPR:$SRC1),
                              "mt $DEST, $SRC1", []>;
 
 let Constraints = "$SRC = $DEST", SRC2 = 0x0 in
-def MF  : MINA32InstStandard<0b0101, 0b0010,
+def MF  : MINA32InstStandard<0b0101, 0b1010,
                              (outs GPR:$DEST), (ins TF:$MCR, GPR:$SRC, GPR:$SRC1),
                              "mf $DEST, $SRC1", []>;
+
+let SRC1 = 0x0, SRC2 = 0x0, Defs = [MCR] in
+def MTOC : MINA32InstStandard<0b0101, 0b1011,
+                              (outs), (ins GPR:$DEST),
+                              "mtoc $DEST", []>;
+
+let SRC1 = 0x0, SRC2 = 0x0, Uses = [MCR] in
+def MFRC : MINA32InstStandard<0b0101, 0b1100,
+                              (outs GPR:$DEST), (ins),
+                              "mfrc $DEST", []>;
+
+let SRC2 = 0x0 in
+def MTOU : MINA32InstStandard<0b0101, 0b1101,
+                             (outs GPR:$DEST), (ins GPR:$SRC1),
+                             "mtou $DEST, $SRC1", []>;
+
+let SRC2 = 0x0 in
+def MFRU : MINA32InstStandard<0b0101, 0b1110,
+                             (outs GPR:$DEST), (ins GPR:$SRC1),
+                             "mfru $DEST, $SRC1", []>;
 
 // Shift Group
 
@@ -295,8 +362,25 @@ def FLSL : MINA32InstFunnelShift<0b0110, 0b1100,
 
 def FLSR : MINA32InstFunnelShift<0b0110, 0b1101,
                                  (outs GPR:$DEST), (ins GPR:$SRC1, GPR:$SRC2, GPR:$RSHIFT),
-                                 "flsl $DEST, $SRC1, $SRC2, $RSHIFT",
+                                 "flsr $DEST, $SRC1, $SRC2, $RSHIFT",
                                  [(set GPR:$DEST, (fshr GPR:$SRC1, GPR:$SRC2, GPR:$RSHIFT))]>;
+
+// Control Group
+
+let DEST = 0x0, SRC1 = 0x0, IMMS = 0x0 in {
+def STOP   : MINA32InstImmediate<0b0111, 0b0000, (outs), (ins), "stop"  , []>;
+def WFI    : MINA32InstImmediate<0b0111, 0b0001, (outs), (ins), "wfi"   , []>;
+def SETT   : MINA32InstImmediate<0b0111, 0b0010, (outs), (ins), "sett"  , []>;
+def CLRT   : MINA32InstImmediate<0b0111, 0b0011, (outs), (ins), "clrt"  , []>;
+def SWITCH : MINA32InstImmediate<0b0111, 0b0100, (outs), (ins), "switch", []>;
+} // DEST = 0x0, SRC1 = 0x0, IMMS = 0x0
+
+let SRC1 = 0x0, SRC2 = 0x0 in {
+def SVCALL : MINA32InstStandard<0b0111, 0b1000, (outs), (ins GPR:$DEST), "svcall $DEST", []>;
+def FAULT  : MINA32InstStandard<0b0111, 0b1001, (outs), (ins GPR:$DEST), "fault $DEST" , []>;
+def MTOF   : MINA32InstStandard<0b0111, 0b1010, (outs), (ins GPR:$DEST), "mtof $DEST"  , []>;
+def MFRF   : MINA32InstStandard<0b0111, 0b1011, (outs), (ins GPR:$DEST), "mfrf $DEST"  , []>;
+} // SRC1 = 0x0, SRC2 = 0x0
 
 // PC-relative Branch Group
 
@@ -314,6 +398,21 @@ let isBranch = 1, isTerminator = 1 in
 def BF  : MINA32InstBranch<0b1000, 0b0010,
                            (outs), (ins TF:$MCR, addr24:$IMM),
                            "bf $IMM", []>;
+
+let isCall = 1, Defs = [SP] in
+def CALL : MINA32InstBranch<0b1000, 0b1000,
+                            (outs), (ins addr24:$IMM),
+                            "call $IMM", []>;
+
+let isCall = 1, Defs = [SP] in
+def CT  : MINA32InstBranch<0b1000, 0b1001,
+                           (outs), (ins TF:$MCR, addr24:$IMM),
+                           "ct $IMM", []>;
+
+let isCall = 1, Defs = [SP] in
+def CF  : MINA32InstBranch<0b1000, 0b1010,
+                           (outs), (ins TF:$MCR, addr24:$IMM),
+                           "cf $IMM", []>;
 
 // Non-Instruction Patterns
 
