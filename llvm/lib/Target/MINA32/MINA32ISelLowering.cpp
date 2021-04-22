@@ -26,7 +26,7 @@
 #include "llvm/Support/ErrorHandling.h"
 
 #include "MINA32.h"
-//#include "MINA32MachineFunctionInfo.h"
+#include "MINA32MachineFunctionInfo.h"
 #include "MCTargetDesc/MINA32MCTargetDesc.h"
 #include "MINA32Subtarget.h"
 #include "MINA32TargetMachine.h"
@@ -42,6 +42,16 @@ MINA32TargetLowering::MINA32TargetLowering(const TargetMachine &TM,
   // Compute derived properties from the register classes.
   computeRegisterProperties(Subtarget.getRegisterInfo());
 
+  setOperationAction(ISD::DYNAMIC_STACKALLOC, MVT::i32, Expand);
+  setOperationAction(ISD::STACKSAVE, MVT::Other, Expand);
+  setOperationAction(ISD::STACKRESTORE, MVT::Other, Expand);
+
+  setOperationAction(ISD::VASTART, MVT::Other, Custom);
+  setOperationAction(ISD::VAARG, MVT::Other, Expand);
+  setOperationAction(ISD::VACOPY, MVT::Other, Expand);
+  setOperationAction(ISD::VAEND, MVT::Other, Expand);
+
+  setOperationAction(ISD::BR_JT, MVT::Other, Expand);
   setOperationAction(ISD::BR_CC, MVT::i32, Expand);
   setOperationAction(ISD::SELECT_CC, MVT::i32, Expand);
   setBooleanContents(ZeroOrOneBooleanContent);
@@ -80,6 +90,9 @@ MINA32TargetLowering::MINA32TargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::BSWAP, MVT::i32, Expand);
   setOperationAction(ISD::CTTZ, MVT::i32, Expand);
   setOperationAction(ISD::GlobalAddress, MVT::i32, Custom);
+
+  // Effectively disable jump table generation.
+  setMinimumJumpTableEntries(INT_MAX);
 }
 
 const char *MINA32TargetLowering::getTargetNodeName(unsigned Opcode) const {
@@ -97,6 +110,8 @@ SDValue MINA32TargetLowering::LowerOperation(SDValue Op,
     report_fatal_error("LowerOperation() unimplemented");
   case ISD::GlobalAddress:
     return LowerGlobalAddress(Op, DAG);
+  case ISD::VASTART:
+    return LowerVASTART(Op, DAG);
   }
 }
 
@@ -124,6 +139,21 @@ SDValue MINA32TargetLowering::LowerGlobalAddress(SDValue Op,
       DAG.getTargetGlobalAddress(GV, DL, Ty, Offset, MINA32II::MO_LO);
   SDValue MNHi = SDValue(DAG.getMachineNode(MINA32::MOVU, DL, Ty, GAHi), 0);
   return SDValue(DAG.getMachineNode(MINA32::MOVL, DL, Ty, MNHi, GALo), 0);
+}
+
+SDValue MINA32TargetLowering::LowerVASTART(SDValue Op, SelectionDAG &DAG) const {
+  MachineFunction &MF = DAG.getMachineFunction();
+  auto *FuncInfo = MF.getInfo<MINA32MachineFunctionInfo>();
+
+  SDLoc DL(Op);
+  SDValue FI = DAG.getFrameIndex(FuncInfo->getVarArgsFrameIndex(),
+                                 getPointerTy(MF.getDataLayout()));
+
+  // vastart just stores the address of the VarArgsFrameIndex slot into the
+  // memory location argument.
+  const Value *SV = cast<SrcValueSDNode>(Op.getOperand(2))->getValue();
+  return DAG.getStore(Op.getOperand(0), DL, FI, Op.getOperand(1),
+                      MachinePointerInfo(SV));
 }
 
 SDValue MINA32TargetLowering::LowerExternalSymbol(SDValue Op,
@@ -156,6 +186,7 @@ SDValue MINA32TargetLowering::LowerFormalArguments(
     SelectionDAG &DAG, SmallVectorImpl<SDValue> &InVals) const {
   MachineFunction &MF = DAG.getMachineFunction();
   MachineRegisterInfo &RegInfo = MF.getRegInfo();
+  std::vector<SDValue> OutChains;
 
   // Assign locations to all of the incoming arguments.
   SmallVector<CCValAssign, 16> ArgLocs;
@@ -185,7 +216,56 @@ SDValue MINA32TargetLowering::LowerFormalArguments(
   }
 
   if (isVarArg) {
-    llvm_unreachable("Lowering VarArgs unimplemented");
+    static const MCPhysReg ArgRegs[] = {
+      MINA32::R0, MINA32::R1, MINA32::R2, MINA32::R3
+    };
+    unsigned Idx = CCInfo.getFirstUnallocated(ArgRegs);
+    MachineFrameInfo &MFI = MF.getFrameInfo();
+    auto *FuncInfo = MF.getInfo<MINA32MachineFunctionInfo>();
+
+    // Offset of the first variable argument from stack pointer,
+    // and size of the vararg save area.
+    int VaArgOffset, VarArgsSaveSize;
+
+    // If all registers are allocated, then all varargs must be passed on the
+    // stack and we don't need to save any argregs.
+    if (Idx == array_lengthof(ArgRegs)) {
+      VaArgOffset = CCInfo.getNextStackOffset();
+      VarArgsSaveSize = 0;
+    } else {
+      VarArgsSaveSize = 4 * (array_lengthof(ArgRegs) - Idx);
+      VaArgOffset = -VarArgsSaveSize;
+    }
+
+    // Record the frame index of the first variable argument
+    // which is a value necessary to VASTART.
+    int FI = MFI.CreateFixedObject(4, VaArgOffset, true);
+    FuncInfo->setVarArgsFrameIndex(FI);
+
+    // Copy the integer registers that may have been used for passing varargs
+    // to the vararg save area.
+    for (unsigned i = Idx; i < array_lengthof(ArgRegs); ++i, VaArgOffset += 4) {
+      Register VReg = RegInfo.createVirtualRegister(&MINA32::GPRRegClass);
+      RegInfo.addLiveIn(ArgRegs[i], VReg);
+      SDValue ArgValue = DAG.getCopyFromReg(Chain, DL, VReg, MVT::i32);
+
+      FI = MFI.CreateFixedObject(4, VaArgOffset, true);
+      SDValue PtrOff = DAG.getFrameIndex(FI, getPointerTy(DAG.getDataLayout()));
+      SDValue Store = DAG.getStore(Chain, DL, ArgValue, PtrOff,
+                                   MachinePointerInfo::getFixedStack(MF, FI));
+      cast<StoreSDNode>(Store.getNode())
+          ->getMemOperand()
+          ->setValue((Value *)nullptr);
+      OutChains.push_back(Store);
+    }
+    FuncInfo->setVarArgsSaveSize(VarArgsSaveSize);
+  }
+
+  // All stores are grouped in one node to allow the matching between
+  // the size of Ins and InVals. This only happens for vararg functions.
+  if (!OutChains.empty()) {
+    OutChains.push_back(Chain);
+    Chain = DAG.getNode(ISD::TokenFactor, DL, MVT::Other, OutChains);
   }
 
   return Chain;
@@ -205,10 +285,6 @@ MINA32TargetLowering::LowerCall(CallLoweringInfo &CLI,
   CallingConv::ID CallConv = CLI.CallConv;
   bool isVarArg = CLI.IsVarArg;
   EVT PtrVT = getPointerTy(DAG.getDataLayout());
-
-  if (isVarArg) {
-    report_fatal_error("Lowering VarArgs unimplemented");
-  }
 
   MachineFunction &MF = DAG.getMachineFunction();
 

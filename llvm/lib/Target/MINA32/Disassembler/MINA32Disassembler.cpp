@@ -1,9 +1,9 @@
 //===-- MINA32Disassembler.cpp - Disassembler for MINA32 ------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
+// Part of the LLVM fork for the MINA32 project, under the Apache License v2.0
+// with LLVM Exceptions. See https://llvm.org/LICENSE.txt for license
+// information.
+// SPDX-License-Identifier: Apache-2.0 with LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 //

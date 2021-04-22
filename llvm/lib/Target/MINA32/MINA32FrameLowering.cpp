@@ -12,6 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "MINA32FrameLowering.h"
+#include "MINA32MachineFunctionInfo.h"
 
 #include "llvm/CodeGen/MachineFrameInfo.h"
 #include "llvm/CodeGen/MachineFunction.h"
@@ -108,7 +109,9 @@ void MINA32FrameLowering::emitPrologue(MachineFunction &MF,
 
   // FIXME (note copied from Lanai): This appears to be overallocating.  Needs
   // investigation. Get the number of bytes to allocate from the FrameInfo.
+  const auto *FuncInfo = MF.getInfo<MINA32MachineFunctionInfo>();
   int64_t StackSize = MFI.getStackSize();
+  int64_t FPOffset = StackSize - FuncInfo->getVarArgsSaveSize();
 
   // Early exit if there is no need to allocate on the stack
   if (StackSize == 0 && !MFI.adjustsStack())
@@ -128,7 +131,7 @@ void MINA32FrameLowering::emitPrologue(MachineFunction &MF,
   std::advance(MBBI, CSI.size());
 
   // Generate new FP.
-  adjustReg(MBB, MBBI, DL, FrameReg, StackReg, StackSize, FrameSetup);
+  adjustReg(MBB, MBBI, DL, FrameReg, StackReg, FPOffset, FrameSetup);
 }
 
 void MINA32FrameLowering::emitEpilogue(MachineFunction &MF,
@@ -153,13 +156,15 @@ void MINA32FrameLowering::emitEpilogue(MachineFunction &MF,
   MachineBasicBlock::iterator LastFrameDestroy = MBBI;
   std::advance(LastFrameDestroy, -MFI.getCalleeSavedInfo().size());
 
+  const auto *FuncInfo = MF.getInfo<MINA32MachineFunctionInfo>();
   int64_t StackSize = MFI.getStackSize();
+  int64_t FPOffset = StackSize - FuncInfo->getVarArgsSaveSize();
 
   // Restore the stack pointer using the value of the frame pointer. Only
   // necessary if the stack pointer was modified, meaning the stack size is
   // unknown.
   if (RegInfo->needsStackRealignment(MF) || MFI.hasVarSizedObjects()) {
-    adjustReg(MBB, LastFrameDestroy, DL, StackReg, FrameReg, -StackSize,
+    adjustReg(MBB, LastFrameDestroy, DL, StackReg, FrameReg, -FPOffset,
               MachineInstr::FrameDestroy);
   }
 
@@ -196,6 +201,7 @@ int MINA32FrameLowering::getFrameIndexReference(const MachineFunction &MF,
   const MINA32Subtarget &Subtarget = MF.getSubtarget<MINA32Subtarget>();
   const MachineFrameInfo &MFI = MF.getFrameInfo();
   const MINA32RegisterInfo *RegInfo = Subtarget.getRegisterInfo();
+  const auto *FuncInfo = MF.getInfo<MINA32MachineFunctionInfo>();
 
   // Callee-saved registers should be referenced relative to the stack
   // pointer (positive offset), otherwise use the frame pointer (negative
@@ -211,10 +217,12 @@ int MINA32FrameLowering::getFrameIndexReference(const MachineFunction &MF,
     MaxCSFI = CSI[CSI.size() - 1].getFrameIdx();
   }
 
-  FrameReg = RegInfo->getFrameRegister(MF);
   if (FI >= MinCSFI && FI <= MaxCSFI) {
     FrameReg = MINA32::SP;
     Offset += MF.getFrameInfo().getStackSize();
+  } else {
+    FrameReg = RegInfo->getFrameRegister(MF);
+    Offset += FuncInfo->getVarArgsSaveSize();
   }
   return Offset;
 }
