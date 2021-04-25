@@ -88,14 +88,19 @@ MINA32MCCodeEmitter::getImmOpValue(const MCInst &MI, unsigned OpNo,
   return 0;
 }
 
+template <unsigned N>
 unsigned MINA32MCCodeEmitter::getAddrOpValue(const MCInst &MI, unsigned OpNo,
                                              SmallVectorImpl<MCFixup> &Fixups,
                                              const MCSubtargetInfo &STI) const {
   const MCOperand &MO = MI.getOperand(OpNo);
 
-  // If the destination is an immediate, there is nothing to do
-  if (MO.isImm())
-    return MO.getImm();
+  if (MO.isImm()) {
+    int Res = MO.getImm();
+    int Base = (Res >> N) & 0xffffff;
+    int Enc = SignExtend32<24>(Base) << N;
+    assert(Enc == Res && "Unencodable immediate");
+    return Base;
+  }
 
   assert(MO.isExpr() &&
          "getAddrOpValue expects only expressions or immediates");

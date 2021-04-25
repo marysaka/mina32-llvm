@@ -152,6 +152,13 @@ StringRef llvm::object::getELFRelocationTypeName(uint32_t Machine,
       break;
     }
     break;
+  case ELF::EM_MINA32:
+    switch (Type) {
+#include "llvm/BinaryFormat/ELFRelocs/MINA32.def"
+    default:
+      break;
+    }
+    break;
   default:
     break;
   }

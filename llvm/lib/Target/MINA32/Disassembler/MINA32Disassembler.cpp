@@ -84,8 +84,8 @@ static DecodeStatus decodeImmOperand(MCInst &Inst, uint64_t Imm,
 
 static DecodeStatus decodeAddrOperand(MCInst &Inst, uint64_t Imm,
                                       int64_t Address, const void *Decoder) {
-  assert(isUInt<24>(Imm) && "Invalid immediate");
-  Inst.addOperand(MCOperand::createImm(SignExtend32<24>(Imm)));
+  int Base = SignExtend32<24>(Imm & 0xffffff);
+  Inst.addOperand(MCOperand::createImm(Base << 2));
   return MCDisassembler::Success;
 }
 

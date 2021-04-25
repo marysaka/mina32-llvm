@@ -18,16 +18,16 @@ movl r1, %lo(val)
 
 bra .LBB0
 ; CHECK-FIXUP: fixup A - offset: 0, value: .LBB0, kind: fixup_mina32_bra
-; CHECK-INSTR: bra -2
+; CHECK-INSTR: bra -8
 bra .LBB2
 ; CHECK-FIXUP: fixup A - offset: 0, value: .LBB2, kind: fixup_mina32_bra
-; CHECK-INSTR: bra 82749
+; CHECK-INSTR: bra 330996
 bt .LBB0
 ; CHECK-FIXUP: fixup A - offset: 0, value: .LBB0, kind: fixup_mina32_bra
-; CHECK-INSTR: bt -4
+; CHECK-INSTR: bt -16
 bf .LBB1
 ; CHECK-FIXUP: fixup A - offset: 0, value: .LBB1, kind: fixup_mina32_bra
-; CHECK-INSTR: bf 277
+; CHECK-INSTR: bf 1108
 
 .fill 1104
 

@@ -85,17 +85,17 @@ def rol32x : SDNodeXForm<imm, [{
 def immL16 : Operand<i32>, ImmLeaf<i32, [{
   return isUInt<16>(Imm);
 }]> {
-  let EncoderMethod = "getAddrOpValue";
+  let EncoderMethod = "getAddrOpValue<0>";
 }
 
 def immU16 : Operand<i32>, ImmLeaf<i32, [{
   return isShiftedUInt<16, 16>(Imm);
 }], up16x> {
-  let EncoderMethod = "getAddrOpValue";
+  let EncoderMethod = "getAddrOpValue<0>";
 }
 
 def addr24 : Operand<OtherVT> {
-  let EncoderMethod = "getAddrOpValue";
+  let EncoderMethod = "getAddrOpValue<2>";
   let DecoderMethod = "decodeAddrOperand";
 }
 
