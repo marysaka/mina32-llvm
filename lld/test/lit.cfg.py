@@ -71,6 +71,7 @@ llvm_config.feature_config(
                           'ARM': 'arm',
                           'AVR': 'avr',
                           'Hexagon': 'hexagon',
+                          'MINA32': 'mina32',
                           'Mips': 'mips',
                           'MSP430': 'msp430',
                           'PowerPC': 'ppc',

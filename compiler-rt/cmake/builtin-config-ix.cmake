@@ -28,6 +28,7 @@ set(ARM32 arm armhf armv6m armv7m armv7em armv7 armv7s armv7k)
 set(HEXAGON hexagon)
 set(X86 i386)
 set(X86_64 x86_64)
+set(MINA32 mina32)
 set(MIPS32 mips mipsel)
 set(MIPS64 mips64 mips64el)
 set(PPC64 powerpc64 powerpc64le)
@@ -47,9 +48,9 @@ endif()
 
 set(ALL_BUILTIN_SUPPORTED_ARCH
   ${X86} ${X86_64} ${ARM32} ${ARM64}
-  ${HEXAGON} ${MIPS32} ${MIPS64} ${PPC64}
-  ${RISCV32} ${RISCV64} ${SPARC} ${SPARCV9}
-  ${WASM32} ${WASM64} ${VE})
+  ${HEXAGON} ${MINA32} ${MIPS32} ${MIPS64}
+  ${PPC64} ${RISCV32} ${RISCV64} ${SPARC}
+  ${SPARCV9} ${WASM32} ${WASM64} ${VE})
 
 include(CompilerRTUtils)
 include(CompilerRTDarwinUtils)

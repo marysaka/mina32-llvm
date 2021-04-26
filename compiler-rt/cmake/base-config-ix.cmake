@@ -206,6 +206,8 @@ macro(test_targets)
     elseif("${COMPILER_RT_DEFAULT_TARGET_ARCH}" MATCHES "sparc")
       test_target_arch(sparc "" "-m32")
       test_target_arch(sparcv9 "" "-m64")
+    elseif("${COMPILER_RT_DEFAULT_TARGET_ARCH}" MATCHES "mina32")
+      test_target_arch(mina32 "" "")
     elseif("${COMPILER_RT_DEFAULT_TARGET_ARCH}" MATCHES "mipsel|mips64el")
       # Gcc doesn't accept -m32/-m64 so we do the next best thing and use
       # -mips32r2/-mips64r2. We don't use -mips1/-mips3 because we want to match
