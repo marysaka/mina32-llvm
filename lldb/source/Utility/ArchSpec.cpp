@@ -106,6 +106,9 @@ static const CoreDefinition g_core_definitions[] = {
     {eByteOrderLittle, 8, 4, 4, llvm::Triple::aarch64,
      ArchSpec::eCore_arm_aarch64, "aarch64"},
 
+    {eByteOrderLittle, 4, 4, 4, llvm::Triple::mina32, ArchSpec::eCore_mina32,
+     "mina32"},
+
     // mips32, mips32r2, mips32r3, mips32r5, mips32r6
     {eByteOrderBig, 4, 2, 4, llvm::Triple::mips, ArchSpec::eCore_mips32,
      "mips"},
@@ -422,6 +425,8 @@ static const ArchDefinitionEntry g_elf_arch_entries[] = {
      LLDB_INVALID_CPUTYPE, 0xFFFFFFFFu, 0xFFFFFFFFu}, // SPARC V9
     {ArchSpec::eCore_x86_64_x86_64, llvm::ELF::EM_X86_64, LLDB_INVALID_CPUTYPE,
      0xFFFFFFFFu, 0xFFFFFFFFu}, // AMD64
+    {ArchSpec::eCore_mina32, llvm::ELF::EM_MINA32, LLDB_INVALID_CPUTYPE,
+     0xFFFFFFFFu, 0xFFFFFFFFu}, // mina32
     {ArchSpec::eCore_mips32, llvm::ELF::EM_MIPS, ArchSpec::eMIPSSubType_mips32,
      0xFFFFFFFFu, 0xFFFFFFFFu}, // mips32
     {ArchSpec::eCore_mips32r2, llvm::ELF::EM_MIPS,

@@ -284,18 +284,18 @@ def PUSH : MINA32InstStandard<0b0100, 0b1111,
 
 let SRC1 = 0x0 in
 def MOVI : MINA32InstImmediate<0b0101, 0b0000,
-                               (outs GPR:$DEST), (ins i32imm:$IMMS),
+                               (outs GPR:$DEST), (ins immS12B:$IMMS),
                                "movi $DEST, $IMMS",
                                [(set GPR:$DEST, immS12B:$IMMS)]>;
 
 let Constraints = "$SRC = $DEST", SRC1 = 0x0 in
 def MTI  : MINA32InstImmediate<0b0101, 0b0001,
-                               (outs GPR:$DEST), (ins TF:$MCR, GPR:$SRC, i32imm:$IMMS),
+                               (outs GPR:$DEST), (ins TF:$MCR, GPR:$SRC, immS12B:$IMMS),
                                "mti $DEST, $IMMS", []>;
 
 let Constraints = "$SRC = $DEST", SRC1 = 0x0 in
 def MFI  : MINA32InstImmediate<0b0101, 0b0010,
-                               (outs GPR:$DEST), (ins TF:$MCR, GPR:$SRC, i32imm:$IMMS),
+                               (outs GPR:$DEST), (ins TF:$MCR, GPR:$SRC, immS12B:$IMMS),
                                "mfi $DEST, $IMMS", []>;
 
 let Constraints = "$SRC = $DEST" in
