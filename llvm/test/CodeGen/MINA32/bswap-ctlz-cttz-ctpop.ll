@@ -90,18 +90,18 @@ define i8 @test_cttz_i8(i8 %a) nounwind {
 ; M32I-NEXT:    addi sp, sp, -4
 ; M32I-NEXT:    st r14, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 4
-; M32I-NEXT:    addi r1, r0, 0
-; M32I-NEXT:    movi r0, 8
-; M32I-NEXT:    andi r2, r1, 255
-; M32I-NEXT:    cmpi.eq r2, 0
-; M32I-NEXT:    bt .LBB3_2
-; M32I-NEXT:    bra .LBB3_1
-; M32I-NEXT:  .LBB3_1: ; %cond.false
-; M32I-NEXT:    addi r0, r1, -1
-; M32I-NEXT:    xori r1, r1, -1
-; M32I-NEXT:    and r0, r1, r0
+; M32I-NEXT:    andi r1, r0, 255
+; M32I-NEXT:    cmpi.eq r1, 0
+; M32I-NEXT:    bt .LBB3_1
+; M32I-NEXT:  ; %bb.2: ; %cond.false
+; M32I-NEXT:    addi r1, r0, -1
+; M32I-NEXT:    xori r0, r0, -1
+; M32I-NEXT:    and r0, r0, r1
 ; M32I-NEXT:    popcnt r0, r0
-; M32I-NEXT:  .LBB3_2: ; %cond.end
+; M32I-NEXT:    bra .LBB3_3
+; M32I-NEXT:  .LBB3_1:
+; M32I-NEXT:    movi r0, 8
+; M32I-NEXT:  .LBB3_3: ; %cond.end
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
@@ -115,20 +115,20 @@ define i16 @test_cttz_i16(i16 %a) nounwind {
 ; M32I-NEXT:    addi sp, sp, -4
 ; M32I-NEXT:    st r14, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 4
-; M32I-NEXT:    addi r1, r0, 0
-; M32I-NEXT:    movi r0, 16
-; M32I-NEXT:    movu r2, 0
-; M32I-NEXT:    movl r2, 65535
-; M32I-NEXT:    and r2, r1, r2
-; M32I-NEXT:    cmpi.eq r2, 0
-; M32I-NEXT:    bt .LBB4_2
-; M32I-NEXT:    bra .LBB4_1
-; M32I-NEXT:  .LBB4_1: ; %cond.false
-; M32I-NEXT:    addi r0, r1, -1
-; M32I-NEXT:    xori r1, r1, -1
-; M32I-NEXT:    and r0, r1, r0
+; M32I-NEXT:    movu r1, 0
+; M32I-NEXT:    movl r1, 65535
+; M32I-NEXT:    and r1, r0, r1
+; M32I-NEXT:    cmpi.eq r1, 0
+; M32I-NEXT:    bt .LBB4_1
+; M32I-NEXT:  ; %bb.2: ; %cond.false
+; M32I-NEXT:    addi r1, r0, -1
+; M32I-NEXT:    xori r0, r0, -1
+; M32I-NEXT:    and r0, r0, r1
 ; M32I-NEXT:    popcnt r0, r0
-; M32I-NEXT:  .LBB4_2: ; %cond.end
+; M32I-NEXT:    bra .LBB4_3
+; M32I-NEXT:  .LBB4_1:
+; M32I-NEXT:    movi r0, 16
+; M32I-NEXT:  .LBB4_3: ; %cond.end
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
@@ -142,17 +142,17 @@ define i32 @test_cttz_i32(i32 %a) nounwind {
 ; M32I-NEXT:    addi sp, sp, -4
 ; M32I-NEXT:    st r14, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 4
-; M32I-NEXT:    addi r1, r0, 0
-; M32I-NEXT:    movi r0, 32
-; M32I-NEXT:    cmpi.eq r1, 0
-; M32I-NEXT:    bt .LBB5_2
-; M32I-NEXT:    bra .LBB5_1
-; M32I-NEXT:  .LBB5_1: ; %cond.false
-; M32I-NEXT:    addi r0, r1, -1
-; M32I-NEXT:    xori r1, r1, -1
-; M32I-NEXT:    and r0, r1, r0
+; M32I-NEXT:    cmpi.eq r0, 0
+; M32I-NEXT:    bt .LBB5_1
+; M32I-NEXT:  ; %bb.2: ; %cond.false
+; M32I-NEXT:    addi r1, r0, -1
+; M32I-NEXT:    xori r0, r0, -1
+; M32I-NEXT:    and r0, r0, r1
 ; M32I-NEXT:    popcnt r0, r0
-; M32I-NEXT:  .LBB5_2: ; %cond.end
+; M32I-NEXT:    bra .LBB5_3
+; M32I-NEXT:  .LBB5_1:
+; M32I-NEXT:    movi r0, 32
+; M32I-NEXT:  .LBB5_3: ; %cond.end
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
@@ -166,15 +166,15 @@ define i32 @test_ctlz_i32(i32 %a) nounwind {
 ; M32I-NEXT:    addi sp, sp, -4
 ; M32I-NEXT:    st r14, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 4
-; M32I-NEXT:    addi r1, r0, 0
-; M32I-NEXT:    movi r0, 32
-; M32I-NEXT:    cmpi.eq r1, 0
-; M32I-NEXT:    bt .LBB6_2
-; M32I-NEXT:    bra .LBB6_1
-; M32I-NEXT:  .LBB6_1: ; %cond.false
-; M32I-NEXT:    xori r0, r1, -1
+; M32I-NEXT:    cmpi.eq r0, 0
+; M32I-NEXT:    bt .LBB6_1
+; M32I-NEXT:  ; %bb.2: ; %cond.false
+; M32I-NEXT:    xori r0, r0, -1
 ; M32I-NEXT:    clo r0, r0
-; M32I-NEXT:  .LBB6_2: ; %cond.end
+; M32I-NEXT:    bra .LBB6_3
+; M32I-NEXT:  .LBB6_1:
+; M32I-NEXT:    movi r0, 32
+; M32I-NEXT:  .LBB6_3: ; %cond.end
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret

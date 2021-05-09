@@ -11,59 +11,48 @@ define void @foo(i32 %a, i32 *%b, i1 %c) {
 ; M32I-NEXT:    ld r3, [r1, 0]
 ; M32I-NEXT:    cmp.eq r3, r0
 ; M32I-NEXT:    bt .LBB0_12
-; M32I-NEXT:    bra .LBB0_1
-; M32I-NEXT:  .LBB0_1: ; %test2
+; M32I-NEXT:  ; %bb.1: ; %test2
 ; M32I-NEXT:    ld r3, [r1, 0]
 ; M32I-NEXT:    cmp.eq r3, r0
 ; M32I-NEXT:    bf .LBB0_12
-; M32I-NEXT:    bra .LBB0_2
-; M32I-NEXT:  .LBB0_2: ; %test3
+; M32I-NEXT:  ; %bb.2: ; %test3
 ; M32I-NEXT:    ld r3, [r1, 0]
 ; M32I-NEXT:    cmp.lt r3, r0
 ; M32I-NEXT:    bt .LBB0_12
-; M32I-NEXT:    bra .LBB0_3
-; M32I-NEXT:  .LBB0_3: ; %test4
+; M32I-NEXT:  ; %bb.3: ; %test4
 ; M32I-NEXT:    ld r3, [r1, 0]
 ; M32I-NEXT:    cmp.lt r3, r0
 ; M32I-NEXT:    bf .LBB0_12
-; M32I-NEXT:    bra .LBB0_4
-; M32I-NEXT:  .LBB0_4: ; %test5
+; M32I-NEXT:  ; %bb.4: ; %test5
 ; M32I-NEXT:    ld r3, [r1, 0]
 ; M32I-NEXT:    cmp.lo r3, r0
 ; M32I-NEXT:    bt .LBB0_12
-; M32I-NEXT:    bra .LBB0_5
-; M32I-NEXT:  .LBB0_5: ; %test6
+; M32I-NEXT:  ; %bb.5: ; %test6
 ; M32I-NEXT:    ld r3, [r1, 0]
 ; M32I-NEXT:    cmp.lo r3, r0
 ; M32I-NEXT:    bf .LBB0_12
-; M32I-NEXT:    bra .LBB0_6
-; M32I-NEXT:  .LBB0_6: ; %test7
+; M32I-NEXT:  ; %bb.6: ; %test7
 ; M32I-NEXT:    ld r3, [r1, 0]
 ; M32I-NEXT:    cmp.le r3, r0
 ; M32I-NEXT:    bf .LBB0_12
-; M32I-NEXT:    bra .LBB0_7
-; M32I-NEXT:  .LBB0_7: ; %test8
+; M32I-NEXT:  ; %bb.7: ; %test8
 ; M32I-NEXT:    ld r3, [r1, 0]
 ; M32I-NEXT:    cmp.le r3, r0
 ; M32I-NEXT:    bt .LBB0_12
-; M32I-NEXT:    bra .LBB0_8
-; M32I-NEXT:  .LBB0_8: ; %test9
+; M32I-NEXT:  ; %bb.8: ; %test9
 ; M32I-NEXT:    ld r3, [r1, 0]
 ; M32I-NEXT:    cmp.ls r3, r0
 ; M32I-NEXT:    bf .LBB0_12
-; M32I-NEXT:    bra .LBB0_9
-; M32I-NEXT:  .LBB0_9: ; %test10
+; M32I-NEXT:  ; %bb.9: ; %test10
 ; M32I-NEXT:    ld r3, [r1, 0]
 ; M32I-NEXT:    cmp.ls r3, r0
 ; M32I-NEXT:    bt .LBB0_12
-; M32I-NEXT:    bra .LBB0_10
-; M32I-NEXT:  .LBB0_10: ; %test11
+; M32I-NEXT:  ; %bb.10: ; %test11
 ; M32I-NEXT:    ld r0, [r1, 0]
 ; M32I-NEXT:    andi r0, r2, 1
 ; M32I-NEXT:    cmpi.eq r0, 0
 ; M32I-NEXT:    bf .LBB0_12
-; M32I-NEXT:    bra .LBB0_11
-; M32I-NEXT:  .LBB0_11: ; %test12
+; M32I-NEXT:  ; %bb.11: ; %test12
 ; M32I-NEXT:    ld r0, [r1, 0]
 ; M32I-NEXT:  .LBB0_12: ; %end
 ; M32I-NEXT:    ld r14, [sp, 0]

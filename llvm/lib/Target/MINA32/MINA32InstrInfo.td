@@ -216,7 +216,7 @@ def CMPLE  : CMP<0b0010, 0b1100, "cmp.le">;
 
 // Register Branch Group
 
-let isBranch = 1, isTerminator = 1, DEST = 0x0 in
+let isBarrier = 1, isBranch = 1, isTerminator = 1, DEST = 0x0 in
 def RBRA : MINA32InstImmediate<0b0011, 0b0000,
                                (outs), (ins GPR:$SRC1, immS12W:$IMMS),
                                "rbra $SRC1, $IMMS", []>;
@@ -227,12 +227,12 @@ def RCALL : MINA32InstImmediate<0b0011, 0b0001,
                                 "rcall $SRC1, $IMMS",
                                 [(mina32_call (add GPR:$SRC1, immS12W: $IMMS))]>;
 
-let isReturn = 1, isTerminator = 1, isBarrier = 1,
+let isBarrier = 1, isReturn = 1, isTerminator = 1,
     IMMS = 0x0, DEST = 0x0, SRC1 = 0x0 in
 def RET : MINA32InstImmediate<0b0011, 0b0010,
                               (outs), (ins), "ret", [(mina32_ret)]>;
 
-let isBranch = 1, isTerminator = 1, DEST = 0x0 in
+let isBarrier = 1, isBranch = 1, isTerminator = 1, DEST = 0x0 in
 def ROBRA : MINA32InstStandard<0b0011, 0b1000,
                                (outs), (ins GPR:$SRC1, GPR:$SRC2),
                                "robra $SRC1, $SRC2", []>;
@@ -384,7 +384,7 @@ def MFRF   : MINA32InstStandard<0b0111, 0b1011, (outs), (ins GPR:$DEST), "mfrf $
 
 // PC-relative Branch Group
 
-let isBranch = 1, isTerminator = 1 in
+let isBarrier = 1, isBranch = 1, isTerminator = 1 in
 def BRA : MINA32InstBranch<0b1000, 0b0000,
                            (outs), (ins addr24:$IMM),
                            "bra $IMM", [(br bb:$IMM)]>;
