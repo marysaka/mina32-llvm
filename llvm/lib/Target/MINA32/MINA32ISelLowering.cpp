@@ -90,6 +90,7 @@ MINA32TargetLowering::MINA32TargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::BSWAP, MVT::i32, Expand);
   setOperationAction(ISD::CTTZ, MVT::i32, Expand);
   setOperationAction(ISD::GlobalAddress, MVT::i32, Custom);
+  setOperationAction(ISD::BlockAddress, MVT::i32, Custom);
 
   // Effectively disable jump table generation.
   setMinimumJumpTableEntries(INT_MAX);
@@ -110,6 +111,8 @@ SDValue MINA32TargetLowering::LowerOperation(SDValue Op,
     report_fatal_error("LowerOperation() unimplemented");
   case ISD::GlobalAddress:
     return LowerGlobalAddress(Op, DAG);
+  case ISD::BlockAddress:
+    return LowerBlockAddress(Op, DAG);
   case ISD::VASTART:
     return LowerVASTART(Op, DAG);
   }
@@ -139,6 +142,24 @@ SDValue MINA32TargetLowering::LowerGlobalAddress(SDValue Op,
       DAG.getTargetGlobalAddress(GV, DL, Ty, Offset, MINA32II::MO_LO);
   SDValue MNHi = SDValue(DAG.getMachineNode(MINA32::MOVU, DL, Ty, GAHi), 0);
   return SDValue(DAG.getMachineNode(MINA32::MOVL, DL, Ty, MNHi, GALo), 0);
+}
+
+SDValue MINA32TargetLowering::LowerBlockAddress(SDValue Op,
+                                                SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  EVT Ty = Op.getValueType();
+  BlockAddressSDNode *N = cast<BlockAddressSDNode>(Op);
+  const BlockAddress *BA = N->getBlockAddress();
+  int64_t Offset = N->getOffset();
+
+  if (isPositionIndependent()) {
+    report_fatal_error("Unable to LowerBlockAddress");
+  }
+
+  SDValue BAHi = DAG.getTargetBlockAddress(BA, Ty, Offset, MINA32II::MO_HI);
+  SDValue BALo = DAG.getTargetBlockAddress(BA, Ty, Offset, MINA32II::MO_LO);
+  SDValue MNHi = SDValue(DAG.getMachineNode(MINA32::MOVU, DL, Ty, BAHi), 0);
+  return SDValue(DAG.getMachineNode(MINA32::MOVL, DL, Ty, MNHi, BALo), 0);
 }
 
 SDValue MINA32TargetLowering::LowerVASTART(SDValue Op, SelectionDAG &DAG) const {

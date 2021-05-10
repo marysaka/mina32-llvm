@@ -216,26 +216,30 @@ def CMPLE  : CMP<0b0010, 0b1100, "cmp.le">;
 
 // Register Branch Group
 
-let isBarrier = 1, isBranch = 1, isTerminator = 1, DEST = 0x0 in
+let isBarrier = 1, isBranch = 1, isIndirectBranch = 1,
+    isTerminator = 1, DEST = 0x0 in
 def RBRA : MINA32InstImmediate<0b0011, 0b0000,
                                (outs), (ins GPR:$SRC1, immS12W:$IMMS),
-                               "rbra $SRC1, $IMMS", []>;
+                               "rbra $SRC1, $IMMS",
+                               [(brind (add GPR:$SRC1, immS12W:$IMMS))]>;
 
 let isCall = 1, DEST = 0x0, Defs = [SP] in
 def RCALL : MINA32InstImmediate<0b0011, 0b0001,
                                 (outs), (ins GPR:$SRC1, immS12W:$IMMS),
                                 "rcall $SRC1, $IMMS",
-                                [(mina32_call (add GPR:$SRC1, immS12W: $IMMS))]>;
+                                [(mina32_call (add GPR:$SRC1, immS12W:$IMMS))]>;
 
 let isBarrier = 1, isReturn = 1, isTerminator = 1,
     IMMS = 0x0, DEST = 0x0, SRC1 = 0x0 in
 def RET : MINA32InstImmediate<0b0011, 0b0010,
                               (outs), (ins), "ret", [(mina32_ret)]>;
 
-let isBarrier = 1, isBranch = 1, isTerminator = 1, DEST = 0x0 in
+let isBarrier = 1, isBranch = 1, isIndirectBranch = 1,
+    isTerminator = 1, DEST = 0x0 in
 def ROBRA : MINA32InstStandard<0b0011, 0b1000,
                                (outs), (ins GPR:$SRC1, GPR:$SRC2),
-                               "robra $SRC1, $SRC2", []>;
+                               "robra $SRC1, $SRC2",
+                               [(brind (add GPR:$SRC1, GPR:$SRC2))]>;
 
 let isCall = 1, DEST = 0x0, Defs = [SP] in
 def ROCALL : MINA32InstStandard<0b0011, 0b1001,
@@ -420,6 +424,7 @@ def : Pat<(i32 imm:$IMM), (MOVL (MOVU (up16x imm:$IMM)), (lo16x imm:$IMM))>;
 def : Pat<(rotl GPR:$SRC1, immS12B:$IMMS), (ROR GPR:$SRC1, (rol32x imm:$IMMS))>;
 def : Pat<(rotl GPR:$SRC1, GPR:$SRC2), (RROR GPR:$SRC1, (MULTI GPR:$SRC2, -1))>;
 def : Pat<(ctlz GPR:$SRC1), (CLO (XORI GPR:$SRC1, -1))>;
+def : Pat<(brind GPR:$SRC1), (RBRA GPR:$SRC1, 0)>;
 def : Pat<(mina32_call GPR:$SRC1), (RCALL GPR:$SRC1, 0)>;
 
 def : Pat<(seteq GPR:$SRC1, GPR:$SRC2), (SLTIU (XOR GPR:$SRC1, GPR:$SRC2), 1)>;
