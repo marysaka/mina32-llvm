@@ -43,6 +43,9 @@ public:
   Register getFrameRegister(const MachineFunction &MF) const override;
 
   bool hasBasePointer(const MachineFunction &MF) const;
+
+  const TargetRegisterClass *
+  getCrossCopyRegClass(const TargetRegisterClass *RC) const override;
 };
 
 } // end namespace llvm

@@ -137,17 +137,19 @@ class STORE<bits<4> opcode, string opstr, SDPatternOperator opnode>
                          !strconcat(opstr, " $DEST, [$SRC1, $SRC2]"),
                          [(opnode GPR:$DEST, (add GPR:$SRC1, GPR:$SRC2))]>;
 
-let DEST = 0x0 in
-class CMPI<bits<4> group, bits<4> opcode, string opstr>
+let DEST = 0x0, Defs = [MCR] in
+class CMPI<bits<4> group, bits<4> opcode, string opstr, SDPatternOperator opnode>
     : MINA32InstImmediate<group, opcode,
-                          (outs TF:$MCR), (ins GPR:$SRC1, immS12B:$IMMS),
-                          !strconcat(opstr, " $SRC1, $IMMS"), []>;
+                          (outs), (ins GPR:$SRC1, immS12B:$IMMS),
+                          !strconcat(opstr, " $SRC1, $IMMS"),
+                          [(set MCR, (opnode GPR:$SRC1, immS12B:$IMMS))]>;
 
-let DEST = 0x0 in
-class CMP<bits<4> group, bits<4> opcode, string opstr>
+let DEST = 0x0, Defs = [MCR] in
+class CMP<bits<4> group, bits<4> opcode, string opstr, SDPatternOperator opnode>
     : MINA32InstStandard<group, opcode,
-                         (outs TF:$MCR), (ins GPR:$SRC1, GPR:$SRC2),
-                         !strconcat(opstr, " $SRC1, $SRC2"), []>;
+                         (outs), (ins GPR:$SRC1, GPR:$SRC2),
+                         !strconcat(opstr, " $SRC1, $SRC2"),
+                         [(set MCR, (opnode GPR:$SRC1, GPR:$SRC2))]>;
 
 // Arithmetic/Divide/NOP Group
 
@@ -155,19 +157,25 @@ def ADDI  : ALUI<0b0000, 0b0000, "addi",  add>;
 def MULTI : ALUI<0b0000, 0b0001, "multi", mul>;
 def DIVI  : ALUI<0b0000, 0b0010, "divi",  udiv>;
 def REMI  : ALUI<0b0000, 0b0011, "remi",  urem>;
-def SLTI  : ALUI<0b0000, 0b0100, "slti",  setlt>;
-def SLTIU : ALUI<0b0000, 0b0101, "sltiu", setult>;
 
 let hasSideEffects = 0, DEST = 0x0, SRC1 = 0x0, SRC2 = 0x0 in
 def NOP : MINA32InstStandard<0b0000, 0b0110, (outs), (ins), "nop", []>;
+
+let SRC1 = 0x0 in
+def PCADDI : MINA32InstImmediate<0b0000, 0b0111,
+                                 (outs GPR:$DEST), (ins immS12B:$IMMS),
+                                 "pcaddi $DEST, $IMMS", []>;
 
 def ADD   : ALU<0b0000, 0b1000, "add",  add>;
 def MULT  : ALU<0b0000, 0b1001, "mult", mul>;
 def DIV   : ALU<0b0000, 0b1010, "div",  udiv>;
 def REM   : ALU<0b0000, 0b1011, "rem",  urem>;
 def SUB   : ALU<0b0000, 0b1110, "sub",  sub>;
-def SLT   : ALU<0b0000, 0b1100, "slt",  setlt>;
-def SLTU  : ALU<0b0000, 0b1101, "sltu", setult>;
+
+let SRC2 = 0x0 in
+def PCADD : MINA32InstStandard<0b0000, 0b1111,
+                               (outs GPR:$DEST), (ins GPR:$SRC1),
+                               "pcadd $DEST, $SRC1", []>;
 
 // Logic/Bitwise Group
 
@@ -202,17 +210,22 @@ def PLO : MINA32InstStandard<0b0001, 0b1110,
 
 // Compare Group
 
-def CMPIEQ : CMPI<0b0010, 0b0000, "cmpi.eq">;
-def CMPILO : CMPI<0b0010, 0b0001, "cmpi.lo">;
-def CMPILS : CMPI<0b0010, 0b0010, "cmpi.ls">;
-def CMPILT : CMPI<0b0010, 0b0011, "cmpi.lt">;
-def CMPILE : CMPI<0b0010, 0b0100, "cmpi.le">;
+def CMPIEQ : CMPI<0b0010, 0b0000, "cmpi.eq", seteq>;
+def CMPILO : CMPI<0b0010, 0b0001, "cmpi.lo", setult>;
+def CMPILS : CMPI<0b0010, 0b0010, "cmpi.ls", setule>;
+def CMPILT : CMPI<0b0010, 0b0011, "cmpi.lt", setlt>;
+def CMPILE : CMPI<0b0010, 0b0100, "cmpi.le", setle>;
 
-def CMPEQ  : CMP<0b0010, 0b1000, "cmp.eq">;
-def CMPLO  : CMP<0b0010, 0b1001, "cmp.lo">;
-def CMPLS  : CMP<0b0010, 0b1010, "cmp.ls">;
-def CMPLT  : CMP<0b0010, 0b1011, "cmp.lt">;
-def CMPLE  : CMP<0b0010, 0b1100, "cmp.le">;
+def CMPEQ  : CMP<0b0010, 0b1000, "cmp.eq", seteq>;
+def CMPLO  : CMP<0b0010, 0b1001, "cmp.lo", setult>;
+def CMPLS  : CMP<0b0010, 0b1010, "cmp.ls", setule>;
+def CMPLT  : CMP<0b0010, 0b1011, "cmp.lt", setlt>;
+def CMPLE  : CMP<0b0010, 0b1100, "cmp.le", setle>;
+
+def SLTI  : ALUI<0b0000, 0b0100, "slti",  setlt>;
+def SLTIU : ALUI<0b0000, 0b0101, "sltiu", setult>;
+def SLT   : ALU<0b0000, 0b1100, "slt",  setlt>;
+def SLTU  : ALU<0b0000, 0b1101, "sltu", setult>;
 
 // Register Branch Group
 
@@ -292,15 +305,17 @@ def MOVI : MINA32InstImmediate<0b0101, 0b0000,
                                "movi $DEST, $IMMS",
                                [(set GPR:$DEST, immS12B:$IMMS)]>;
 
-let Constraints = "$SRC = $DEST", SRC1 = 0x0 in
+let Constraints = "$SRC = $DEST", Uses = [MCR], SRC1 = 0x0 in
 def MTI  : MINA32InstImmediate<0b0101, 0b0001,
-                               (outs GPR:$DEST), (ins TF:$MCR, GPR:$SRC, immS12B:$IMMS),
-                               "mti $DEST, $IMMS", []>;
+                               (outs GPR:$DEST), (ins GPR:$SRC, immS12B:$IMMS),
+                               "mti $DEST, $IMMS",
+                               [(set GPR:$DEST, (select MCR, immS12B:$IMMS, GPR:$SRC))]>;
 
-let Constraints = "$SRC = $DEST", SRC1 = 0x0 in
+let Constraints = "$SRC = $DEST", Uses = [MCR], SRC1 = 0x0 in
 def MFI  : MINA32InstImmediate<0b0101, 0b0010,
-                               (outs GPR:$DEST), (ins TF:$MCR, GPR:$SRC, immS12B:$IMMS),
-                               "mfi $DEST, $IMMS", []>;
+                               (outs GPR:$DEST), (ins GPR:$SRC, immS12B:$IMMS),
+                               "mfi $DEST, $IMMS",
+                               [(set GPR:$DEST, (select MCR, GPR:$SRC, immS12B:$IMMS))]>;
 
 let Constraints = "$SRC = $DEST" in
 def MOVL : MINA32InstMove<0b0101, 0b0011,
@@ -317,15 +332,17 @@ def MOV : MINA32InstStandard<0b0101, 0b1000,
                              (outs GPR:$DEST), (ins GPR:$SRC1),
                              "mov $DEST, $SRC1", []>;
 
-let Constraints = "$SRC = $DEST", SRC2 = 0x0 in
+let Constraints = "$SRC = $DEST", Uses = [MCR], SRC2 = 0x0 in
 def MT  : MINA32InstStandard<0b0101, 0b1001,
-                             (outs GPR:$DEST), (ins TF:$MCR, GPR:$SRC, GPR:$SRC1),
-                             "mt $DEST, $SRC1", []>;
+                             (outs GPR:$DEST), (ins GPR:$SRC, GPR:$SRC1),
+                             "mt $DEST, $SRC1",
+                             [(set GPR:$DEST, (select MCR, GPR:$SRC1, GPR:$SRC))]>;
 
-let Constraints = "$SRC = $DEST", SRC2 = 0x0 in
+let Constraints = "$SRC = $DEST", Uses = [MCR], SRC2 = 0x0 in
 def MF  : MINA32InstStandard<0b0101, 0b1010,
-                             (outs GPR:$DEST), (ins TF:$MCR, GPR:$SRC, GPR:$SRC1),
-                             "mf $DEST, $SRC1", []>;
+                             (outs GPR:$DEST), (ins GPR:$SRC, GPR:$SRC1),
+                             "mf $DEST, $SRC1",
+                             [(set GPR:$DEST, (select MCR, GPR:$SRC, GPR:$SRC1))]>;
 
 let SRC1 = 0x0, SRC2 = 0x0, Defs = [MCR] in
 def MTOC : MINA32InstStandard<0b0101, 0b1011,
@@ -393,15 +410,15 @@ def BRA : MINA32InstBranch<0b1000, 0b0000,
                            (outs), (ins addr24:$IMM),
                            "bra $IMM", [(br bb:$IMM)]>;
 
-let isBranch = 1, isTerminator = 1 in
+let isBranch = 1, isTerminator = 1, Uses = [MCR] in
 def BT  : MINA32InstBranch<0b1000, 0b0001,
-                           (outs), (ins TF:$MCR, addr24:$IMM),
-                           "bt $IMM", []>;
+                           (outs), (ins addr24:$IMM),
+                           "bt $IMM", [(brcond MCR, bb:$IMM)]>;
 
-let isBranch = 1, isTerminator = 1 in
+let isBranch = 1, isTerminator = 1, Uses = [MCR] in
 def BF  : MINA32InstBranch<0b1000, 0b0010,
-                           (outs), (ins TF:$MCR, addr24:$IMM),
-                           "bf $IMM", []>;
+                           (outs), (ins addr24:$IMM),
+                           "bf $IMM", [(brcond (xor MCR, 1), bb:$IMM)]>;
 
 let isCall = 1, Defs = [SP] in
 def CALL : MINA32InstBranch<0b1000, 0b1000,
@@ -410,12 +427,12 @@ def CALL : MINA32InstBranch<0b1000, 0b1000,
 
 let isCall = 1, Defs = [SP] in
 def CT  : MINA32InstBranch<0b1000, 0b1001,
-                           (outs), (ins TF:$MCR, addr24:$IMM),
+                           (outs), (ins addr24:$IMM),
                            "ct $IMM", []>;
 
 let isCall = 1, Defs = [SP] in
 def CF  : MINA32InstBranch<0b1000, 0b1010,
-                           (outs), (ins TF:$MCR, addr24:$IMM),
+                           (outs), (ins addr24:$IMM),
                            "cf $IMM", []>;
 
 // Non-Instruction Patterns
@@ -426,15 +443,6 @@ def : Pat<(rotl GPR:$SRC1, GPR:$SRC2), (RROR GPR:$SRC1, (MULTI GPR:$SRC2, -1))>;
 def : Pat<(ctlz GPR:$SRC1), (CLO (XORI GPR:$SRC1, -1))>;
 def : Pat<(brind GPR:$SRC1), (RBRA GPR:$SRC1, 0)>;
 def : Pat<(mina32_call GPR:$SRC1), (RCALL GPR:$SRC1, 0)>;
-
-def : Pat<(seteq GPR:$SRC1, GPR:$SRC2), (SLTIU (XOR GPR:$SRC1, GPR:$SRC2), 1)>;
-def : Pat<(setne GPR:$SRC1, GPR:$SRC2), (XORI (SLTIU (XOR GPR:$SRC1, GPR:$SRC2), 1), 1)>;
-def : Pat<(setugt GPR:$SRC1, GPR:$SRC2), (SLTU GPR:$SRC2, GPR:$SRC1)>;
-def : Pat<(setuge GPR:$SRC1, GPR:$SRC2), (XORI (SLTU GPR:$SRC1, GPR:$SRC2), 1)>;
-def : Pat<(setule GPR:$SRC1, GPR:$SRC2), (XORI (SLTU GPR:$SRC2, GPR:$SRC1), 1)>;
-def : Pat<(setgt GPR:$SRC1, GPR:$SRC2), (SLT GPR:$SRC2, GPR:$SRC1)>;
-def : Pat<(setge GPR:$SRC1, GPR:$SRC2), (XORI (SLT GPR:$SRC1, GPR:$SRC2), 1)>;
-def : Pat<(setle GPR:$SRC1, GPR:$SRC2), (XORI (SLT GPR:$SRC2, GPR:$SRC1), 1)>;
 
 // Memory Patterns
 
@@ -462,53 +470,3 @@ def : Pat<(truncstorei8  GPR:$DEST, GPR:$SRC1), (STB GPR:$DEST, GPR:$SRC1, 0)>;
 def : Pat<(store         GPR:$DEST, addrFI:$SRC1), (ST  GPR:$DEST, addrFI:$SRC1, 0)>;
 def : Pat<(truncstorei16 GPR:$DEST, addrFI:$SRC1), (STH GPR:$DEST, addrFI:$SRC1, 0)>;
 def : Pat<(truncstorei8  GPR:$DEST, addrFI:$SRC1), (STB GPR:$DEST, addrFI:$SRC1, 0)>;
-
-// Compare Patterns
-
-multiclass CmpiPat<PatFrag opt, PatFrag opf, MINA32InstImmediate cmpi> {
-    def mti : Pat<(select (opt GPR:$SRC1, immS12B:$IMMS), immS12B:$IMMT, GPR:$SRCF),
-                  (MT (cmpi GPR:$SRC1, imm:$IMMS), GPR:$SRCF, imm:$IMMT)>;
-    def mfi : Pat<(select (opf GPR:$SRC1, immS12B:$IMMS), immS12B:$IMMT, GPR:$SRCF),
-                  (MF (cmpi GPR:$SRC1, imm:$IMMS), GPR:$SRCF, imm:$IMMT)>;
-    def mt  : Pat<(select (opt GPR:$SRC1, immS12B:$IMMS), GPR:$SRCT, GPR:$SRCF),
-                  (MT (cmpi GPR:$SRC1, imm:$IMMS), GPR:$SRCF, GPR:$SRCT)>;
-    def mf  : Pat<(select (opf GPR:$SRC1, immS12B:$IMMS), GPR:$SRCT, GPR:$SRCF),
-                  (MF (cmpi GPR:$SRC1, imm:$IMMS), GPR:$SRCF, GPR:$SRCT)>;
-    def bt  : Pat<(brcond (opt GPR:$SRC1, immS12B:$IMMS), bb:$IMM),
-                  (BT (cmpi GPR:$SRC1, imm:$IMMS), addr24:$IMM)>;
-    def bf  : Pat<(brcond (opf GPR:$SRC1, immS12B:$IMMS), bb:$IMM),
-                  (BF (cmpi GPR:$SRC1, imm:$IMMS), addr24:$IMM)>;
-}
-
-multiclass CmpPat<PatFrag opt, PatFrag opf, MINA32InstStandard cmp> {
-    def mti : Pat<(select (opt GPR:$SRC1, GPR:$SRC2), immS12B:$IMMT, GPR:$SRCF),
-                  (MT (cmp GPR:$SRC1, GPR:$SRC2), GPR:$SRCF, imm:$IMMT)>;
-    def mfi : Pat<(select (opf GPR:$SRC1, GPR:$SRC2), immS12B:$IMMT, GPR:$SRCF),
-                  (MF (cmp GPR:$SRC1, GPR:$SRC2), GPR:$SRCF, imm:$IMMT)>;
-    def mt  : Pat<(select (opt GPR:$SRC1, GPR:$SRC2), GPR:$SRCT, GPR:$SRCF),
-                  (MT (cmp GPR:$SRC1, GPR:$SRC2), GPR:$SRCF, GPR:$SRCT)>;
-    def mf  : Pat<(select (opf GPR:$SRC1, GPR:$SRC2), GPR:$SRCT, GPR:$SRCF),
-                  (MF (cmp GPR:$SRC1, GPR:$SRC2), GPR:$SRCF, GPR:$SRCT)>;
-    def bt  : Pat<(brcond (opt GPR:$SRC1, GPR:$SRC2), bb:$IMM),
-                  (BT (cmp GPR:$SRC1, GPR:$SRC2), addr24:$IMM)>;
-    def bf  : Pat<(brcond (opf GPR:$SRC1, GPR:$SRC2), bb:$IMM),
-                  (BF (cmp GPR:$SRC1, GPR:$SRC2), addr24:$IMM)>;
-}
-
-defm : CmpiPat<seteq,  setne,  CMPIEQ>;
-defm : CmpiPat<setult, setuge, CMPILO>;
-defm : CmpiPat<setule, setugt, CMPILS>;
-defm : CmpiPat<setlt,  setge,  CMPILT>;
-defm : CmpiPat<setle,  setgt,  CMPILE>;
-
-defm : CmpPat<seteq,  setne,  CMPEQ>;
-defm : CmpPat<setult, setuge, CMPLO>;
-defm : CmpPat<setule, setugt, CMPLS>;
-defm : CmpPat<setlt,  setge,  CMPLT>;
-defm : CmpPat<setle,  setgt,  CMPLE>;
-
-def : Pat<(select GPR:$SRC1, immS12B:$IMMT, GPR:$SRCF),
-          (MF (CMPIEQ GPR:$SRC1, 0), GPR:$SRCF, imm:$IMMT)>;
-def : Pat<(select GPR:$SRC1, GPR:$SRCT, GPR:$SRCF),
-          (MF (CMPIEQ GPR:$SRC1, 0), GPR:$SRCF, GPR:$SRCT)>;
-def : Pat<(brcond GPR:$SRC1, bb:$IMM), (BF (CMPIEQ GPR:$SRC1, 0), bb:$IMM)>;

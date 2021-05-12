@@ -26,11 +26,21 @@ void MINA32InstrInfo::copyPhysReg(MachineBasicBlock &MBB,
                                   MachineBasicBlock::iterator MBBI,
                                   const DebugLoc &DL, MCRegister DstReg,
                                   MCRegister SrcReg, bool KillSrc) const {
-  assert(MINA32::GPRRegClass.contains(DstReg, SrcReg) &&
-         "Impossible reg-to-reg copy");
-
-  BuildMI(MBB, MBBI, DL, get(MINA32::ADDI), DstReg)
-      .addReg(SrcReg, getKillRegState(KillSrc)).addImm(0);
+  if (MINA32::GPRRegClass.contains(DstReg, SrcReg)) {
+    BuildMI(MBB, MBBI, DL, get(MINA32::MOV), DstReg)
+        .addReg(SrcReg, getKillRegState(KillSrc));
+  } else if (MINA32::GPRRegClass.contains(SrcReg) &&
+             MINA32::MCR == DstReg) {
+    BuildMI(MBB, MBBI, DL, get(MINA32::CMPIEQ))
+        .addReg(SrcReg, getKillRegState(KillSrc)).addImm(1);
+  } else if (MINA32::GPRRegClass.contains(DstReg) &&
+             MINA32::MCR == SrcReg) {
+    BuildMI(MBB, MBBI, DL, get(MINA32::MOVI), DstReg).addImm(0);
+    BuildMI(MBB, MBBI, DL, get(MINA32::MTI), DstReg)
+      .addReg(DstReg, getKillRegState(KillSrc)).addImm(1);
+  } else {
+    llvm_unreachable("Impossible reg-to-reg copy");
+  }
 }
 
 void MINA32InstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
@@ -61,16 +71,14 @@ void MINA32InstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
 }
 
 // The contents of values added to Cond are not examined outside of
-// MINA32InstrInfo, giving us flexibility in what to push to it. For MINA32, we
-// push BranchOpcode, TF.
+// MINA32InstrInfo, giving us flexibility in what to push to it.
 static void parseCondBranch(MachineInstr &LastInst, MachineBasicBlock *&Target,
                             SmallVectorImpl<MachineOperand> &Cond) {
   // Block ends with fall-through condbranch.
   assert(LastInst.getDesc().isConditionalBranch() &&
          "Unknown conditional branch");
-  Target = LastInst.getOperand(1).getMBB();
+  Target = LastInst.getOperand(0).getMBB();
   Cond.push_back(MachineOperand::CreateImm(LastInst.getOpcode()));
-  Cond.push_back(LastInst.getOperand(0));
 }
 
 bool MINA32InstrInfo::analyzeBranch(MachineBasicBlock &MBB,
@@ -177,7 +185,7 @@ unsigned MINA32InstrInfo::insertBranch(
 
   // Shouldn't be a fall through.
   assert(TBB && "InsertBranch must not be told to insert a fallthrough");
-  assert((Cond.size() == 2 || Cond.size() == 0) &&
+  assert((Cond.size() == 1 || Cond.size() == 0) &&
          "MINA32 branch conditions have one component!");
 
   // Unconditional branch.
@@ -188,7 +196,7 @@ unsigned MINA32InstrInfo::insertBranch(
 
   // Either a one or two-way conditional branch.
   unsigned Opc = Cond[0].getImm();
-  BuildMI(&MBB, DL, get(Opc)).add(Cond[1]).addMBB(TBB);
+  BuildMI(&MBB, DL, get(Opc)).addMBB(TBB);
 
   // One-way conditional branch.
   if (!FBB)
@@ -201,7 +209,7 @@ unsigned MINA32InstrInfo::insertBranch(
 
 bool MINA32InstrInfo::reverseBranchCondition(
     SmallVectorImpl<MachineOperand> &Cond) const {
-  assert((Cond.size() == 2) && "Invalid branch condition!");
+  assert((Cond.size() == 1) && "Invalid branch condition!");
 
   switch (Cond[0].getImm()) {
   default:

@@ -107,18 +107,5 @@ DecodeStatus MINA32Disassembler::getInstruction(MCInst &MI, uint64_t &Size,
 
   // Get the four bytes of the instruction.
   uint32_t Inst = support::endian::read32le(Bytes.data());
-  DecodeStatus Result = decodeInstruction(DecoderTableMINA3232, MI, Inst,
-                                          Address, this, STI);
-  // Insert MCR operand as needed
-  if (Result) {
-    const MCOperandInfo *OpInfo = MINA32Insts[MI.getOpcode()].OpInfo;
-    unsigned NumOps = MINA32Insts[MI.getOpcode()].NumOperands;
-    MCInst::iterator I = MI.begin();
-    for (unsigned i = 0; i < NumOps && I != MI.end(); ++i, ++I) {
-      if (OpInfo[i].RegClass != MINA32::TFRegClassID) continue;
-      MI.insert(I, MCOperand::createReg(MINA32::MCR));
-    }
-  }
-
-  return Result;
+  return decodeInstruction(DecoderTableMINA3232, MI, Inst, Address, this, STI);
 }

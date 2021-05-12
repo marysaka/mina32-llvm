@@ -54,8 +54,6 @@ def SP_USER  : MINA32Reg<15, "sp_usr", [], ["r15_usr"]>;
 def MCR  : MINA32Reg<0, "mcr">;
 def FRET : MINA32Reg<1, "fret">;
 
-def TF : RegisterClass<"MINA32", [i32], 32, (add MCR)>;
-
 // Supervior only
 def SPR  : RegisterClass<"MINA32", [i32], 32, (add (sequence "R%u_USER", 8, 14), SP_USER, MCR, FRET)> {
   let CopyCost = -1;  // Don't allow copying of special registers.

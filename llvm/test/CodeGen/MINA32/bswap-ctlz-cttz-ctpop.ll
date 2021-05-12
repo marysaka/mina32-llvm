@@ -76,7 +76,7 @@ define i64 @test_bswap_i64(i64 %a) nounwind {
 ; M32I-NEXT:    andi r0, r0, 16711680
 ; M32I-NEXT:    or r0, r3, r0
 ; M32I-NEXT:    or r1, r0, r1
-; M32I-NEXT:    addi r0, r2, 0
+; M32I-NEXT:    mov r0, r2
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
@@ -194,13 +194,12 @@ define i64 @test_cttz_i64(i64 %a) nounwind {
 ; M32I-NEXT:    addi r2, r0, -1
 ; M32I-NEXT:    xori r3, r0, -1
 ; M32I-NEXT:    and r2, r3, r2
-; M32I-NEXT:    popcnt r3, r2
-; M32I-NEXT:    popcnt r1, r1
-; M32I-NEXT:    addi r2, r1, 32
 ; M32I-NEXT:    cmpi.eq r0, 0
-; M32I-NEXT:    mf r2, r3
+; M32I-NEXT:    popcnt r0, r2
+; M32I-NEXT:    popcnt r1, r1
+; M32I-NEXT:    addi r1, r1, 32
+; M32I-NEXT:    mt r0, r1
 ; M32I-NEXT:    movi r1, 0
-; M32I-NEXT:    addi r0, r2, 0
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
@@ -271,13 +270,12 @@ define i64 @test_cttz_i64_zero_undef(i64 %a) nounwind {
 ; M32I-NEXT:    addi r2, r0, -1
 ; M32I-NEXT:    xori r3, r0, -1
 ; M32I-NEXT:    and r2, r3, r2
-; M32I-NEXT:    popcnt r3, r2
-; M32I-NEXT:    popcnt r1, r1
-; M32I-NEXT:    addi r2, r1, 32
 ; M32I-NEXT:    cmpi.eq r0, 0
-; M32I-NEXT:    mf r2, r3
+; M32I-NEXT:    popcnt r0, r2
+; M32I-NEXT:    popcnt r1, r1
+; M32I-NEXT:    addi r1, r1, 32
+; M32I-NEXT:    mt r0, r1
 ; M32I-NEXT:    movi r1, 0
-; M32I-NEXT:    addi r0, r2, 0
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret

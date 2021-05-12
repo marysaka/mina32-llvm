@@ -229,7 +229,7 @@ define i32 @ld_st_constant(i32 %a) nounwind {
 ; M32I-NEXT:    movl r2, 48879
 ; M32I-NEXT:    ld r1, [r2, 0]
 ; M32I-NEXT:    st r0, [r2, 0]
-; M32I-NEXT:    addi r0, r1, 0
+; M32I-NEXT:    mov r0, r1
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
@@ -257,7 +257,7 @@ define i32 @lw_sw_global(i32 %a) nounwind {
 ; M32I-NEXT:    movl r2, %lo(G+36)
 ; M32I-NEXT:    ld r3, [r2, 0]
 ; M32I-NEXT:    st r0, [r2, 0]
-; M32I-NEXT:    addi r0, r1, 0
+; M32I-NEXT:    mov r0, r1
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret

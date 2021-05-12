@@ -8,33 +8,35 @@ define void @jt(i32 %in, i32* %out) {
 ; M32I-NEXT:    addi sp, sp, -4
 ; M32I-NEXT:    st r14, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 4
-; M32I-NEXT:    cmpi.le r0, 2
-; M32I-NEXT:    bf .LBB0_4
+; M32I-NEXT:    movi r2, 2
+; M32I-NEXT:    cmp.lt r2, r0
+; M32I-NEXT:    bt .LBB0_4
 ; M32I-NEXT:  ; %bb.1: ; %entry
 ; M32I-NEXT:    cmpi.eq r0, 1
-; M32I-NEXT:    bt .LBB0_7
+; M32I-NEXT:    bt .LBB0_8
 ; M32I-NEXT:  ; %bb.2: ; %entry
 ; M32I-NEXT:    cmpi.eq r0, 2
 ; M32I-NEXT:    bf .LBB0_10
 ; M32I-NEXT:  ; %bb.3: ; %bb2
 ; M32I-NEXT:    movi r0, 3
-; M32I-NEXT:    bra .LBB0_9
+; M32I-NEXT:    st r0, [r1, 0]
+; M32I-NEXT:    bra .LBB0_10
 ; M32I-NEXT:  .LBB0_4: ; %entry
 ; M32I-NEXT:    cmpi.eq r0, 3
-; M32I-NEXT:    bt .LBB0_8
+; M32I-NEXT:    bt .LBB0_9
 ; M32I-NEXT:  ; %bb.5: ; %entry
 ; M32I-NEXT:    cmpi.eq r0, 4
 ; M32I-NEXT:    bf .LBB0_10
 ; M32I-NEXT:  ; %bb.6: ; %bb4
 ; M32I-NEXT:    movi r0, 1
-; M32I-NEXT:    bra .LBB0_9
-; M32I-NEXT:  .LBB0_7: ; %bb1
-; M32I-NEXT:    movi r0, 4
-; M32I-NEXT:    bra .LBB0_9
-; M32I-NEXT:  .LBB0_8: ; %bb3
-; M32I-NEXT:    movi r0, 2
-; M32I-NEXT:  .LBB0_9: ; %exit
 ; M32I-NEXT:    st r0, [r1, 0]
+; M32I-NEXT:    bra .LBB0_10
+; M32I-NEXT:  .LBB0_8: ; %bb1
+; M32I-NEXT:    movi r0, 4
+; M32I-NEXT:    st r0, [r1, 0]
+; M32I-NEXT:    bra .LBB0_10
+; M32I-NEXT:  .LBB0_9: ; %bb3
+; M32I-NEXT:    st r2, [r1, 0]
 ; M32I-NEXT:  .LBB0_10: ; %exit
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4

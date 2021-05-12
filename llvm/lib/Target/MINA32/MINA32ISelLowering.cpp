@@ -57,6 +57,12 @@ MINA32TargetLowering::MINA32TargetLowering(const TargetMachine &TM,
   setBooleanContents(ZeroOrOneBooleanContent);
   setStackPointerRegisterToSaveRestore(MINA32::SP);
 
+  setCondCodeAction(ISD::SETNE, MVT::i32, Expand);
+  setCondCodeAction(ISD::SETGT, MVT::i32, Expand);
+  setCondCodeAction(ISD::SETGE, MVT::i32, Expand);
+  setCondCodeAction(ISD::SETUGT, MVT::i32, Expand);
+  setCondCodeAction(ISD::SETUGE, MVT::i32, Expand);
+
   for (auto VT : MVT::integer_valuetypes()) {
     setLoadExtAction(ISD::EXTLOAD,  VT, MVT::i1,  Promote);
     setLoadExtAction(ISD::SEXTLOAD, VT, MVT::i1,  Promote);

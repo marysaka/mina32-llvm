@@ -11,8 +11,9 @@ define i32 @icmp_eq(i32 %a, i32 %b) nounwind {
 ; M32I-NEXT:    addi sp, sp, -4
 ; M32I-NEXT:    st r14, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 4
-; M32I-NEXT:    xor r0, r0, r1
-; M32I-NEXT:    sltiu r0, r0, 1
+; M32I-NEXT:    cmp.eq r0, r1
+; M32I-NEXT:    movi r0, 0
+; M32I-NEXT:    mti r0, 1
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
@@ -27,8 +28,9 @@ define i32 @icmp_ne(i32 %a, i32 %b) nounwind {
 ; M32I-NEXT:    addi sp, sp, -4
 ; M32I-NEXT:    st r14, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 4
-; M32I-NEXT:    xor r0, r0, r1
-; M32I-NEXT:    sltiu r0, r0, 1
+; M32I-NEXT:    cmp.eq r0, r1
+; M32I-NEXT:    movi r0, 0
+; M32I-NEXT:    mti r0, 1
 ; M32I-NEXT:    xori r0, r0, 1
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
@@ -44,7 +46,9 @@ define i32 @icmp_ugt(i32 %a, i32 %b) nounwind {
 ; M32I-NEXT:    addi sp, sp, -4
 ; M32I-NEXT:    st r14, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 4
-; M32I-NEXT:    sltu r0, r1, r0
+; M32I-NEXT:    cmp.lo r1, r0
+; M32I-NEXT:    movi r0, 0
+; M32I-NEXT:    mti r0, 1
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
@@ -59,8 +63,9 @@ define i32 @icmp_uge(i32 %a, i32 %b) nounwind {
 ; M32I-NEXT:    addi sp, sp, -4
 ; M32I-NEXT:    st r14, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 4
-; M32I-NEXT:    sltu r0, r0, r1
-; M32I-NEXT:    xori r0, r0, 1
+; M32I-NEXT:    cmp.ls r1, r0
+; M32I-NEXT:    movi r0, 0
+; M32I-NEXT:    mti r0, 1
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
@@ -75,7 +80,9 @@ define i32 @icmp_ult(i32 %a, i32 %b) nounwind {
 ; M32I-NEXT:    addi sp, sp, -4
 ; M32I-NEXT:    st r14, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 4
-; M32I-NEXT:    sltu r0, r0, r1
+; M32I-NEXT:    cmp.lo r0, r1
+; M32I-NEXT:    movi r0, 0
+; M32I-NEXT:    mti r0, 1
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
@@ -90,8 +97,9 @@ define i32 @icmp_ule(i32 %a, i32 %b) nounwind {
 ; M32I-NEXT:    addi sp, sp, -4
 ; M32I-NEXT:    st r14, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 4
-; M32I-NEXT:    sltu r0, r1, r0
-; M32I-NEXT:    xori r0, r0, 1
+; M32I-NEXT:    cmp.ls r0, r1
+; M32I-NEXT:    movi r0, 0
+; M32I-NEXT:    mti r0, 1
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
@@ -106,7 +114,9 @@ define i32 @icmp_sgt(i32 %a, i32 %b) nounwind {
 ; M32I-NEXT:    addi sp, sp, -4
 ; M32I-NEXT:    st r14, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 4
-; M32I-NEXT:    slt r0, r1, r0
+; M32I-NEXT:    cmp.lt r1, r0
+; M32I-NEXT:    movi r0, 0
+; M32I-NEXT:    mti r0, 1
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
@@ -121,8 +131,9 @@ define i32 @icmp_sge(i32 %a, i32 %b) nounwind {
 ; M32I-NEXT:    addi sp, sp, -4
 ; M32I-NEXT:    st r14, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 4
-; M32I-NEXT:    slt r0, r0, r1
-; M32I-NEXT:    xori r0, r0, 1
+; M32I-NEXT:    cmp.le r1, r0
+; M32I-NEXT:    movi r0, 0
+; M32I-NEXT:    mti r0, 1
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
@@ -137,7 +148,9 @@ define i32 @icmp_slt(i32 %a, i32 %b) nounwind {
 ; M32I-NEXT:    addi sp, sp, -4
 ; M32I-NEXT:    st r14, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 4
-; M32I-NEXT:    slt r0, r0, r1
+; M32I-NEXT:    cmp.lt r0, r1
+; M32I-NEXT:    movi r0, 0
+; M32I-NEXT:    mti r0, 1
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
@@ -152,8 +165,9 @@ define i32 @icmp_sle(i32 %a, i32 %b) nounwind {
 ; M32I-NEXT:    addi sp, sp, -4
 ; M32I-NEXT:    st r14, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 4
-; M32I-NEXT:    slt r0, r1, r0
-; M32I-NEXT:    xori r0, r0, 1
+; M32I-NEXT:    cmp.le r0, r1
+; M32I-NEXT:    movi r0, 0
+; M32I-NEXT:    mti r0, 1
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret

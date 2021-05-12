@@ -64,6 +64,7 @@ BitVector MINA32RegisterInfo::getReservedRegs(const MachineFunction &MF) const {
   markSuperRegs(Reserved, MINA32::R13_USER);
   markSuperRegs(Reserved, MINA32::R14_USER);
   markSuperRegs(Reserved, MINA32::SP_USER);
+  markSuperRegs(Reserved, MINA32::MCR);
   markSuperRegs(Reserved, MINA32::FRET);
   if (TFI->hasFP(MF))
     markSuperRegs(Reserved, MINA32::R14);
@@ -107,6 +108,13 @@ void MINA32RegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator MI,
 Register MINA32RegisterInfo::getFrameRegister(const MachineFunction &MF) const {
   const TargetFrameLowering *TFI = MF.getSubtarget().getFrameLowering();
   return TFI->hasFP(MF) ? MINA32::R14 : MINA32::SP;
+}
+
+const TargetRegisterClass *
+MINA32RegisterInfo::getCrossCopyRegClass(const TargetRegisterClass *RC) const {
+   if (RC == &MINA32::SPRRegClass)
+     return &MINA32::GPRRegClass;
+   return RC;
 }
 
 } // end namespace llvm

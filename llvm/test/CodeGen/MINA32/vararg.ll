@@ -17,7 +17,7 @@ define i32 @va1(i8* %fmt, ...) nounwind {
 ; M32I-NEXT:    addi sp, sp, -20
 ; M32I-NEXT:    st r14, [sp, 4]
 ; M32I-NEXT:    addi r14, sp, 8
-; M32I-NEXT:    addi r0, r1, 0
+; M32I-NEXT:    mov r0, r1
 ; M32I-NEXT:    st r3, [r14, 8]
 ; M32I-NEXT:    st r2, [r14, 4]
 ; M32I-NEXT:    addi r1, r14, 0
@@ -45,7 +45,7 @@ define i32 @va1_va_arg(i8* %fmt, ...) nounwind {
 ; M32I-NEXT:    addi sp, sp, -20
 ; M32I-NEXT:    st r14, [sp, 4]
 ; M32I-NEXT:    addi r14, sp, 8
-; M32I-NEXT:    addi r0, r1, 0
+; M32I-NEXT:    mov r0, r1
 ; M32I-NEXT:    st r3, [r14, 8]
 ; M32I-NEXT:    st r2, [r14, 4]
 ; M32I-NEXT:    addi r1, r14, 0
@@ -72,7 +72,7 @@ define i32 @va1_va_arg_alloca(i8* %fmt, ...) nounwind {
 ; M32I-NEXT:    st r4, [sp, 8]
 ; M32I-NEXT:    st r14, [sp, 4]
 ; M32I-NEXT:    addi r14, sp, 12
-; M32I-NEXT:    addi r4, r1, 0
+; M32I-NEXT:    mov r4, r1
 ; M32I-NEXT:    st r3, [r14, 8]
 ; M32I-NEXT:    st r2, [r14, 4]
 ; M32I-NEXT:    addi r0, r14, 0
@@ -82,11 +82,11 @@ define i32 @va1_va_arg_alloca(i8* %fmt, ...) nounwind {
 ; M32I-NEXT:    addi r0, r4, 3
 ; M32I-NEXT:    andi r0, r0, -4
 ; M32I-NEXT:    sub r0, sp, r0
-; M32I-NEXT:    addi sp, r0, 0
+; M32I-NEXT:    mov sp, r0
 ; M32I-NEXT:    movu r1, %hi(notdead)
 ; M32I-NEXT:    movl r1, %lo(notdead)
 ; M32I-NEXT:    rcall r1, 0
-; M32I-NEXT:    addi r0, r4, 0
+; M32I-NEXT:    mov r0, r4
 ; M32I-NEXT:    addi sp, r14, -12
 ; M32I-NEXT:    ld r14, [sp, 4]
 ; M32I-NEXT:    ld r4, [sp, 8]
@@ -131,7 +131,7 @@ define i32 @va2_va_copy(i32 %argno, ...) nounwind {
 ; M32I-NEXT:    st r4, [sp, 12]
 ; M32I-NEXT:    st r14, [sp, 8]
 ; M32I-NEXT:    addi r14, sp, 16
-; M32I-NEXT:    addi r4, r1, 0
+; M32I-NEXT:    mov r4, r1
 ; M32I-NEXT:    st r3, [r14, 8]
 ; M32I-NEXT:    st r2, [r14, 4]
 ; M32I-NEXT:    st r4, [r14, 0]

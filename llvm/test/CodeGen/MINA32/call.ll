@@ -56,8 +56,8 @@ define i32 @call_indirect(i32 (i32)* %a, i32 %b) nounwind {
 ; M32I-NEXT:    addi sp, sp, -4
 ; M32I-NEXT:    st r14, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 4
-; M32I-NEXT:    addi r2, r0, 0
-; M32I-NEXT:    addi r0, r1, 0
+; M32I-NEXT:    mov r2, r0
+; M32I-NEXT:    mov r0, r1
 ; M32I-NEXT:    rcall r2, 0
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
@@ -90,11 +90,11 @@ define i32 @call_fastcc(i32 %a, i32 %b) nounwind {
 ; M32I-NEXT:    st r4, [sp, 4]
 ; M32I-NEXT:    st r14, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 8
-; M32I-NEXT:    addi r4, r0, 0
+; M32I-NEXT:    mov r4, r0
 ; M32I-NEXT:    movu r2, %hi(fastcc_function)
 ; M32I-NEXT:    movl r2, %lo(fastcc_function)
 ; M32I-NEXT:    rcall r2, 0
-; M32I-NEXT:    addi r0, r4, 0
+; M32I-NEXT:    mov r0, r4
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    ld r4, [sp, 4]
 ; M32I-NEXT:    addi sp, sp, 8

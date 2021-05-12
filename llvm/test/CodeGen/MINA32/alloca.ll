@@ -16,7 +16,7 @@ define void @simple_alloca(i32 %n) nounwind {
 ; M32I-NEXT:    addi r0, r0, 3
 ; M32I-NEXT:    andi r0, r0, -4
 ; M32I-NEXT:    sub r0, sp, r0
-; M32I-NEXT:    addi sp, r0, 0
+; M32I-NEXT:    mov sp, r0
 ; M32I-NEXT:    movu r1, %hi(notdead)
 ; M32I-NEXT:    movl r1, %lo(notdead)
 ; M32I-NEXT:    rcall r1, 0
@@ -39,15 +39,15 @@ define void @scoped_alloca(i32 %n) nounwind {
 ; M32I-NEXT:    st r4, [sp, 4]
 ; M32I-NEXT:    st r14, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 8
-; M32I-NEXT:    addi r4, sp, 0
+; M32I-NEXT:    mov r4, sp
 ; M32I-NEXT:    addi r0, r0, 3
 ; M32I-NEXT:    andi r0, r0, -4
 ; M32I-NEXT:    sub r0, sp, r0
-; M32I-NEXT:    addi sp, r0, 0
+; M32I-NEXT:    mov sp, r0
 ; M32I-NEXT:    movu r1, %hi(notdead)
 ; M32I-NEXT:    movl r1, %lo(notdead)
 ; M32I-NEXT:    rcall r1, 0
-; M32I-NEXT:    addi sp, r4, 0
+; M32I-NEXT:    mov sp, r4
 ; M32I-NEXT:    addi sp, r14, -8
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    ld r4, [sp, 4]

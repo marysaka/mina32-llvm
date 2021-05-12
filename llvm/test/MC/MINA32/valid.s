@@ -35,7 +35,16 @@ slti r13, r12, 5
 ; CHECK-INST: sltiu r13, r12, 5
 ; CHECK: encoding: [0x05,0xd0,0xc0,0x05]
 sltiu r13, r12, 5
+; CHECK-INST: nop
+; CHECK: encoding: [0x00,0x00,0x00,0x06]
+nop
+; CHECK-INST: pcaddi r13, 5
+; CHECK: encoding: [0x05,0xd0,0x00,0x07]
+pcaddi r13, 5
 
+; CHECK-INST: add r13, r12, r5
+; CHECK: encoding: [0x00,0xd0,0xc5,0x08]
+add r13, r12, r5
 ; CHECK-INST: mult r13, r12, r5
 ; CHECK: encoding: [0x00,0xd0,0xc5,0x09]
 mult r13, r12, r5
@@ -51,6 +60,12 @@ slt r13, r12, r5
 ; CHECK-INST: sltu r13, r12, r5
 ; CHECK: encoding: [0x00,0xd0,0xc5,0x0d]
 sltu r13, r12, r5
+; CHECK-INST: sub r13, r12, r5
+; CHECK: encoding: [0x00,0xd0,0xc5,0x0e]
+sub r13, r12, r5
+; CHECK-INST: pcadd r13, r5
+; CHECK: encoding: [0x00,0xd0,0x50,0x0f]
+pcadd r13, r5
 
 ; Logical instruction tests
 

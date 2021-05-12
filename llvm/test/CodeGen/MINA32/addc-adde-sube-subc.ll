@@ -12,9 +12,11 @@ define i64 @addc_adde(i64 %a, i64 %b) {
 ; M32I-NEXT:    addi r14, sp, 4
 ; M32I-NEXT:    add r1, r1, r3
 ; M32I-NEXT:    add r2, r0, r2
-; M32I-NEXT:    sltu r0, r2, r0
+; M32I-NEXT:    cmp.lo r2, r0
+; M32I-NEXT:    movi r0, 0
+; M32I-NEXT:    mti r0, 1
 ; M32I-NEXT:    add r1, r1, r0
-; M32I-NEXT:    addi r0, r2, 0
+; M32I-NEXT:    mov r0, r2
 ; M32I-NEXT:    ld r14, [sp, 0]
 ; M32I-NEXT:    addi sp, sp, 4
 ; M32I-NEXT:    ret
@@ -25,15 +27,19 @@ define i64 @addc_adde(i64 %a, i64 %b) {
 define i64 @subc_sube(i64 %a, i64 %b) {
 ; M32I-LABEL: subc_sube:
 ; M32I:       ; %bb.0:
-; M32I-NEXT:    addi sp, sp, -4
+; M32I-NEXT:    addi sp, sp, -8
+; M32I-NEXT:    st r4, [sp, 4]
 ; M32I-NEXT:    st r14, [sp, 0]
-; M32I-NEXT:    addi r14, sp, 4
-; M32I-NEXT:    sub r1, r1, r3
-; M32I-NEXT:    sltu r3, r0, r2
-; M32I-NEXT:    sub r1, r1, r3
+; M32I-NEXT:    addi r14, sp, 8
+; M32I-NEXT:    cmp.lo r0, r2
+; M32I-NEXT:    movi r4, 0
+; M32I-NEXT:    mti r4, 1
 ; M32I-NEXT:    sub r0, r0, r2
+; M32I-NEXT:    sub r1, r1, r3
+; M32I-NEXT:    sub r1, r1, r4
 ; M32I-NEXT:    ld r14, [sp, 0]
-; M32I-NEXT:    addi sp, sp, 4
+; M32I-NEXT:    ld r4, [sp, 4]
+; M32I-NEXT:    addi sp, sp, 8
 ; M32I-NEXT:    ret
   %1 = sub i64 %a, %b
   ret i64 %1
