@@ -76,10 +76,14 @@ void MINA32FrameLowering::adjustReg(MachineBasicBlock &MBB,
   if (DestReg == SrcReg && Val == 0)
     return;
 
-  // TODO: Check against actual MINA immediate range
-  if (!isInt<12>(Val)) {
-    report_fatal_error("adjustReg cannot yet handle adjustments >12 bits");
-  }
+  // Check against MINA immediate range
+  int Abs = Val ^ (Val >> 63);
+  int Shift = Log2_32(Abs) - 10;
+  Shift = Shift > 0 ? Shift : 0;
+  int Base = (Val >> Shift) & 0xfff;
+
+  int Enc = SignExtend32<12>(Base) << Shift;
+  assert(Enc == Val && "adjustReg cannot encode adjustment");
 
   BuildMI(MBB, MBBI, DL, TII->get(MINA32::ADDI), DestReg)
       .addReg(SrcReg).addImm(Val).setMIFlag(Flag);

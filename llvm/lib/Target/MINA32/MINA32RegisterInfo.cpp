@@ -94,12 +94,14 @@ void MINA32RegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator MI,
 
   assert(TFI->hasFP(MF) && "eliminateFrameIndex currently requires hasFP");
 
-  // Offsets must be directly encoded in a 12-bit immediate field
-  // TODO: Check against actual MINA immediate range
-  if (!isInt<12>(Offset)) {
-    report_fatal_error(
-        "Frame offsets outside of the signed 12-bit range not supported");
-  }
+  // Check against MINA immediate range
+  int Abs = Offset ^ (Offset >> 31);
+  int Shift = Log2_32(Abs) - 10;
+  Shift = Shift > 0 ? Shift : 0;
+  int Base = (Offset >> Shift) & 0xfff;
+
+  int Enc = SignExtend32<12>(Base) << Shift;
+  assert(Enc == Offset && "Frame offset not in supported range");
 
   MI->getOperand(FIOperandNum).ChangeToRegister(FrameReg, false);
   MI->getOperand(FIOperandNum + 1).ChangeToImmediate(Offset);
