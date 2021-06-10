@@ -31,21 +31,8 @@ MINA32FrameLowering::MINA32FrameLowering()
 // Determines the size of the frame and maximum call frame size.
 void MINA32FrameLowering::determineFrameLayout(MachineFunction &MF) const {
   MachineFrameInfo &MFI = MF.getFrameInfo();
-  const MINA32Subtarget &Subtarget = MF.getSubtarget<MINA32Subtarget>();
-  const MINA32RegisterInfo *RegInfo = Subtarget.getRegisterInfo();
-
-  // Get the number of bytes to allocate from the FrameInfo.
   unsigned FrameSize = MFI.getStackSize();
-
-  // Get the alignment.
   Align StackAlign = getStackAlign();
-  if (RegInfo->needsStackRealignment(MF)) {
-    Align MaxStackAlign = std::max(StackAlign, MFI.getMaxAlign());
-    FrameSize += (MaxStackAlign.value() - StackAlign.value());
-    StackAlign = MaxStackAlign;
-  }
-
-  // Get the maximum call frame size of all the calls.
   unsigned MaxCallFrameSize = MFI.getMaxCallFrameSize();
 
   // If we have dynamic alloca then MaxCallFrameSize needs to be aligned so

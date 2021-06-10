@@ -14,18 +14,15 @@ declare void @notdead(i8*)
 define i32 @va1(i8* %fmt, ...) nounwind {
 ; M32I-LABEL: va1:
 ; M32I:       ; %bb.0:
-; M32I-NEXT:    addi sp, sp, -20
+; M32I-NEXT:    addi sp, sp, -8
 ; M32I-NEXT:    st r14, [sp, 4]
 ; M32I-NEXT:    addi r14, sp, 8
-; M32I-NEXT:    mov r0, r1
-; M32I-NEXT:    st r3, [r14, 8]
-; M32I-NEXT:    st r2, [r14, 4]
-; M32I-NEXT:    addi r1, r14, 0
-; M32I-NEXT:    addi r1, r1, 4
-; M32I-NEXT:    st r1, [r14, -8]
-; M32I-NEXT:    st r0, [r14, 0]
+; M32I-NEXT:    addi r0, r14, 8
+; M32I-NEXT:    addi r0, r0, 4
+; M32I-NEXT:    st r0, [r14, -8]
+; M32I-NEXT:    ld r0, [r14, 8]
 ; M32I-NEXT:    ld r14, [sp, 4]
-; M32I-NEXT:    addi sp, sp, 20
+; M32I-NEXT:    addi sp, sp, 8
 ; M32I-NEXT:    ret
   %va = alloca i8*, align 4
   %1 = bitcast i8** %va to i8*
@@ -42,18 +39,15 @@ define i32 @va1(i8* %fmt, ...) nounwind {
 define i32 @va1_va_arg(i8* %fmt, ...) nounwind {
 ; M32I-LABEL: va1_va_arg:
 ; M32I:       ; %bb.0:
-; M32I-NEXT:    addi sp, sp, -20
+; M32I-NEXT:    addi sp, sp, -8
 ; M32I-NEXT:    st r14, [sp, 4]
 ; M32I-NEXT:    addi r14, sp, 8
-; M32I-NEXT:    mov r0, r1
-; M32I-NEXT:    st r3, [r14, 8]
-; M32I-NEXT:    st r2, [r14, 4]
-; M32I-NEXT:    addi r1, r14, 0
-; M32I-NEXT:    addi r1, r1, 4
-; M32I-NEXT:    st r1, [r14, -8]
-; M32I-NEXT:    st r0, [r14, 0]
+; M32I-NEXT:    addi r0, r14, 8
+; M32I-NEXT:    addi r0, r0, 4
+; M32I-NEXT:    st r0, [r14, -8]
+; M32I-NEXT:    ld r0, [r14, 8]
 ; M32I-NEXT:    ld r14, [sp, 4]
-; M32I-NEXT:    addi sp, sp, 20
+; M32I-NEXT:    addi sp, sp, 8
 ; M32I-NEXT:    ret
   %va = alloca i8*, align 4
   %1 = bitcast i8** %va to i8*
@@ -68,17 +62,14 @@ define i32 @va1_va_arg(i8* %fmt, ...) nounwind {
 define i32 @va1_va_arg_alloca(i8* %fmt, ...) nounwind {
 ; M32I-LABEL: va1_va_arg_alloca:
 ; M32I:       ; %bb.0:
-; M32I-NEXT:    addi sp, sp, -24
-; M32I-NEXT:    st r4, [sp, 8]
-; M32I-NEXT:    st r14, [sp, 4]
+; M32I-NEXT:    addi sp, sp, -12
+; M32I-NEXT:    st r14, [sp, 8]
+; M32I-NEXT:    st r4, [sp, 4]
 ; M32I-NEXT:    addi r14, sp, 12
-; M32I-NEXT:    mov r4, r1
-; M32I-NEXT:    st r3, [r14, 8]
-; M32I-NEXT:    st r2, [r14, 4]
-; M32I-NEXT:    addi r0, r14, 0
+; M32I-NEXT:    addi r0, r14, 8
 ; M32I-NEXT:    addi r0, r0, 4
 ; M32I-NEXT:    st r0, [r14, -12]
-; M32I-NEXT:    st r4, [r14, 0]
+; M32I-NEXT:    ld r4, [r14, 8]
 ; M32I-NEXT:    addi r0, r4, 3
 ; M32I-NEXT:    andi r0, r0, -4
 ; M32I-NEXT:    sub r0, sp, r0
@@ -88,9 +79,9 @@ define i32 @va1_va_arg_alloca(i8* %fmt, ...) nounwind {
 ; M32I-NEXT:    rcall r1, 0
 ; M32I-NEXT:    mov r0, r4
 ; M32I-NEXT:    addi sp, r14, -12
-; M32I-NEXT:    ld r14, [sp, 4]
-; M32I-NEXT:    ld r4, [sp, 8]
-; M32I-NEXT:    addi sp, sp, 24
+; M32I-NEXT:    ld r4, [sp, 4]
+; M32I-NEXT:    ld r14, [sp, 8]
+; M32I-NEXT:    addi sp, sp, 12
 ; M32I-NEXT:    ret
   %va = alloca i8*, align 4
   %1 = bitcast i8** %va to i8*
@@ -105,17 +96,20 @@ define i32 @va1_va_arg_alloca(i8* %fmt, ...) nounwind {
 define void @va1_caller() nounwind {
 ; M32I-LABEL: va1_caller:
 ; M32I:       ; %bb.0:
-; M32I-NEXT:    addi sp, sp, -4
-; M32I-NEXT:    st r14, [sp, 0]
-; M32I-NEXT:    addi r14, sp, 4
+; M32I-NEXT:    addi sp, sp, -20
+; M32I-NEXT:    st r14, [sp, 16]
+; M32I-NEXT:    addi r14, sp, 20
+; M32I-NEXT:    movi r0, 2
+; M32I-NEXT:    st r0, [sp, 12]
+; M32I-NEXT:    movu r0, 16368
+; M32I-NEXT:    st r0, [sp, 8]
+; M32I-NEXT:    movi r0, 0
+; M32I-NEXT:    st r0, [sp, 4]
 ; M32I-NEXT:    movu r0, %hi(va1)
 ; M32I-NEXT:    movl r0, %lo(va1)
-; M32I-NEXT:    movi r1, 0
-; M32I-NEXT:    movu r2, 16368
-; M32I-NEXT:    movi r3, 2
 ; M32I-NEXT:    rcall r0, 0
-; M32I-NEXT:    ld r14, [sp, 0]
-; M32I-NEXT:    addi sp, sp, 4
+; M32I-NEXT:    ld r14, [sp, 16]
+; M32I-NEXT:    addi sp, sp, 20
 ; M32I-NEXT:    ret
 ; Pass a double, as a float would be promoted by a C/C++ frontend
   %1 = call i32 (i8*, ...) @va1(i8* undef, double 1.0, i32 2)
@@ -127,18 +121,15 @@ declare void @llvm.va_copy(i8*, i8*)
 define i32 @va2_va_copy(i32 %argno, ...) nounwind {
 ; M32I-LABEL: va2_va_copy:
 ; M32I:       ; %bb.0:
-; M32I-NEXT:    addi sp, sp, -28
-; M32I-NEXT:    st r4, [sp, 12]
-; M32I-NEXT:    st r14, [sp, 8]
+; M32I-NEXT:    addi sp, sp, -16
+; M32I-NEXT:    st r14, [sp, 12]
+; M32I-NEXT:    st r4, [sp, 8]
 ; M32I-NEXT:    addi r14, sp, 16
-; M32I-NEXT:    mov r4, r1
-; M32I-NEXT:    st r3, [r14, 8]
-; M32I-NEXT:    st r2, [r14, 4]
-; M32I-NEXT:    st r4, [r14, 0]
-; M32I-NEXT:    addi r0, r14, 0
+; M32I-NEXT:    addi r0, r14, 8
 ; M32I-NEXT:    addi r0, r0, 4
 ; M32I-NEXT:    st r0, [r14, -12]
 ; M32I-NEXT:    st r0, [r14, -16]
+; M32I-NEXT:    ld r4, [r14, 8]
 ; M32I-NEXT:    movu r1, %hi(notdead)
 ; M32I-NEXT:    movl r1, %lo(notdead)
 ; M32I-NEXT:    rcall r1, 0
@@ -161,9 +152,9 @@ define i32 @va2_va_copy(i32 %argno, ...) nounwind {
 ; M32I-NEXT:    add r1, r1, r2
 ; M32I-NEXT:    ld r0, [r0, 0]
 ; M32I-NEXT:    add r0, r1, r0
-; M32I-NEXT:    ld r14, [sp, 8]
-; M32I-NEXT:    ld r4, [sp, 12]
-; M32I-NEXT:    addi sp, sp, 28
+; M32I-NEXT:    ld r4, [sp, 8]
+; M32I-NEXT:    ld r14, [sp, 12]
+; M32I-NEXT:    addi sp, sp, 16
 ; M32I-NEXT:    ret
   %vargs = alloca i8*, align 4
   %wargs = alloca i8*, align 4
@@ -192,18 +183,15 @@ define i32 @va2_va_copy(i32 %argno, ...) nounwind {
 define i32 @va3_no_fixed_args(...) nounwind {
 ; M32I-LABEL: va3_no_fixed_args:
 ; M32I:       ; %bb.0:
-; M32I-NEXT:    addi sp, sp, -24
+; M32I-NEXT:    addi sp, sp, -8
 ; M32I-NEXT:    st r14, [sp, 4]
 ; M32I-NEXT:    addi r14, sp, 8
-; M32I-NEXT:    st r3, [r14, 12]
-; M32I-NEXT:    st r2, [r14, 8]
-; M32I-NEXT:    st r1, [r14, 4]
-; M32I-NEXT:    addi r1, r14, 0
-; M32I-NEXT:    addi r1, r1, 4
-; M32I-NEXT:    st r1, [r14, -8]
-; M32I-NEXT:    st r0, [r14, 0]
+; M32I-NEXT:    addi r0, r14, 4
+; M32I-NEXT:    addi r0, r0, 4
+; M32I-NEXT:    st r0, [r14, -8]
+; M32I-NEXT:    ld r0, [r14, 4]
 ; M32I-NEXT:    ld r14, [sp, 4]
-; M32I-NEXT:    addi sp, sp, 24
+; M32I-NEXT:    addi sp, sp, 8
 ; M32I-NEXT:    ret
   %va = alloca i8*, align 4
   %1 = bitcast i8** %va to i8*

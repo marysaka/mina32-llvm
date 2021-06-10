@@ -1468,6 +1468,7 @@ Triple Triple::getBigEndianArchVariant() const {
   case Triple::kalimba:
   case Triple::le32:
   case Triple::le64:
+  case Triple::mina32:
   case Triple::msp430:
   case Triple::nvptx64:
   case Triple::nvptx:
@@ -1554,6 +1555,7 @@ bool Triple::isLittleEndian() const {
   case Triple::kalimba:
   case Triple::le32:
   case Triple::le64:
+  case Triple::mina32:
   case Triple::mips64el:
   case Triple::mipsel:
   case Triple::msp430:

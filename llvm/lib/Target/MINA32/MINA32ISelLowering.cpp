@@ -212,87 +212,40 @@ SDValue MINA32TargetLowering::LowerFormalArguments(
     const SmallVectorImpl<ISD::InputArg> &Ins, const SDLoc &DL,
     SelectionDAG &DAG, SmallVectorImpl<SDValue> &InVals) const {
   MachineFunction &MF = DAG.getMachineFunction();
-  MachineRegisterInfo &RegInfo = MF.getRegInfo();
-  std::vector<SDValue> OutChains;
+    MachineFrameInfo &MFI = MF.getFrameInfo();
+  MachineRegisterInfo &RI = MF.getRegInfo();
 
   // Assign locations to all of the incoming arguments.
   SmallVector<CCValAssign, 16> ArgLocs;
   CCState CCInfo(CallConv, isVarArg, MF, ArgLocs, *DAG.getContext());
   CCInfo.AnalyzeFormalArguments(Ins, CC_MINA32);
 
+  if (isVarArg) {
+    auto *FuncInfo = MF.getInfo<MINA32MachineFunctionInfo>();
+    unsigned Offset = CCInfo.getNextStackOffset();
+    int FI = MFI.CreateFixedObject(4, 4 + Offset, true);
+    FuncInfo->setVarArgsFrameIndex(FI);
+  }
+
   for (unsigned i = 0, e = ArgLocs.size(); i != e; ++i) {
     CCValAssign &VA = ArgLocs[i];
     SDValue ArgValue;
 
     if (VA.isRegLoc()) {
-      Register VReg = RegInfo.createVirtualRegister(&MINA32::GPRRegClass);
-      RegInfo.addLiveIn(VA.getLocReg(), VReg);
+      Register VReg = RI.createVirtualRegister(&MINA32::GPRRegClass);
+      RI.addLiveIn(VA.getLocReg(), VReg);
       ArgValue = DAG.getCopyFromReg(Chain, DL, VReg, VA.getLocVT());
     } else {
       assert(VA.isMemLoc());  // sanity check
       // create frame index object for parameter
-      MachineFrameInfo &MFI = MF.getFrameInfo();
       int FI = MFI.CreateFixedObject(VA.getValVT().getSizeInBits() / 8,
-                                     VA.getLocMemOffset(), true);
+                                     4 + VA.getLocMemOffset(), true);
       // create SelectionDAG nodes for load from this parameter
       SDValue FIN = DAG.getFrameIndex(FI, MVT::i32);
       ArgValue = DAG.getLoad(VA.getLocVT(), DL, Chain, FIN,
                              MachinePointerInfo::getFixedStack(MF, FI));
     }
     InVals.push_back(ArgValue);
-  }
-
-  if (isVarArg) {
-    static const MCPhysReg ArgRegs[] = {
-      MINA32::R0, MINA32::R1, MINA32::R2, MINA32::R3
-    };
-    unsigned Idx = CCInfo.getFirstUnallocated(ArgRegs);
-    MachineFrameInfo &MFI = MF.getFrameInfo();
-    auto *FuncInfo = MF.getInfo<MINA32MachineFunctionInfo>();
-
-    // Offset of the first variable argument from stack pointer,
-    // and size of the vararg save area.
-    int VaArgOffset, VarArgsSaveSize;
-
-    // If all registers are allocated, then all varargs must be passed on the
-    // stack and we don't need to save any argregs.
-    if (Idx == array_lengthof(ArgRegs)) {
-      VaArgOffset = CCInfo.getNextStackOffset();
-      VarArgsSaveSize = 0;
-    } else {
-      VarArgsSaveSize = 4 * (array_lengthof(ArgRegs) - Idx);
-      VaArgOffset = -VarArgsSaveSize;
-    }
-
-    // Record the frame index of the first variable argument
-    // which is a value necessary to VASTART.
-    int FI = MFI.CreateFixedObject(4, VaArgOffset, true);
-    FuncInfo->setVarArgsFrameIndex(FI);
-
-    // Copy the integer registers that may have been used for passing varargs
-    // to the vararg save area.
-    for (unsigned i = Idx; i < array_lengthof(ArgRegs); ++i, VaArgOffset += 4) {
-      Register VReg = RegInfo.createVirtualRegister(&MINA32::GPRRegClass);
-      RegInfo.addLiveIn(ArgRegs[i], VReg);
-      SDValue ArgValue = DAG.getCopyFromReg(Chain, DL, VReg, MVT::i32);
-
-      FI = MFI.CreateFixedObject(4, VaArgOffset, true);
-      SDValue PtrOff = DAG.getFrameIndex(FI, getPointerTy(DAG.getDataLayout()));
-      SDValue Store = DAG.getStore(Chain, DL, ArgValue, PtrOff,
-                                   MachinePointerInfo::getFixedStack(MF, FI));
-      cast<StoreSDNode>(Store.getNode())
-          ->getMemOperand()
-          ->setValue((Value *)nullptr);
-      OutChains.push_back(Store);
-    }
-    FuncInfo->setVarArgsSaveSize(VarArgsSaveSize);
-  }
-
-  // All stores are grouped in one node to allow the matching between
-  // the size of Ins and InVals. This only happens for vararg functions.
-  if (!OutChains.empty()) {
-    OutChains.push_back(Chain);
-    Chain = DAG.getNode(ISD::TokenFactor, DL, MVT::Other, OutChains);
   }
 
   return Chain;
@@ -375,7 +328,7 @@ MINA32TargetLowering::LowerCall(CallLoweringInfo &CLI,
       assert(VA.isMemLoc() && "Argument not register or memory");
       // Work out the address of the stack slot.
       if (!StackPtr.getNode())
-        StackPtr = DAG.getCopyFromReg(Chain, DL, MINA32::R14, PtrVT);
+        StackPtr = DAG.getCopyFromReg(Chain, DL, MINA32::SP, PtrVT);
       SDValue Address =
           DAG.getNode(ISD::ADD, DL, PtrVT, StackPtr,
                       DAG.getIntPtrConstant(VA.getLocMemOffset(), DL));
@@ -448,7 +401,6 @@ MINA32TargetLowering::LowerCall(CallLoweringInfo &CLI,
                                           VA.getLocVT(), Glue);
     Chain = RetValue.getValue(1);
     Glue = RetValue.getValue(2);
-
     InVals.push_back(Chain.getValue(0));
   }
 

@@ -12,18 +12,19 @@
 //===----------------------------------------------------------------------===//
 
 def CC_MINA32 : CallingConv<[
-  // Handle i1, i8, i16 and i32 by passing in registers R0-R3
+  // First try passing in registers R0-R3
   CCIfType<[i1, i8, i16], CCPromoteToType<i32>>,
-  CCIfType<[i32], CCAssignToReg<[R0, R1, R2, R3]>>,
+  CCIfNotVarArg<CCIfType<[i32, i64], CCAssignToReg<[R0, R1, R2, R3]>>>,
 
-  // If more than fit in register, use the stack
-  CCIfType<[i32], CCAssignToStack<4, 4>>
+  // If more than fit in registers, use the stack
+  CCIfType<[i32], CCAssignToStack<4, 4>>,
+  CCIfType<[i64], CCAssignToStack<8, 4>>
 ]>;
 
 def RetCC_MINA32 : CallingConv<[
-  // Return i1, i8, i16 and i32 in registers R0-R3
+  // Return in registers R0-R3
   CCIfType<[i1, i8, i16], CCPromoteToType<i32>>,
-  CCIfType<[i32], CCAssignToReg<[R0, R1, R2, R3]>>,
+  CCIfType<[i32, i64], CCAssignToReg<[R0, R1, R2, R3]>>
 ]>;
 
-def CSR : CalleeSavedRegs<(sequence "R%u", 4, 14)>;
+def CSR : CalleeSavedRegs<(add R14, (sequence "R%u", 4, 13))>;

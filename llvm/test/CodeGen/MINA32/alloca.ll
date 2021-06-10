@@ -36,8 +36,8 @@ define void @scoped_alloca(i32 %n) nounwind {
 ; M32I-LABEL: scoped_alloca:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -8
-; M32I-NEXT:    st r4, [sp, 4]
-; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    st r14, [sp, 4]
+; M32I-NEXT:    st r4, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 8
 ; M32I-NEXT:    mov r4, sp
 ; M32I-NEXT:    addi r0, r0, 3
@@ -49,8 +49,8 @@ define void @scoped_alloca(i32 %n) nounwind {
 ; M32I-NEXT:    rcall r1, 0
 ; M32I-NEXT:    mov sp, r4
 ; M32I-NEXT:    addi sp, r14, -8
-; M32I-NEXT:    ld r14, [sp, 0]
-; M32I-NEXT:    ld r4, [sp, 4]
+; M32I-NEXT:    ld r4, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 4]
 ; M32I-NEXT:    addi sp, sp, 8
 ; M32I-NEXT:    ret
   %sp = call i8* @llvm.stacksave()

@@ -48,14 +48,14 @@ define i64 @udiv64(i64 %a, i64 %b) nounwind {
 ; M32I-LABEL: udiv64:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -8
-; M32I-NEXT:    st r4, [sp, 4]
-; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    st r14, [sp, 4]
+; M32I-NEXT:    st r4, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 8
 ; M32I-NEXT:    movu r4, %hi(__udivdi3)
 ; M32I-NEXT:    movl r4, %lo(__udivdi3)
 ; M32I-NEXT:    rcall r4, 0
-; M32I-NEXT:    ld r14, [sp, 0]
-; M32I-NEXT:    ld r4, [sp, 4]
+; M32I-NEXT:    ld r4, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 4]
 ; M32I-NEXT:    addi sp, sp, 8
 ; M32I-NEXT:    ret
   %1 = udiv i64 %a, %b
@@ -66,16 +66,16 @@ define i64 @udiv64_constant(i64 %a) nounwind {
 ; M32I-LABEL: udiv64_constant:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -8
-; M32I-NEXT:    st r4, [sp, 4]
-; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    st r14, [sp, 4]
+; M32I-NEXT:    st r4, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 8
 ; M32I-NEXT:    movu r4, %hi(__udivdi3)
 ; M32I-NEXT:    movl r4, %lo(__udivdi3)
 ; M32I-NEXT:    movi r2, 5
 ; M32I-NEXT:    movi r3, 0
 ; M32I-NEXT:    rcall r4, 0
-; M32I-NEXT:    ld r14, [sp, 0]
-; M32I-NEXT:    ld r4, [sp, 4]
+; M32I-NEXT:    ld r4, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 4]
 ; M32I-NEXT:    addi sp, sp, 8
 ; M32I-NEXT:    ret
   %1 = udiv i64 %a, 5
@@ -136,14 +136,14 @@ define i64 @sdiv64(i64 %a, i64 %b) nounwind {
 ; M32I-LABEL: sdiv64:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -8
-; M32I-NEXT:    st r4, [sp, 4]
-; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    st r14, [sp, 4]
+; M32I-NEXT:    st r4, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 8
 ; M32I-NEXT:    movu r4, %hi(__divdi3)
 ; M32I-NEXT:    movl r4, %lo(__divdi3)
 ; M32I-NEXT:    rcall r4, 0
-; M32I-NEXT:    ld r14, [sp, 0]
-; M32I-NEXT:    ld r4, [sp, 4]
+; M32I-NEXT:    ld r4, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 4]
 ; M32I-NEXT:    addi sp, sp, 8
 ; M32I-NEXT:    ret
   %1 = sdiv i64 %a, %b
@@ -154,16 +154,16 @@ define i64 @sdiv64_constant(i64 %a) nounwind {
 ; M32I-LABEL: sdiv64_constant:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -8
-; M32I-NEXT:    st r4, [sp, 4]
-; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    st r14, [sp, 4]
+; M32I-NEXT:    st r4, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 8
 ; M32I-NEXT:    movu r4, %hi(__divdi3)
 ; M32I-NEXT:    movl r4, %lo(__divdi3)
 ; M32I-NEXT:    movi r2, 5
 ; M32I-NEXT:    movi r3, 0
 ; M32I-NEXT:    rcall r4, 0
-; M32I-NEXT:    ld r14, [sp, 0]
-; M32I-NEXT:    ld r4, [sp, 4]
+; M32I-NEXT:    ld r4, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 4]
 ; M32I-NEXT:    addi sp, sp, 8
 ; M32I-NEXT:    ret
   %1 = sdiv i64 %a, 5

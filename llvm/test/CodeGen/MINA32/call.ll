@@ -87,18 +87,95 @@ define i32 @call_fastcc(i32 %a, i32 %b) nounwind {
 ; M32I-LABEL: call_fastcc:
 ; M32I:       ; %bb.0:
 ; M32I-NEXT:    addi sp, sp, -8
-; M32I-NEXT:    st r4, [sp, 4]
-; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    st r14, [sp, 4]
+; M32I-NEXT:    st r4, [sp, 0]
 ; M32I-NEXT:    addi r14, sp, 8
 ; M32I-NEXT:    mov r4, r0
 ; M32I-NEXT:    movu r2, %hi(fastcc_function)
 ; M32I-NEXT:    movl r2, %lo(fastcc_function)
 ; M32I-NEXT:    rcall r2, 0
 ; M32I-NEXT:    mov r0, r4
-; M32I-NEXT:    ld r14, [sp, 0]
-; M32I-NEXT:    ld r4, [sp, 4]
+; M32I-NEXT:    ld r4, [sp, 0]
+; M32I-NEXT:    ld r14, [sp, 4]
 ; M32I-NEXT:    addi sp, sp, 8
 ; M32I-NEXT:    ret
   %1 = call fastcc i32 @fastcc_function(i32 %a, i32 %b)
   ret i32 %a
+}
+
+declare i32 @external_many_args(i32, i32, i32, i32, i32, i32, i32, i32, i32, i32) nounwind
+
+define i32 @test_call_external_many_args(i32 %a) nounwind {
+; M32I-LABEL: test_call_external_many_args:
+; M32I:       ; %bb.0:
+; M32I-NEXT:    addi sp, sp, -36
+; M32I-NEXT:    st r14, [sp, 32]
+; M32I-NEXT:    st r4, [sp, 28]
+; M32I-NEXT:    st r5, [sp, 24]
+; M32I-NEXT:    addi r14, sp, 36
+; M32I-NEXT:    mov r4, r0
+; M32I-NEXT:    st r4, [sp, 20]
+; M32I-NEXT:    st r4, [sp, 16]
+; M32I-NEXT:    st r4, [sp, 12]
+; M32I-NEXT:    st r4, [sp, 8]
+; M32I-NEXT:    st r4, [sp, 4]
+; M32I-NEXT:    st r4, [sp, 0]
+; M32I-NEXT:    movu r5, %hi(external_many_args)
+; M32I-NEXT:    movl r5, %lo(external_many_args)
+; M32I-NEXT:    mov r1, r4
+; M32I-NEXT:    mov r2, r4
+; M32I-NEXT:    mov r3, r4
+; M32I-NEXT:    rcall r5, 0
+; M32I-NEXT:    mov r0, r4
+; M32I-NEXT:    ld r5, [sp, 24]
+; M32I-NEXT:    ld r4, [sp, 28]
+; M32I-NEXT:    ld r14, [sp, 32]
+; M32I-NEXT:    addi sp, sp, 36
+; M32I-NEXT:    ret
+  %1 = call i32 @external_many_args(i32 %a, i32 %a, i32 %a, i32 %a, i32 %a,
+                                    i32 %a, i32 %a, i32 %a, i32 %a, i32 %a)
+  ret i32 %a
+}
+
+define i32 @defined_many_args(i32, i32, i32, i32, i32, i32, i32, i32, i32, i32 %j) nounwind {
+; M32I-LABEL: defined_many_args:
+; M32I:       ; %bb.0:
+; M32I-NEXT:    addi sp, sp, -4
+; M32I-NEXT:    st r14, [sp, 0]
+; M32I-NEXT:    addi r14, sp, 4
+; M32I-NEXT:    ld r0, [r14, 24]
+; M32I-NEXT:    addi r0, r0, 1
+; M32I-NEXT:    ld r14, [sp, 0]
+; M32I-NEXT:    addi sp, sp, 4
+; M32I-NEXT:    ret
+  %added = add i32 %j, 1
+  ret i32 %added
+}
+
+define i32 @test_call_defined_many_args(i32 %a) nounwind {
+; M32I-LABEL: test_call_defined_many_args:
+; M32I:       ; %bb.0:
+; M32I-NEXT:    addi sp, sp, -32
+; M32I-NEXT:    st r14, [sp, 28]
+; M32I-NEXT:    st r4, [sp, 24]
+; M32I-NEXT:    addi r14, sp, 32
+; M32I-NEXT:    st r0, [sp, 20]
+; M32I-NEXT:    st r0, [sp, 16]
+; M32I-NEXT:    st r0, [sp, 12]
+; M32I-NEXT:    st r0, [sp, 8]
+; M32I-NEXT:    st r0, [sp, 4]
+; M32I-NEXT:    st r0, [sp, 0]
+; M32I-NEXT:    movu r4, %hi(defined_many_args)
+; M32I-NEXT:    movl r4, %lo(defined_many_args)
+; M32I-NEXT:    mov r1, r0
+; M32I-NEXT:    mov r2, r0
+; M32I-NEXT:    mov r3, r0
+; M32I-NEXT:    rcall r4, 0
+; M32I-NEXT:    ld r4, [sp, 24]
+; M32I-NEXT:    ld r14, [sp, 28]
+; M32I-NEXT:    addi sp, sp, 32
+; M32I-NEXT:    ret
+  %1 = call i32 @defined_many_args(i32 %a, i32 %a, i32 %a, i32 %a, i32 %a,
+                                   i32 %a, i32 %a, i32 %a, i32 %a, i32 %a)
+  ret i32 %1
 }
