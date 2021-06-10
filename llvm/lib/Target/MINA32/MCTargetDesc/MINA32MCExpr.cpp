@@ -31,11 +31,24 @@ bool MINA32MCExpr::evaluateAsRelocatableImpl(MCValue &Res,
 }
 
 void MINA32MCExpr::printImpl(raw_ostream &OS, const MCAsmInfo *MAI) const {
+  if (Kind == VK_MINA32_LO) OS << "%lo(";
+  if (Kind == VK_MINA32_HI) OS << "%hi(";
+
   Expr->print(OS, MAI);
+
+  if (Kind != VK_MINA32_None)
+    OS << ')';
 }
 
 void MINA32MCExpr::visitUsedExpr(MCStreamer &Streamer) const {
   Streamer.visitUsedExpr(*Expr);
+}
+
+MINA32MCExpr::VariantKind MINA32MCExpr::getVariantKindForName(StringRef name) {
+  return StringSwitch<MINA32MCExpr::VariantKind>(name)
+      .Case("lo", VK_MINA32_LO)
+      .Case("hi", VK_MINA32_HI)
+      .Default(VK_MINA32_None);
 }
 
 MCFragment *MINA32MCExpr::findAssociatedFragment() const {

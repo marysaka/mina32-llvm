@@ -38,9 +38,19 @@ unsigned MINA32ELFObjectWriter::getRelocType(MCContext &Ctx,
                                              const MCValue &Target,
                                              const MCFixup &Fixup,
                                              bool IsPCRel) const {
-  // TODO
-  llvm_unreachable("getRelocType() unimplemented");
-  return 0;
+  // Determine the type of the relocation
+  switch ((unsigned)Fixup.getKind()) {
+  default:
+    llvm_unreachable("Invalid fixup kind!");
+  case FK_Data_4:
+    return ELF::R_MINA32_32;
+  case MINA32::fixup_mina32_hi16:
+    return ELF::R_MINA32_HI16;
+  case MINA32::fixup_mina32_lo16:
+    return ELF::R_MINA32_LO16;
+  case MINA32::fixup_mina32_bra:
+    return ELF::R_MINA32_BRA;
+  }
 }
 
 std::unique_ptr<MCObjectTargetWriter>

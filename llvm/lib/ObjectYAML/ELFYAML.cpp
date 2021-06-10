@@ -222,6 +222,7 @@ void ScalarEnumerationTraits<ELFYAML::ELF_EM>::enumeration(
   ECase(EM_LANAI);
   ECase(EM_BPF);
   ECase(EM_VE);
+  ECase(EM_MINA32);
 #undef ECase
   IO.enumFallback<Hex16>(Value);
 }
@@ -632,6 +633,9 @@ void ScalarEnumerationTraits<ELFYAML::ELF_REL>::enumeration(
   switch (Object->Header.Machine) {
   case ELF::EM_X86_64:
 #include "llvm/BinaryFormat/ELFRelocs/x86_64.def"
+    break;
+  case ELF::EM_MINA32:
+#include "llvm/BinaryFormat/ELFRelocs/MINA32.def"
     break;
   case ELF::EM_MIPS:
 #include "llvm/BinaryFormat/ELFRelocs/Mips.def"

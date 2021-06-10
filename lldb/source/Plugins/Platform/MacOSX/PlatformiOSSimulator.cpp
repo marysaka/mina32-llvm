@@ -286,7 +286,8 @@ Status PlatformiOSSimulator::GetSymbolFile(const FileSpec &platform_file,
 
 Status PlatformiOSSimulator::GetSharedModule(
     const ModuleSpec &module_spec, Process *process, ModuleSP &module_sp,
-    const FileSpecList *module_search_paths_ptr, ModuleSP *old_module_sp_ptr,
+    const FileSpecList *module_search_paths_ptr,
+    llvm::SmallVectorImpl<lldb::ModuleSP> *old_modules,
     bool *did_create_ptr) {
   // For iOS, the SDK files are all cached locally on the host system. So first
   // we ask for the file in the cached SDK, then we attempt to get a shared
@@ -302,7 +303,7 @@ Status PlatformiOSSimulator::GetSharedModule(
   } else {
     const bool always_create = false;
     error = ModuleList::GetSharedModule(
-        module_spec, module_sp, module_search_paths_ptr, old_module_sp_ptr,
+        module_spec, module_sp, module_search_paths_ptr, old_modules,
         did_create_ptr, always_create);
   }
   if (module_sp)

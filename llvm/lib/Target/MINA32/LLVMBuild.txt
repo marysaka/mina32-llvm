@@ -7,15 +7,15 @@
 ;===------------------------------------------------------------------------===;
 
 [common]
-subdirectories = AsmParser MCTargetDesc TargetInfo
+subdirectories = AsmParser Disassembler MCTargetDesc TargetInfo
 
 [component_0]
 type = TargetGroup
 name = MINA32
 parent = Target
 has_asmparser = 1
-has_asmprinter = 0
-has_disassembler = 0
+has_asmprinter = 1
+has_disassembler = 1
 has_jit = 0
 
 [component_1]

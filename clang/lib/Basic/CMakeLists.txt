@@ -74,6 +74,7 @@ add_clang_library(clangBasic
   Targets/Lanai.cpp
   Targets/Le64.cpp
   Targets/MSP430.cpp
+  Targets/MINA32.cpp
   Targets/Mips.cpp
   Targets/NVPTX.cpp
   Targets/OSTargets.cpp

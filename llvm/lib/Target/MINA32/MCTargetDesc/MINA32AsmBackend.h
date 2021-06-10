@@ -28,9 +28,6 @@ class MINA32AsmBackend : public MCAsmBackend {
 public:
   MINA32AsmBackend() : MCAsmBackend(support::little) {}
 
-  void adjustFixupValue(const MCFixup &Fixup, const MCValue &Target,
-                        uint64_t &Value, MCContext *Ctx = nullptr) const;
-
   std::unique_ptr<MCObjectTargetWriter>
   createObjectTargetWriter() const override;
 
@@ -60,9 +57,6 @@ public:
   }
 
   bool writeNopData(raw_ostream &OS, uint64_t Count) const override;
-
-  bool shouldForceRelocation(const MCAssembler &Asm, const MCFixup &Fixup,
-                             const MCValue &Target) override;
 };
 
 } // end namespace llvm

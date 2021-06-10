@@ -44,6 +44,8 @@ private:
   const MINA32Subtarget *Subtarget;
   void Select(SDNode *N) override;
   bool trySelect(SDNode *N);
+  bool SelectAddrFI(SDValue Addr, SDValue &Base);
+  SDValue getImm(const SDNode *Node, unsigned Imm);
 };
 
 bool MINA32DAGToDAGISel::runOnMachineFunction(MachineFunction &MF) {
@@ -60,17 +62,33 @@ void MINA32DAGToDAGISel::Select(SDNode *N) {
     return;
   }
 
-  // See if subclasses can handle this node.
-  if (trySelect(N))
+  if (N->getOpcode() == ISD::FrameIndex) {
+    SDLoc DL(N);
+    SDValue Imm = CurDAG->getTargetConstant(0, DL, MVT::i32);
+    int FI = dyn_cast<FrameIndexSDNode>(N)->getIndex();
+    EVT VT = N->getValueType(0);
+    SDValue TFI = CurDAG->getTargetFrameIndex(FI, VT);
+    ReplaceNode(N, CurDAG->getMachineNode(MINA32::ADDI, DL, VT, TFI, Imm));
     return;
+  }
+
+  // See if subclasses can handle this node.
+  // if (trySelect(N)) ...
 
   // Select the default instruction.
   SelectCode(N);
 }
 
-bool MINA32DAGToDAGISel::trySelect(SDNode *N) {
-  // TODO
-  llvm_unreachable("trySelect() unimplemented");
+bool MINA32DAGToDAGISel::SelectAddrFI(SDValue Addr, SDValue &Base) {
+  if (FrameIndexSDNode *FIN = dyn_cast<FrameIndexSDNode>(Addr)) {
+    Base = CurDAG->getTargetFrameIndex(FIN->getIndex(), MVT::i32);
+    return true;
+  }
+  return false;
+}
+
+SDValue MINA32DAGToDAGISel::getImm(const SDNode *Node, unsigned Imm) {
+  return CurDAG->getTargetConstant(Imm, SDLoc(Node), MVT::i32);
 }
 
 FunctionPass *llvm::createMINA32ISelDag(MINA32TargetMachine &TM,

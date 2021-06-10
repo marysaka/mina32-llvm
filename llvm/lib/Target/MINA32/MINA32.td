@@ -16,18 +16,18 @@
 include "llvm/Target/Target.td"
 
 //===---------------------------------------------------------------------===//
-// Register File Description
+// Register File, Calling Conv, and Instruction Descriptions
 //===---------------------------------------------------------------------===//
 
 include "MINA32RegisterInfo.td"
-
-//===---------------------------------------------------------------------===//
-// Instruction Descriptions
-//===---------------------------------------------------------------------===//
-
 include "MINA32InstrInfo.td"
+include "MINA32CallingConv.td"
 
 def MINA32InstrInfo : InstrInfo;
+
+def MINA32AsmParser : AsmParser {
+  let ShouldEmitMatchRegisterAltName = 1;
+}
 
 //===----------------------------------------------------------------------===//
 // MINA32 Subtarget features.
@@ -39,6 +39,7 @@ def MINA32InstrInfo : InstrInfo;
 
 def MINA32 : Target {
   let InstructionSet = MINA32InstrInfo;
+  let AssemblyParsers = [MINA32AsmParser];
 }
 
 // One CPU definition as it's needed.

@@ -29,6 +29,7 @@
 #include "ToolChains/Hurd.h"
 #include "ToolChains/Lanai.h"
 #include "ToolChains/Linux.h"
+#include "ToolChains/MINA32.h"
 #include "ToolChains/MSP430.h"
 #include "ToolChains/MSVC.h"
 #include "ToolChains/MinGW.h"
@@ -5022,6 +5023,10 @@ const ToolChain &Driver::getToolChain(const ArgList &Args,
         break;
       case llvm::Triple::avr:
         TC = std::make_unique<toolchains::AVRToolChain>(*this, Target, Args);
+        break;
+      case llvm::Triple::mina32:
+        TC =
+            std::make_unique<toolchains::MINA32ToolChain>(*this, Target, Args);
         break;
       case llvm::Triple::msp430:
         TC =

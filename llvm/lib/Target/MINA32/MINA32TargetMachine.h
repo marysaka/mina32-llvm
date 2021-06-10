@@ -9,8 +9,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_LIB_TARGET_MINA32_MINA32TARGETMACHINE_H
-#define LLVM_LIB_TARGET_MINA32_MINA32TARGETMACHINE_H
+#ifndef LLVM_LIB_TARGET_MINA32_TARGET_MACHINE_H
+#define LLVM_LIB_TARGET_MINA32_TARGET_MACHINE_H
 
 #include "llvm/Target/TargetMachine.h"
 
@@ -46,4 +46,5 @@ private:
 };
 
 } // end namespace llvm
-#endif
+
+#endif // LLVM_LIB_TARGET_MINA32_TARGET_MACHINE_H

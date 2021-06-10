@@ -43,8 +43,7 @@ StringRef Triple::getArchTypeName(ArchType Kind) {
   case lanai:          return "lanai";
   case le32:           return "le32";
   case le64:           return "le64";
-  case mina32:
-    return "mina32";
+  case mina32:         return "mina32";
   case mips64:         return "mips64";
   case mips64el:       return "mips64el";
   case mips:           return "mips";
@@ -103,6 +102,8 @@ StringRef Triple::getArchTypePrefix(ArchType Kind) {
   case ppc64:
   case ppc64le:
   case ppc:         return "ppc";
+
+  case mina32:      return "mina32";
 
   case mips:
   case mipsel:
@@ -280,6 +281,7 @@ Triple::ArchType Triple::getArchTypeForLLVMName(StringRef Name) {
     .Case("armeb", armeb)
     .Case("avr", avr)
     .StartsWith("bpf", BPFArch)
+    .Case("mina32", mina32)
     .Case("mips", mips)
     .Case("mipsel", mipsel)
     .Case("mips64", mips64)
@@ -414,6 +416,7 @@ static Triple::ArchType parseArch(StringRef ArchName) {
     .Case("thumbeb", Triple::thumbeb)
     .Case("avr", Triple::avr)
     .Case("msp430", Triple::msp430)
+    .Case("mina32", Triple::mina32)
     .Cases("mips", "mipseb", "mipsallegrex", "mipsisa32r6",
            "mipsr6", Triple::mips)
     .Cases("mipsel", "mipsallegrexel", "mipsisa32r6el", "mipsr6el",
@@ -1465,6 +1468,7 @@ Triple Triple::getBigEndianArchVariant() const {
   case Triple::kalimba:
   case Triple::le32:
   case Triple::le64:
+  case Triple::mina32:
   case Triple::msp430:
   case Triple::nvptx64:
   case Triple::nvptx:
@@ -1551,6 +1555,7 @@ bool Triple::isLittleEndian() const {
   case Triple::kalimba:
   case Triple::le32:
   case Triple::le64:
+  case Triple::mina32:
   case Triple::mips64el:
   case Triple::mipsel:
   case Triple::msp430:

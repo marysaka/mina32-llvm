@@ -22,6 +22,8 @@ public:
   /// Specifies the type of an expression.
   enum VariantKind {
     VK_MINA32_None,
+    VK_MINA32_LO,
+    VK_MINA32_HI
     // TODO
   };
 
@@ -30,12 +32,18 @@ public:
   static const MINA32MCExpr *create(VariantKind Kind, const MCExpr *Expr,
                                     MCContext &Ctx);
 
+  VariantKind getKind() const { return Kind; }
+
+  const MCExpr *getSubExpr() const { return Expr; }
+
   void printImpl(raw_ostream &OS, const MCAsmInfo *MAI) const override;
   bool evaluateAsRelocatableImpl(MCValue &Res, const MCAsmLayout *Layout,
                                  const MCFixup *Fixup) const override;
   void visitUsedExpr(MCStreamer &Streamer) const override;
   MCFragment *findAssociatedFragment() const override;
   void fixELFSymbolsInTLSFixups(MCAssembler &Asm) const override;
+
+  static VariantKind getVariantKindForName(StringRef name);
 
 private:
   const VariantKind Kind;

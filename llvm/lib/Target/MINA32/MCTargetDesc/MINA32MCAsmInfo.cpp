@@ -19,9 +19,14 @@ namespace llvm {
 
 MINA32MCAsmInfo::MINA32MCAsmInfo(const Triple &TT,
                                  const MCTargetOptions &Options) {
-  CommentString = "//";
+  Data16bitsDirective = "\t.half\t";
+  Data32bitsDirective = "\t.word\t";
+  Data64bitsDirective = nullptr;
+
   PrivateGlobalPrefix = ".L";
   PrivateLabelPrefix = ".L";
+
+  CommentString = ";";
   SupportsDebugInformation = true;
   UseIntegratedAssembler = true;
 }

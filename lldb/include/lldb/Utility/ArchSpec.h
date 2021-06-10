@@ -128,6 +128,8 @@ public:
     eCore_arm_arm64_32,
     eCore_arm_aarch64,
 
+    eCore_mina32,
+
     eCore_mips32,
     eCore_mips32r2,
     eCore_mips32r3,
